@@ -16,6 +16,7 @@ namespace JudgeTest
 
         static void JudgerTest()
         {
+            Console.WriteLine("Judging the results...");
             IJudger judger = new JudgeCore.Judger.CommonJudge("1 + 2 = 3\n");
             int ppp = new DirectoryInfo("..\\..\\..\\out").GetFiles().Length;
             for (int i = 1; i <= ppp; i++)
@@ -28,6 +29,7 @@ namespace JudgeTest
 
         static void CompilerTest()
         {
+            Console.WriteLine("\n\nTest building with msvc141...");
             ICompiler compiler = new JudgeCore.Compiler.Msvc();
             var ret = compiler.Compile("#include <cstdio>\nint main() { return 0; }", Guid.NewGuid());
             if (ret == false) Console.WriteLine(compiler.StandardOutput);

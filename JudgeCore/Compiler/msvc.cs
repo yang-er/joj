@@ -33,19 +33,10 @@ namespace JudgeCore.Compiler
 
             // Compile
             string cl_args = "";
-            Options.ForEach((str) => cl_args = cl_args + $" {str}");
-            IncludePath.ForEach((str) => cl_args = cl_args + $" /I\"{str}\"");
-            cl_args = cl_args + $" /c {file_name}.cpp /Fo{file_name}.obj";
-            Debug.WriteLine("cl.exe" + cl_args);
-            var cl = new Process();
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            cl.StartInfo.RedirectStandardOutput = true;
-            cl.StartInfo.StandardOutputEncoding = Encoding.GetEncoding(936);
-            cl.StartInfo.RedirectStandardError = true;
-            cl.StartInfo.StandardErrorEncoding = Encoding.GetEncoding(936);
-            cl.StartInfo.CreateNoWindow = true;
-            cl.StartInfo.FileName = ToolchainPath[0] + "\\cl.exe";
-            cl.StartInfo.Arguments = cl_args;
+            Options.ForEach((str) => cl_args += $" {str}");
+            IncludePath.ForEach((str) => cl_args += $" /I\"{str}\"");
+            cl_args += $" /c {file_name}.cpp /Fo{file_name}.obj";
+            var cl = Helper.MakeProcess(ToolchainPath[0] + "\\cl.exe", cl_args);
             cl.Start();
             cl.WaitForExit();
             var stdout = cl.StandardOutput.ReadToEnd();
@@ -55,9 +46,25 @@ namespace JudgeCore.Compiler
             StandardOutput = stdout.Replace(file_name, "main");
             StandardError = stderr.Replace(file_name, "main");
             ExitCode = cl.ExitCode;
+            Console.WriteLine("cl.exe exited with status code {0}. ", ExitCode);
             if (ExitCode != 0) return false;
 
             // Link
+            string link_args = " " + Options[0];
+            LibraryPath.ForEach((str) => link_args += $" /LIBPATH:\"{str}\"");
+            link_args += $" /out:{file_name}.exe {file_name}.obj";
+            var link = Helper.MakeProcess(ToolchainPath[0] + "\\link.exe", link_args);
+            link.Start();
+            link.WaitForExit();
+            stdout = link.StandardOutput.ReadToEnd();
+            Debug.WriteLine(stdout);
+            stderr = link.StandardError.ReadToEnd();
+            Debug.WriteLine(stderr);
+            StandardOutput += stdout.Replace(file_name, "main");
+            StandardError += stderr.Replace(file_name, "main");
+            ExitCode = link.ExitCode;
+            Console.WriteLine("link.exe exited with status code {0}. ", ExitCode);
+            if (ExitCode != 0) return false;
 
             return true;
         }
