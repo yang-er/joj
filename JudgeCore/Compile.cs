@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace JudgeCore
 {
-    interface ICompiler
+    public interface ICompiler
     {
-        string IncludePath { get; }
-        string Options { get; }
-        string LibraryDirs { get; }
+        List<string> IncludePath { get; }
+        List<string> LibraryPath { get; }
+        List<string> Options { get; }
+        List<string> ToolchainPath { get; }
         string MasterPath { get; }
-        string ExtraPath { get; }
+        string StandardError { get; }
+        string StandardOutput { get; }
+        int ExitCode { get; }
         bool Compile(string ans, Guid identify);
     }
 }

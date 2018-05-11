@@ -10,6 +10,7 @@ namespace JudgeTest
         {
             Console.WriteLine("Hello World!");
             JudgerTest();
+            CompilerTest();
             Console.ReadKey();
         }
 
@@ -23,6 +24,13 @@ namespace JudgeTest
                 var pp = new StreamReader(fs);
                 Console.WriteLine("Result {0} : {1}", i, judger.Judge(pp).ToString());
             }
+        }
+
+        static void CompilerTest()
+        {
+            ICompiler compiler = new JudgeCore.Compiler.Msvc();
+            var ret = compiler.Compile("#include <cstdio>\nint main() { return 0; }", Guid.NewGuid());
+            if (ret == false) Console.WriteLine(compiler.StandardOutput);
         }
     }
 }
