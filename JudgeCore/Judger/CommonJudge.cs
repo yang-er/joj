@@ -18,9 +18,10 @@ namespace JudgeCore.Judger
 
             if (!stream.EndOfStream)
             {
+                stream.Close();
                 return JudgeResult.OutputLimitExceeded;
             }
-
+            
             string result = new string(tojudge).TrimEnd('\0').Replace("\r", "");
             string r2 = result.Replace("\n", "").Replace("\t", "").Replace(" ", "");
 

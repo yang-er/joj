@@ -43,10 +43,10 @@ namespace JudgeCore.Compiler
             Debug.WriteLine(stdout);
             var stderr = cl.StandardError.ReadToEnd();
             Debug.WriteLine(stderr);
-            StandardOutput = stdout.Replace(file_name, "main");
-            StandardError = stderr.Replace(file_name, "main");
+            StandardOutput = stdout.Replace(file_name, "main").Trim();
+            StandardError = stderr.Replace(file_name, "main").Trim();
             ExitCode = cl.ExitCode;
-            Console.WriteLine("cl.exe exited with status code {0}. ", ExitCode);
+            Debug.WriteLine("cl.exe exited with status code {0}. ", ExitCode);
             if (ExitCode != 0) return false;
 
             // Link
@@ -63,7 +63,7 @@ namespace JudgeCore.Compiler
             StandardOutput += stdout.Replace(file_name, "main");
             StandardError += stderr.Replace(file_name, "main");
             ExitCode = link.ExitCode;
-            Console.WriteLine("link.exe exited with status code {0}. ", ExitCode);
+            Debug.WriteLine("link.exe exited with status code {0}. ", ExitCode);
             if (ExitCode != 0) return false;
 
             return true;

@@ -43,6 +43,16 @@
         /// <summary>
         /// 表达形式错误
         /// </summary>
-        PresentationError
+        PresentationError,
+
+        /// <summary>
+        /// 等待评测
+        /// </summary>
+        Pending,
+
+        /// <summary>
+        /// 正在评测
+        /// </summary>
+        Running
     }
 }
