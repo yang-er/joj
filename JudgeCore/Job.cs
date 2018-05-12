@@ -83,6 +83,9 @@ namespace JudgeCore
                 // Judge time span
                 var len = DateTime.Now - pro.StartTime;
                 Debug.WriteLine("Runtime: {0}ms", len.TotalMilliseconds);
+                ti.Memory = Helper.GetProcessMemoryInfo(pro);
+                Debug.WriteLine("Memory: {0}kb", ti.Memory / 1024);
+                if (ti.Memory / 1048576 > 128) ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.Time = len.TotalMilliseconds;
             }
             catch (Exception ex)

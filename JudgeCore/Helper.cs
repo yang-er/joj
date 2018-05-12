@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace JudgeCore
@@ -46,6 +47,39 @@ namespace JudgeCore
             ret.StartInfo.CreateNoWindow = true;
             ret.StartInfo.FileName = filename;
             return ret;
+        }
+        
+        [StructLayout(LayoutKind.Sequential, Size = 72)]
+        private struct PROCESS_MEMORY_COUNTERS
+        {
+            public uint cb;
+            public uint PageFaultCount;
+            public ulong PeakWorkingSetSize;
+            public ulong WorkingSetSize;
+            public ulong QuotaPeakPagedPoolUsage;
+            public ulong QuotaPagedPoolUsage;
+            public ulong QuotaPeakNonPagedPoolUsage;
+            public ulong QuotaNonPagedPoolUsage;
+            public ulong PagefileUsage;
+            public ulong PeakPagefileUsage;
+        }
+
+        [DllImport("psapi.dll", SetLastError = true)]
+        static extern bool GetProcessMemoryInfo(IntPtr hProcess, out PROCESS_MEMORY_COUNTERS counters, uint size);
+
+        public static long GetProcessMemoryInfo(Process proc)
+        {
+            PROCESS_MEMORY_COUNTERS memoryCounters;
+            memoryCounters.cb = (uint)Marshal.SizeOf(typeof(PROCESS_MEMORY_COUNTERS));
+
+            if (GetProcessMemoryInfo(proc.Handle, out memoryCounters, memoryCounters.cb))
+            {
+                return (long)memoryCounters.PeakWorkingSetSize;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }
