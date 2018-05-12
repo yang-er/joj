@@ -19,5 +19,10 @@
         /// 运行结果
         /// </summary>
         public JudgeResult Result;
+
+        /// <summary>
+        /// 退出代码
+        /// </summary>
+        public int ExitCode;
     }
 }

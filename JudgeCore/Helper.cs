@@ -37,8 +37,7 @@ namespace JudgeCore
         public static Process MakeJudgeProcess(Guid guid)
         {
             var filename = guid.ToString("D") + ".exe";
-            if (!File.Exists(filename))
-                return null;
+            if (!File.Exists(filename)) return null;
             var ret = new Process();
             ret.StartInfo.RedirectStandardOutput = true;
             ret.StartInfo.StandardOutputEncoding = Encoding.GetEncoding(936);
@@ -81,5 +80,11 @@ namespace JudgeCore
                 return 0;
             }
         }
+
+        [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int WerAddExcludedApplication(string pwzExeName, bool bAllUsers);
+
+        [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int WerRemoveExcludedApplication(string pwzExeName, bool bAllUsers);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace JudgeCore
@@ -80,13 +81,16 @@ namespace JudgeCore
                     return;
                 }
 
-                // Judge time span
-                var len = DateTime.Now - pro.StartTime;
+                // Judge extra info
+                var len = pro.ExitTime - pro.StartTime;
                 Debug.WriteLine("Runtime: {0}ms", len.TotalMilliseconds);
+                ti.Time = len.TotalMilliseconds;
                 ti.Memory = Helper.GetProcessMemoryInfo(pro);
                 Debug.WriteLine("Memory: {0}kb", ti.Memory / 1024);
                 if (ti.Memory / 1048576 > 128) ti.Result = JudgeResult.MemoryLimitExceeded;
-                ti.Time = len.TotalMilliseconds;
+                ti.ExitCode = pro.ExitCode;
+                Debug.WriteLine("ExitCode: 0x" + ti.ExitCode.ToString("x"));
+                if (ti.ExitCode != 0) ti.Result = JudgeResult.RuntimeError;
             }
             catch (Exception ex)
             {
@@ -105,10 +109,16 @@ namespace JudgeCore
         public void Judge(bool show_log = false)
         {
             var pro = Helper.MakeJudgeProcess(RunID);
+            string full_path = "";
             if (pro != null)
             {
+                full_path = new FileInfo(pro.StartInfo.FileName).FullName;
+                Helper.WerAddExcludedApplication(full_path, false);
                 pro.Start();
-                pro.Kill();
+                pro.StandardInput.Close();
+                pro.StandardOutput.Close();
+                Task.Run(async () => { await Task.Delay(5000); if (!pro.HasExited) pro.Kill(); });
+                pro.WaitForExit();
             }
 
             for (int i = 0; i < Output.Count; i++)
@@ -116,6 +126,9 @@ namespace JudgeCore
                 Judge(i);
                 if (show_log) Console.WriteLine("{0}ms\t{1}", (int)Math.Round(State[i].Time), State[i].Result.ToString());
             }
+
+            if (full_path != "")
+                Helper.WerRemoveExcludedApplication(full_path, false);
         }
 
         /// <summary>
