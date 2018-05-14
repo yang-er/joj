@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2037
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JudgeCore", "JudgeCore\JudgeCore.csproj", "{DCC317F4-8982-4CCA-9AC2-9E468EB4DA09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeCore", "JudgeCore\JudgeCore.csproj", "{DCC317F4-8982-4CCA-9AC2-9E468EB4DA09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JudgeTest", "JudgeTest\JudgeTest.csproj", "{92FC80B2-2AA6-4F51-8EF7-4C575177E44A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeTest", "JudgeTest\JudgeTest.csproj", "{92FC80B2-2AA6-4F51-8EF7-4C575177E44A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeDeamon", "JudgeDeamon\JudgeDeamon.csproj", "{13CBFCF3-3EB5-425E-B6A1-C29366360794}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JudgeWeb", "JudgeWeb\JudgeWeb.csproj", "{BB3ACF92-F108-4C37-9DCD-425BCF33280F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{92FC80B2-2AA6-4F51-8EF7-4C575177E44A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92FC80B2-2AA6-4F51-8EF7-4C575177E44A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92FC80B2-2AA6-4F51-8EF7-4C575177E44A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13CBFCF3-3EB5-425E-B6A1-C29366360794}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13CBFCF3-3EB5-425E-B6A1-C29366360794}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13CBFCF3-3EB5-425E-B6A1-C29366360794}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13CBFCF3-3EB5-425E-B6A1-C29366360794}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB3ACF92-F108-4C37-9DCD-425BCF33280F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB3ACF92-F108-4C37-9DCD-425BCF33280F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB3ACF92-F108-4C37-9DCD-425BCF33280F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB3ACF92-F108-4C37-9DCD-425BCF33280F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

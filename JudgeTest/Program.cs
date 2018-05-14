@@ -46,7 +46,7 @@ namespace JudgeTest
             // thanks to fmgu2000
             var pearl_in = new List<string>();
             var pearl_out = new List<IJudger>();
-            ICompiler compiler = new JudgeCore.Compiler.MinGW();
+            ICompiler compiler = new JudgeCore.Compiler.Msvc();
             for (int i = 1; i <= 10; i++)
             {
                 pearl_in.Add(File.ReadAllText($"..\\pearl{i}.in").Replace("\r", ""));
@@ -59,6 +59,8 @@ namespace JudgeTest
                 job.Build(File.ReadAllText(file));
                 Console.WriteLine("Judge Result of " + file);
                 job.Judge(true);
+                if (job.State[0].Result == JudgeResult.CompileError)
+                    Console.WriteLine(job.CompileInfo);
                 Console.WriteLine("\n");
             }
         }
