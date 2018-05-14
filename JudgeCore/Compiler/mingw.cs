@@ -6,19 +6,14 @@ using System.Text;
 
 namespace JudgeCore.Compiler
 {
-    public class Msvc : ICompiler
+    public class MinGW : ICompiler
     {
-        private string vcv = "";
-        private string winv = "";
-        private string sku = "";
-        private string kit = "C:\\Program Files (x86)\\Windows Kits\\10";
-        private string vsdir => $"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\{sku}";
-
+        private string Version;
         public List<string> IncludePath { get; }
         public List<string> LibraryPath { get; }
         public List<string> Options { get; }
         public List<string> ToolchainPath { get; }
-        public string MasterPath { get; }
+        public string MasterPath => "C:\\MinGW";
         public string StandardError { get; set; }
         public string StandardOutput { get; set; }
         public int ExitCode { get; set; }
@@ -34,9 +29,9 @@ namespace JudgeCore.Compiler
             // Compile
             string cl_args = "";
             Options.ForEach((str) => cl_args += $" {str}");
-            IncludePath.ForEach((str) => cl_args += $" /I\"{str}\"");
-            cl_args += $" /c {file_name}.cpp /Fo{file_name}.obj";
-            var cl = Helper.MakeProcess(ToolchainPath[0] + "\\cl.exe", cl_args);
+            cl_args += $" -c {file_name}.cpp -o{file_name}.o";
+            var cl = Helper.MakeProcess(ToolchainPath[0] + "\\g++.exe", cl_args);
+            cl.StartInfo.Environment["PATH"] += $"{MasterPath}\\bin;";
             cl.Start();
             cl.WaitForExit();
             var stdout = cl.StandardOutput.ReadToEnd();
@@ -46,14 +41,14 @@ namespace JudgeCore.Compiler
             StandardOutput = stdout.Replace(file_name, "main").Trim();
             StandardError = stderr.Replace(file_name, "main").Trim();
             ExitCode = cl.ExitCode;
-            Debug.WriteLine("cl.exe exited with status code {0}. ", ExitCode);
+            Debug.WriteLine("g++.exe exited with status code {0}. ", ExitCode);
             if (ExitCode != 0) return false;
 
             // Link
-            string link_args = " " + Options[0];
-            LibraryPath.ForEach((str) => link_args += $" /LIBPATH:\"{str}\"");
-            link_args += $" /out:{file_name}.exe {file_name}.obj";
-            var link = Helper.MakeProcess(ToolchainPath[0] + "\\link.exe", link_args);
+            string link_args = "";
+            link_args += $" -o {file_name}.exe {file_name}.o";
+            var link = Helper.MakeProcess(ToolchainPath[0] + "\\g++.exe", link_args);
+            link.StartInfo.Environment["PATH"] += $"{MasterPath}\\bin;";
             link.Start();
             link.WaitForExit();
             stdout = link.StandardOutput.ReadToEnd();
@@ -63,60 +58,43 @@ namespace JudgeCore.Compiler
             StandardOutput += stdout.Replace(file_name, "main");
             StandardError += stderr.Replace(file_name, "main");
             ExitCode = link.ExitCode;
-            Debug.WriteLine("link.exe exited with status code {0}. ", ExitCode);
+            Debug.WriteLine("g++.exe exited with status code {0}. ", ExitCode);
             if (ExitCode != 0) return false;
 
             return true;
         }
 
-        public Msvc()
+        public MinGW()
         {
-            var vs = new DirectoryInfo(vsdir);
-            sku = vs.GetDirectories()[0].Name;
-            var vc = new DirectoryInfo(vsdir + "\\VC\\Tools\\MSVC\\");
-            vcv = vc.GetDirectories()[0].Name;
-            var sdk = new DirectoryInfo(kit + "\\Source\\");
-            winv = sdk.GetDirectories()[0].Name;
-
-            MasterPath = $"{vsdir}\\VC\\Tools\\MSVC\\{vcv}";
-
             // Compiler Options
             Options = new List<string>
             {
-                "/nologo",
-                "/EHsc",
-                "/DDEBUG",
+                "-std=c++11",
             };
 
             // Solve include paths
-            IncludePath = new List<string>
-            {
-                $"{vsdir}\\VC\\Tools\\MSVC\\{vcv}\\include",
-                $"{kit}\\Include\\{winv}\\ucrt",
-            };
+            IncludePath = new List<string>{};
 
             // Solve linker paths
-            LibraryPath = new List<string>
-            {
-                $"{MasterPath}\\lib\\x64",
-                $"{kit}\\Lib\\{winv}\\ucrt\\x64",
-                $"{kit}\\Lib\\{winv}\\um\\x64",
-            };
+            LibraryPath = new List<string>{};
 
             // Toolchain paths
             ToolchainPath = new List<string>
             {
-                $"{MasterPath}\\bin\\Hostx64\\x64",
-                $"{vsdir}\\Common7\\IDE",
-                $"{kit}\\bin\\{winv}\\x64"
+                $"{MasterPath}\\bin",
             };
+
+            var proc = Helper.MakeProcess(ToolchainPath[0] + "\\gcc.exe", "--version");
+            proc.Start();
+            var ret = proc.StandardOutput.ReadToEnd().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            Version = ret[0].Split(") ")[1];
 
             Console.WriteLine(ToString() + "\tloaded.");
         }
 
         public override string ToString()
         {
-            return $"Microsoft Visual C++ v{vcv} with Windows 10 SDK v{winv}";
+            return $"MinGW Toolchain v{Version}";
         }
     }
 }

@@ -43,9 +43,16 @@ namespace JudgeCore
         /// <returns></returns>
         public bool Build(string code)
         {
-            return Compiler.Compile(code, RunID);
+            bool ret = Compiler.Compile(code, RunID);
+            CompileInfo = Compiler.StandardOutput.Trim();
+            return ret;
         }
-        
+
+        /// <summary>
+        /// 编译信息
+        /// </summary>
+        public string CompileInfo;
+
         /// <summary>
         /// 对某一次进行评价
         /// </summary>
@@ -67,6 +74,8 @@ namespace JudgeCore
                 ti.Result = JudgeResult.Running;
 
                 // Judge process
+                if (Compiler.GetType().Name == "MinGW")
+                    pro.StartInfo.Environment["PATH"] += $"C:\\MinGW\\bin;";
                 pro.Start();
                 bool tle = false;
                 Task.Run(async () => { await Task.Delay(1000); if (!pro.HasExited) { if (ti.Result == JudgeResult.Running) tle = true; pro.Kill(); } });
@@ -112,6 +121,8 @@ namespace JudgeCore
             string full_path = "";
             if (pro != null)
             {
+                if (Compiler.GetType().Name == "MinGW")
+                    pro.StartInfo.Environment["PATH"] += $"C:\\MinGW\\bin;";
                 full_path = new FileInfo(pro.StartInfo.FileName).FullName;
                 Helper.WerAddExcludedApplication(full_path, false);
                 pro.Start();

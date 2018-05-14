@@ -24,5 +24,10 @@
         /// 退出代码
         /// </summary>
         public int ExitCode;
+
+        /// <summary>
+        /// 提交者信息
+        /// </summary>
+        public string Owner;
     }
 }

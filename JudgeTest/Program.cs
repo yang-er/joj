@@ -36,6 +36,8 @@ namespace JudgeTest
             ICompiler compiler = new JudgeCore.Compiler.Msvc();
             var ret = compiler.Compile("#include <cstdio>\nint main() { return 0; }", Guid.NewGuid());
             if (ret == false) Console.WriteLine(compiler.StandardOutput);
+            new JudgeCore.Compiler.ClangC2();
+            new JudgeCore.Compiler.MinGW();
         }
 
         static void JobTest()
@@ -44,7 +46,7 @@ namespace JudgeTest
             // thanks to fmgu2000
             var pearl_in = new List<string>();
             var pearl_out = new List<IJudger>();
-            ICompiler compiler = new JudgeCore.Compiler.Msvc();
+            ICompiler compiler = new JudgeCore.Compiler.MinGW();
             for (int i = 1; i <= 10; i++)
             {
                 pearl_in.Add(File.ReadAllText($"..\\pearl{i}.in").Replace("\r", ""));
