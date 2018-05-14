@@ -66,6 +66,11 @@ namespace JudgeCore
         [DllImport("psapi.dll", SetLastError = true)]
         static extern bool GetProcessMemoryInfo(IntPtr hProcess, out PROCESS_MEMORY_COUNTERS counters, uint size);
 
+        /// <summary>
+        /// 获取进程内存占用情况
+        /// </summary>
+        /// <param name="proc">进程</param>
+        /// <returns>最大占用内存</returns>
         public static long GetProcessMemoryInfo(Process proc)
         {
             PROCESS_MEMORY_COUNTERS memoryCounters;

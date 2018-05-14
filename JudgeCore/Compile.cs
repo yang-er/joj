@@ -52,5 +52,12 @@ namespace JudgeCore
         /// <param name="identify">程序标识符</param>
         /// <returns>是否编译成功</returns>
         bool Compile(string ans, Guid identify);
+
+        /// <summary>
+        /// 编译
+        /// </summary>
+        /// <param name="file">编译的文件名称</param>
+        /// <returns>是否编译成功</returns>
+        bool Compile(string file);
     }
 }

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Text;
 
 namespace JudgeCore.Compiler
 {
-    public class ClangC2 : ICompiler
+    public sealed class ClangC2 : CompilerBase
     {
         private string vcv = "";
         private string msvcv = "";
@@ -16,23 +14,10 @@ namespace JudgeCore.Compiler
         private string c2v = "";
         private string kit = "C:\\Program Files (x86)\\Windows Kits\\10";
         private string vsdir => $"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\{sku}";
-
-        public List<string> IncludePath { get; }
-        public List<string> LibraryPath { get; }
-        public List<string> Options { get; }
-        public List<string> ToolchainPath { get; }
-        public string MasterPath { get; }
-        public string StandardError { get; set; }
-        public string StandardOutput { get; set; }
-        public int ExitCode { get; set; }
-
-        public bool Compile(string ans, Guid identify)
+        
+        public override bool Compile(string file)
         {
-            var file_name = identify.ToString("D");
-            var file = new FileStream(file_name + ".cpp", FileMode.CreateNew);
-            byte[] grp = Encoding.ASCII.GetBytes(ans);
-            file.Write(grp, 0, grp.Length);
-            file.Close();
+            var file_name = file.Split('.')[0];
 
             // Compile
             string cl_args = "";
@@ -41,16 +26,7 @@ namespace JudgeCore.Compiler
             cl_args += $" -c {file_name}.cpp -o {file_name}.obj";
             var cl = Helper.MakeProcess(ToolchainPath[0] + "\\clang.exe", cl_args);
             cl.StartInfo.Environment["PATH"] += $"{vsdir}\\VC\\Tools\\MSVC\\{msvcv}\\bin\\HostX64\\x64;";
-            cl.Start();
-            cl.WaitForExit();
-            var stdout = cl.StandardOutput.ReadToEnd();
-            Debug.WriteLine(stdout);
-            var stderr = cl.StandardError.ReadToEnd();
-            Debug.WriteLine(stderr);
-            StandardOutput = stdout.Replace(file_name, "main").Trim();
-            StandardError = stderr.Replace(file_name, "main").Trim();
-            ExitCode = cl.ExitCode;
-            Debug.WriteLine("clang.exe exited with status code {0}. ", ExitCode);
+            ReadCompileResult(cl);
             if (ExitCode != 0) return false;
 
             // Link
@@ -59,16 +35,7 @@ namespace JudgeCore.Compiler
             link_args += $" -o {file_name}.exe {file_name}.obj";
             var link = Helper.MakeProcess(ToolchainPath[0] + "\\clang.exe", link_args);
             link.StartInfo.Environment["PATH"] += $"{vsdir}\\VC\\Tools\\MSVC\\{msvcv}\\bin\\HostX64\\x64;";
-            link.Start();
-            link.WaitForExit();
-            stdout = link.StandardOutput.ReadToEnd();
-            Debug.WriteLine(stdout);
-            stderr = link.StandardError.ReadToEnd();
-            Debug.WriteLine(stderr);
-            StandardOutput += stdout.Replace(file_name, "main");
-            StandardError += stderr.Replace(file_name, "main");
-            ExitCode = link.ExitCode;
-            Debug.WriteLine("clang.exe exited with status code {0}. ", ExitCode);
+            ReadCompileResult(link);
             if (ExitCode != 0) return false;
 
             return true;
@@ -136,7 +103,7 @@ namespace JudgeCore.Compiler
 
         public override string ToString()
         {
-            return $"Clang with Microsoft CodeGen v{clangv}, c2 v{c2v}";
+            return $"Clang with Microsoft CodeGen v{clangv}";
         }
     }
 }

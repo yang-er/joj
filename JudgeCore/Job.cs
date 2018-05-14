@@ -86,8 +86,6 @@ namespace JudgeCore
                 if (tle)
                 {
                     ti.Result = JudgeResult.TimeLimitExceeded;
-                    ti.Time = -1;
-                    return;
                 }
 
                 // Judge extra info
@@ -99,7 +97,7 @@ namespace JudgeCore
                 if (ti.Memory / 1048576 > 128) ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = pro.ExitCode;
                 Debug.WriteLine("ExitCode: 0x" + ti.ExitCode.ToString("x"));
-                if (ti.ExitCode != 0) ti.Result = JudgeResult.RuntimeError;
+                if (!tle && ti.ExitCode != 0) ti.Result = JudgeResult.RuntimeError;
             }
             catch (Exception ex)
             {
