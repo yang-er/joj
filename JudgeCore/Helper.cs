@@ -45,9 +45,17 @@ namespace JudgeCore
                 RedirectStandardInput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                FileName = filename
+                FileName = filename,
+                // UserName = "Judge",
+                // Password = new System.Security.SecureString()
             };
-            ret.Environment["Path"] = "\\;";
+            /* ret.Password.AppendChar('1');
+            ret.Password.AppendChar('2');
+            ret.Password.AppendChar('3');
+            ret.Password.AppendChar('4');
+            ret.Password.AppendChar('5');
+            ret.Password.AppendChar('6');
+            ret.Environment["Path"] = "\\;"; */
             ret.WorkingDirectory = Directory.Exists("F:\\joj") ? "F:\\joj" : Environment.CurrentDirectory;
             // ret.StartInfo.WorkingDirectory = "F:\\joj";
             return ret;

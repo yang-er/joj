@@ -9,9 +9,9 @@ namespace JudgeTest
     {
         static void Main(string[] args)
         {
+            if (Directory.Exists("F:\\joj\\dest"))
+                Environment.CurrentDirectory = "F:\\joj\\dest";
             Console.WriteLine("Hello World!");
-            JudgerTest();
-            CompilerTest();
             JobTest();
             Console.Write("Press any key to continue ... ");
             Console.ReadKey();
