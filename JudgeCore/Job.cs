@@ -20,16 +20,11 @@ namespace JudgeCore
         /// 提交的唯一标识符
         /// </summary>
         public Guid RunID { get; }
-
+        
         /// <summary>
-        /// 标准输入内容
+        /// 子评测内容控制
         /// </summary>
-        public List<string> Input { get; }
-
-        /// <summary>
-        /// 标准输出内容
-        /// </summary>
-        public List<IJudger> Output { get; }
+        public List<IJudger> Judger { get; }
 
         /// <summary>
         /// 目前状态
@@ -101,9 +96,9 @@ namespace JudgeCore
                 pro.Start();
                 bool tle = false;
                 Task.Run(() => CheckRuntime(pro, ref ti, ref tle));
-                pro.StandardInput.Write(Input[id]);
+                Judger[id].Input(pro.StandardInput);
                 pro.StandardInput.Close();
-                ti.Result = Output[id].Judge(pro.StandardOutput);
+                ti.Result = Judger[id].Judge(pro.StandardOutput);
                 pro.WaitForExit();
                 if (tle)
                 {
@@ -157,10 +152,13 @@ namespace JudgeCore
                 pro.WaitForExit();
             }
 
-            for (int i = 0; i < Output.Count; i++)
+            for (int i = 0; i < Judger.Count; i++)
             {
                 Judge(i);
-                if (show_log) Console.WriteLine("{0}ms\t{1}", (int)Math.Round(State[i].Time), State[i].Result.ToString());
+                if (show_log) Console.WriteLine("{0}ms\t{1}mb\t{2}", 
+                    (int)Math.Round(State[i].Time), 
+                    (int)Math.Round(State[i].Memory / 1048576.0), 
+                    State[i].Result.ToString());
             }
 
             if (full_path != "")
@@ -171,14 +169,12 @@ namespace JudgeCore
         /// 初始化任务
         /// </summary>
         /// <param name="cl">编译器</param>
-        /// <param name="i">标准输入</param>
-        /// <param name="o">评价标准</param>
-        public Job(ICompiler cl, List<string> i, List<IJudger> o)
+        /// <param name="o">评测器</param>
+        public Job(ICompiler cl, List<IJudger> o)
         {
             Compiler = cl;
             RunID = Guid.NewGuid();
-            Input = i;
-            Output = o;
+            Judger = o;
             State = new List<TestInfo>();
         }
     }

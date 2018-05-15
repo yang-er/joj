@@ -31,23 +31,15 @@ namespace JudgeWeb
                 if (context.Request.Path == "/test.html")
                 {
                     var cmp = new JudgeCore.Compiler.Msvc();
-                    var inp = new List<string>
-                    {
-                        "1 2\n",
-                        "3 4\n",
-                        "5 6\n",
-                        "7 8\n",
-                        "9 10\n",
-                    };
                     var op = new List<IJudger>
                     {
-                        new JudgeCore.Judger.CommonJudge("3\n"),
-                        new JudgeCore.Judger.CommonJudge("7\n"),
-                        new JudgeCore.Judger.CommonJudge("11\n"),
-                        new JudgeCore.Judger.CommonJudge("15\n"),
-                        new JudgeCore.Judger.CommonJudge("19\n"),
+                        new JudgeCore.Judger.CommonJudge("1 2\n", "3\n"),
+                        new JudgeCore.Judger.CommonJudge("3 4\n", "7\n"),
+                        new JudgeCore.Judger.CommonJudge("5 6\n", "11\n"),
+                        new JudgeCore.Judger.CommonJudge("7 8\n", "15\n"),
+                        new JudgeCore.Judger.CommonJudge("9 10\n", "19\n"),
                     };
-                    var current = new Job(cmp, inp, op);
+                    var current = new Job(cmp, op);
                     await context.Response.WriteAsync("<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>运行测试</title></head><body><h1>A + B Problem</h1><textarea name=\"code\" style=\"width:500px;height:300px\">");
                     await context.Response.WriteAsync(context.Request.Form["code"]);
                     

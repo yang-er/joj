@@ -39,6 +39,7 @@ namespace JudgeCore.Compiler
             Options = new List<string>
             {
                 "-std=c++11",
+                "-fmax-errors=5",
             };
 
             // Solve include paths

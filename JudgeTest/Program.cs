@@ -20,7 +20,7 @@ namespace JudgeTest
         static void JudgerTest()
         {
             Console.WriteLine("Judging the results...");
-            IJudger judger = new JudgeCore.Judger.CommonJudge("1 + 2 = 3\n");
+            IJudger judger = new JudgeCore.Judger.CommonJudge("", "1 + 2 = 3\n");
             int ppp = new DirectoryInfo("..\\..\\out").GetFiles().Length;
             for (int i = 1; i <= ppp; i++)
             {
@@ -44,18 +44,18 @@ namespace JudgeTest
         {
             Console.WriteLine("\n\nTest job...");
             // thanks to fmgu2000
-            var pearl_in = new List<string>();
             var pearl_out = new List<IJudger>();
             ICompiler compiler = new JudgeCore.Compiler.Msvc();
             for (int i = 1; i <= 10; i++)
             {
-                pearl_in.Add(File.ReadAllText($"..\\pearl{i}.in").Replace("\r", ""));
-                pearl_out.Add(new JudgeCore.Judger.CommonJudge(File.ReadAllText($"..\\pearl{i}.ans")));
+                pearl_out.Add(new JudgeCore.Judger.CommonJudge(
+                    File.ReadAllText($"..\\pearl{i}.in").Replace("\r", ""), 
+                    File.ReadAllText($"..\\pearl{i}.ans")));
             }
 
             foreach (var file in Directory.GetFiles($"..\\source"))
             {
-                var job = new Job(compiler, pearl_in, pearl_out);
+                var job = new Job(compiler, pearl_out);
                 job.Build(File.ReadAllText(file));
                 Console.WriteLine("Judge Result of " + file);
                 job.Judge(true);

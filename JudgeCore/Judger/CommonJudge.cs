@@ -9,7 +9,14 @@ namespace JudgeCore.Judger
     {
         private readonly string _correct;
         private readonly string _realthing;
+        private readonly string _input;
         public bool Special => false;
+
+        public void Input(StreamWriter stream)
+        {
+            stream.Write(_input);
+            stream.Flush();
+        }
 
         public JudgeResult Judge(StreamReader stream)
         {
@@ -48,8 +55,9 @@ namespace JudgeCore.Judger
             return JudgeResult.PresentationError;
         }
 
-        public CommonJudge(string ans)
+        public CommonJudge(string inp, string ans)
         {
+            _input = inp;
             _correct = ans.Replace("\r", "");
             _realthing = _correct.Replace("\n", "").Replace("\t", "").Replace(" ", "");
         }
