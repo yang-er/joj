@@ -1,0 +1,6 @@
+LIBRARY JudgeW32
+EXPORTS
+	SetupSandbox
+	UnsetSandbox
+	CreateJudgeProcess
+	PeakProcessMemoryInfo

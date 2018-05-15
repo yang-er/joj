@@ -34,64 +34,23 @@ namespace JudgeCore
         /// </summary>
         /// <param name="guid">程序标识符</param>
         /// <returns>等待启动的进程</returns>
-        public static Process MakeJudgeProcess(Guid guid)
+        public static ProcessStartInfo MakeJudgeInfo(Guid guid)
         {
-            var filename = guid.ToString("D") + ".exe";
+            var filename = new FileInfo(guid.ToString("D") + ".exe").FullName;
             if (!File.Exists(filename)) return null;
-            var ret = new Process();
-            ret.StartInfo.RedirectStandardOutput = true;
-            ret.StartInfo.StandardOutputEncoding = Encoding.GetEncoding(936);
-            ret.StartInfo.RedirectStandardInput = true;
-            ret.StartInfo.UseShellExecute = false;
-            ret.StartInfo.CreateNoWindow = true;
-            ret.StartInfo.FileName = filename;
-            ret.StartInfo.Environment["Path"] = "\\;";
+            var ret = new ProcessStartInfo
+            {
+                RedirectStandardOutput = true,
+                StandardOutputEncoding = Encoding.GetEncoding(936),
+                RedirectStandardInput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                FileName = filename
+            };
+            ret.Environment["Path"] = "\\;";
+            ret.WorkingDirectory = Directory.Exists("F:\\joj") ? "F:\\joj" : Environment.CurrentDirectory;
             // ret.StartInfo.WorkingDirectory = "F:\\joj";
             return ret;
         }
-        
-        [StructLayout(LayoutKind.Sequential, Size = 72)]
-        private struct PROCESS_MEMORY_COUNTERS
-        {
-            public uint cb;
-            public uint PageFaultCount;
-            public ulong PeakWorkingSetSize;
-            public ulong WorkingSetSize;
-            public ulong QuotaPeakPagedPoolUsage;
-            public ulong QuotaPagedPoolUsage;
-            public ulong QuotaPeakNonPagedPoolUsage;
-            public ulong QuotaNonPagedPoolUsage;
-            public ulong PagefileUsage;
-            public ulong PeakPagefileUsage;
-        }
-
-        [DllImport("psapi.dll", SetLastError = true)]
-        static extern bool GetProcessMemoryInfo(IntPtr hProcess, out PROCESS_MEMORY_COUNTERS counters, uint size);
-
-        /// <summary>
-        /// 获取进程内存占用情况
-        /// </summary>
-        /// <param name="proc">进程</param>
-        /// <returns>最大占用内存</returns>
-        public static long GetProcessMemoryInfo(Process proc)
-        {
-            PROCESS_MEMORY_COUNTERS memoryCounters;
-            memoryCounters.cb = (uint)Marshal.SizeOf(typeof(PROCESS_MEMORY_COUNTERS));
-
-            if (GetProcessMemoryInfo(proc.Handle, out memoryCounters, memoryCounters.cb))
-            {
-                return (long)memoryCounters.PeakWorkingSetSize;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern int WerAddExcludedApplication(string pwzExeName, bool bAllUsers);
-
-        [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern int WerRemoveExcludedApplication(string pwzExeName, bool bAllUsers);
     }
 }
