@@ -45,6 +45,8 @@ namespace JudgeCore
             ret.StartInfo.UseShellExecute = false;
             ret.StartInfo.CreateNoWindow = true;
             ret.StartInfo.FileName = filename;
+            ret.StartInfo.Environment["Path"] = "\\;";
+            ret.StartInfo.WorkingDirectory = "F:\\joj";
             return ret;
         }
         
