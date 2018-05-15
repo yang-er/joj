@@ -37,6 +37,11 @@ namespace JudgeCore
         public List<TestInfo> State { get; }
 
         /// <summary>
+        /// 最大内存限制
+        /// </summary>
+        public long MemoryLimit { get; set; } = 128;
+
+        /// <summary>
         /// 编译
         /// </summary>
         /// <param name="code"></param>
@@ -52,6 +57,23 @@ namespace JudgeCore
         /// 编译信息
         /// </summary>
         public string CompileInfo;
+
+        private void CheckRuntime(Process pro, ref TestInfo ti, ref bool tle)
+        {
+            while (!pro.HasExited
+                && pro.TotalProcessorTime.TotalMilliseconds < 1001
+                && (DateTime.Now - pro.StartTime).TotalMilliseconds < 2000
+                && pro.PeakWorkingSet64 < MemoryLimit * 1048576L) ;
+            if (!pro.HasExited)
+            {
+                if (ti.Result == JudgeResult.Running)
+                {
+                    tle = true;
+                }
+
+                pro.Kill();
+            }
+        }
 
         /// <summary>
         /// 对某一次进行评价
@@ -78,23 +100,28 @@ namespace JudgeCore
                     pro.StartInfo.Environment["PATH"] += $"C:\\MinGW\\bin;";
                 pro.Start();
                 bool tle = false;
-                Task.Run(async () => { await Task.Delay(1000); if (!pro.HasExited) { if (ti.Result == JudgeResult.Running) tle = true; pro.Kill(); } });
+                Task.Run(() => CheckRuntime(pro, ref ti, ref tle));
                 pro.StandardInput.Write(Input[id]);
                 pro.StandardInput.Close();
                 ti.Result = Output[id].Judge(pro.StandardOutput);
                 pro.WaitForExit();
                 if (tle)
                 {
-                    ti.Result = JudgeResult.TimeLimitExceeded;
+                    if (pro.TotalProcessorTime.TotalMilliseconds >= 1001)
+                        ti.Result = JudgeResult.TimeLimitExceeded;
+                    else
+                        ti.Result = JudgeResult.Pending;
                 }
 
                 // Judge extra info
-                var len = pro.ExitTime - pro.StartTime;
-                Debug.WriteLine("Runtime: {0}ms", len.TotalMilliseconds);
-                ti.Time = len.TotalMilliseconds;
+                ti.Time = pro.TotalProcessorTime.TotalMilliseconds;
+                Debug.WriteLine("Runtime: {0}ms", ti.Time);
+                if (ti.Time >= 1001)
+                    ti.Result = JudgeResult.TimeLimitExceeded;
                 ti.Memory = Helper.GetProcessMemoryInfo(pro);
                 Debug.WriteLine("Memory: {0}kb", ti.Memory / 1024);
-                if (ti.Memory / 1048576 > 128) ti.Result = JudgeResult.MemoryLimitExceeded;
+                if (ti.Memory / 1048576 > MemoryLimit)
+                    ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = pro.ExitCode;
                 Debug.WriteLine("ExitCode: 0x" + ti.ExitCode.ToString("x"));
                 if (!tle && ti.ExitCode != 0) ti.Result = JudgeResult.RuntimeError;

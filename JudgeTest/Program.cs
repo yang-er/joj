@@ -36,8 +36,8 @@ namespace JudgeTest
             ICompiler compiler = new JudgeCore.Compiler.Msvc();
             var ret = compiler.Compile("#include <cstdio>\nint main() { return 0; }", Guid.NewGuid());
             if (ret == false) Console.WriteLine(compiler.StandardOutput);
-            new JudgeCore.Compiler.ClangC2();
-            new JudgeCore.Compiler.MinGW();
+            // new JudgeCore.Compiler.ClangC2();
+            // new JudgeCore.Compiler.MinGW();
         }
 
         static void JobTest()
