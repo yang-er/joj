@@ -6,13 +6,19 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Security;
+using System.Security.Permissions;
 using System.Text;
 
 namespace JudgeCore.Platform
 {
     public class Win32
     {
+        #region JudgeW32.dll P/Invoke
+
         [DllImport("JudgeW32.dll", SetLastError = true)]
         public static extern UIntPtr PeakProcessMemoryInfo(IntPtr hProcess);
 
@@ -22,32 +28,16 @@ namespace JudgeCore.Platform
         [DllImport("JudgeW32.dll", SetLastError = true)]
         public static extern void UnsetSandbox(IntPtr hJob);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AssignProcessToJobObject(IntPtr hJob, IntPtr hProcess);
-
         [DllImport("JudgeW32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern int CreateJudgeProcess(JudgeInfo pJudgeInfo);
-
-        [DllImport("kernel32.dll")]
-        static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, ref SecurityAttributes lpPipeAttributes, uint nSize);
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct SecurityAttributes
-        {
-            public int nLength;
-            public IntPtr lpSecurityDescriptor;
-            [MarshalAs(UnmanagedType.Bool)]
-            public bool bInheritHandle;
-        }
+        private static extern int CreateJudgeProcess(ref JudgeInfo pJudgeInfo);
 
         [StructLayout(LayoutKind.Sequential)]
         struct JudgeInfo
         {
             public IntPtr hJob;
-            public SafeFileHandle hStdIn;
-            public SafeFileHandle hStdOut;
-            public SafeFileHandle hStdErr;
+            public IntPtr hStdIn;
+            public IntPtr hStdOut;
+            public IntPtr hStdErr;
             public IntPtr pEnv;
             [MarshalAs(UnmanagedType.LPWStr)]
             public string pwzExe;
@@ -57,15 +47,34 @@ namespace JudgeCore.Platform
             public string pwzDir;
         }
 
+        #endregion
+
+        #region Stream Redirect from dotNetSrc
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, ref SecurityAttributes lpPipeAttributes, uint nSize);
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SecurityAttributes
+        {
+            public int nLength;
+            public IntPtr lpSecurityDescriptor;
+            public bool bInheritHandle;
+
+            public SecurityAttributes(bool bI = false)
+            {
+                nLength = 12;
+                lpSecurityDescriptor = IntPtr.Zero;
+                bInheritHandle = bI;
+            }
+        }
+        
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern IntPtr GetStdHandle(int nStdHandle);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool DuplicateHandle(IntPtr hSourceProcessHandle, SafeFileHandle hSourceHandle, IntPtr hTargetProcessHandle, out SafeFileHandle lpTargetHandle, uint dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, uint dwOptions);
-        
-        [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        static extern int WerAddExcludedApplication(string pwzExeName, bool bAllUsers);
+        static extern bool DuplicateHandle(HandleRef hSourceProcessHandle, SafeFileHandle hSourceHandle, HandleRef hTargetProcessHandle, out SafeFileHandle lpTargetHandle, uint dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, uint dwOptions);
         
         static void CreatePipeWithSecurityAttributes(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, uint nSize)
         {
@@ -78,25 +87,22 @@ namespace JudgeCore.Platform
 
         static void CreatePipe(out SafeFileHandle parentHandle, out SafeFileHandle childHandle, bool parentInputs)
         {
-            var securityAttributesParent = new SecurityAttributes
-            {
-                bInheritHandle = true
-            };
-
+            var securityAttributesParent = new SecurityAttributes(true);
             SafeFileHandle hTmp = null;
+
             try
             {
                 if (parentInputs)
                 {
-                    CreatePipeWithSecurityAttributes(out childHandle, out hTmp, securityAttributesParent, 0);
+                    CreatePipeWithSecurityAttributes(out childHandle, out hTmp, securityAttributesParent, 128 * 1024);
                 }
                 else
                 {
-                    CreatePipeWithSecurityAttributes(out hTmp, out childHandle, securityAttributesParent, 0);
+                    CreatePipeWithSecurityAttributes(out hTmp, out childHandle, securityAttributesParent, 128 * 1024);
                 }
 
                 var ptr = Process.GetCurrentProcess().Handle;
-                if (!DuplicateHandle(ptr, hTmp, ptr, out parentHandle, 0, false, 2))
+                if (!DuplicateHandle(new HandleRef(Process.GetCurrentProcess(), ptr), hTmp, new HandleRef(Process.GetCurrentProcess(), ptr), out parentHandle, 0, false, 2))
                 {
                     throw new Win32Exception();
                 }
@@ -110,6 +116,19 @@ namespace JudgeCore.Platform
             }
         }
 
+        #endregion
+
+        #region Other WINAPI Series
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AssignProcessToJobObject(IntPtr hJob, IntPtr hProcess);
+
+        [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        static extern int WerAddExcludedApplication(string pwzExeName, bool bAllUsers);
+        
+        #endregion
+        
         static object cjp_lock = new object();
 
         public static Process CreateJudgeProcess(IntPtr job, ProcessStartInfo info, out StreamReader stdout, out StreamWriter stdin)
@@ -122,8 +141,7 @@ namespace JudgeCore.Platform
                 pwzCmd = info.Arguments,
                 pwzDir = info.WorkingDirectory
             };
-
-            SafeFileHandle standardInputWritePipeHandle, standardOutputReadPipeHandle;
+            
             int pid;
 
             lock (cjp_lock)
@@ -131,18 +149,15 @@ namespace JudgeCore.Platform
                 byte[] environmentBytes = EnvironmentBlock.ToByteArray(info.EnvironmentVariables, true);
                 var environmentHandle = GCHandle.Alloc(environmentBytes, GCHandleType.Pinned);
                 ji.pEnv = environmentHandle.AddrOfPinnedObject();
-                ji.hStdErr = new SafeFileHandle(GetStdHandle(-12), false);
-                CreatePipe(out standardInputWritePipeHandle, out ji.hStdIn, true);
-                CreatePipe(out standardOutputReadPipeHandle, out ji.hStdOut, false);
 
-                pid = CreateJudgeProcess(ji);
+                pid = CreateJudgeProcess(ref ji);
 
                 if (environmentHandle.IsAllocated)
                     environmentHandle.Free();
             }
 
-            stdin = new StreamWriter(new FileStream(standardInputWritePipeHandle, FileAccess.Write, 4096, false), Console.InputEncoding, 4096) { AutoFlush = true, NewLine = "\n" };
-            stdout = new StreamReader(new FileStream(standardOutputReadPipeHandle, FileAccess.Read, 4096, false), info.StandardOutputEncoding ?? Console.OutputEncoding, true, 4096);
+            stdin = new StreamWriter(new FileStream(new SafeFileHandle(ji.hStdIn, true), FileAccess.Write, 4096, false), Console.InputEncoding, 4096) { AutoFlush = true, NewLine = "\n" };
+            stdout = new StreamReader(new FileStream(new SafeFileHandle(ji.hStdOut, true), FileAccess.Read, 4096, false), info.StandardOutputEncoding ?? Console.OutputEncoding, true, 16384);
 
             var ret = Process.GetProcessById(pid);
             var hdl = ret.Handle;
@@ -181,34 +196,22 @@ namespace JudgeCore.Platform
                 }
                 
                 stringBuff.Append('\0');
-
-                if (unicode)
-                {
-                    envBlock = Encoding.Unicode.GetBytes(stringBuff.ToString());
-                }
-                else
-                {
-                    envBlock = Encoding.Default.GetBytes(stringBuff.ToString());
-
-                    if (envBlock.Length > UInt16.MaxValue)
-                        throw new InvalidOperationException("Environment Block too long");
-                }
-
+                envBlock = Encoding.Unicode.GetBytes(stringBuff.ToString());
                 return envBlock;
             }
-        }
-        
-        internal class OrdinalCaseInsensitiveComparer : IComparer
-        {
-            internal static readonly OrdinalCaseInsensitiveComparer Default = new OrdinalCaseInsensitiveComparer();
 
-            public int Compare(Object a, Object b)
+            internal class OrdinalCaseInsensitiveComparer : IComparer
             {
-                if (a is String sa && b is string sb)
+                internal static readonly OrdinalCaseInsensitiveComparer Default = new OrdinalCaseInsensitiveComparer();
+
+                public int Compare(Object a, Object b)
                 {
-                    return String.Compare(sa, sb, StringComparison.OrdinalIgnoreCase);
+                    if (a is String sa && b is string sb)
+                    {
+                        return String.Compare(sa, sb, StringComparison.OrdinalIgnoreCase);
+                    }
+                    return Comparer.Default.Compare(a, b);
                 }
-                return Comparer.Default.Compare(a, b);
             }
         }
     }

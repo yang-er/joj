@@ -16,13 +16,14 @@ namespace JudgeCore.Judger
         {
             stream.Write(_input);
             stream.Flush();
+            stream.Close();
         }
 
         public JudgeResult Judge(StreamReader stream)
         {
             char[] tojudge = new char[128 * 1024];
             stream.Read(tojudge, 0, 128 * 1024);
-
+            
             if (!stream.EndOfStream)
             {
                 stream.Close();

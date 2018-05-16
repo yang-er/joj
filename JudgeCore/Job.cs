@@ -58,18 +58,10 @@ namespace JudgeCore
         private void CheckRuntime(Process pro, ref TestInfo ti, ref bool tle)
         {
             while (!pro.HasExited
-                && pro.TotalProcessorTime.TotalMilliseconds < 1001
+                && pro.TotalProcessorTime.TotalMilliseconds < 1000
                 && (DateTime.Now - pro.StartTime).TotalMilliseconds < 2000
-                && pro.PeakWorkingSet64 < MemoryLimit * 1048576L) ;
-            if (!pro.HasExited)
-            {
-                if (ti.Result == JudgeResult.Running)
-                {
-                    tle = true;
-                }
-
-                pro.Kill();
-            }
+                && (long)Platform.Win32.PeakProcessMemoryInfo(pro.Handle).ToUInt64() < MemoryLimit * 1048576L) ;
+            if (!pro.HasExited) pro.Kill();
         }
 
         /// <summary>
@@ -99,30 +91,24 @@ namespace JudgeCore
                     out var stdout, out var stdin);
                 bool tle = false;
                 Task.Run(() => CheckRuntime(pro, ref ti, ref tle));
-                Judger[id].Input(stdin);
-                stdin.Close();
+                Task.Run(() => Judger[id].Input(stdin));
                 ti.Result = Judger[id].Judge(stdout);
                 pro.WaitForExit();
-                if (tle)
-                {
-                    if (pro.TotalProcessorTime.TotalMilliseconds >= 1001)
-                        ti.Result = JudgeResult.TimeLimitExceeded;
-                    else
-                        ti.Result = JudgeResult.Pending;
-                }
+
+                if (pro.ExitCode == -1) ti.Result = JudgeResult.Pending;
 
                 // Judge extra info
                 ti.Time = pro.TotalProcessorTime.TotalMilliseconds;
                 Debug.WriteLine("Runtime: {0}ms", ti.Time);
-                if (ti.Time >= 1001)
+                if (ti.Time >= 1000)
                     ti.Result = JudgeResult.TimeLimitExceeded;
                 ti.Memory = Platform.Win32.PeakProcessMemoryInfo(pro.Handle).ToUInt32();
                 Debug.WriteLine("Memory: {0}kb", ti.Memory / 1024);
-                if (ti.Memory / 1048576 > MemoryLimit)
+                if (ti.Memory > MemoryLimit << 20)
                     ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = pro.ExitCode;
                 Debug.WriteLine("ExitCode: 0x" + ti.ExitCode.ToString("x"));
-                if (!tle && ti.ExitCode != 0) ti.Result = JudgeResult.RuntimeError;
+                if (ti.ExitCode != 0 && ti.ExitCode != -1) ti.Result = JudgeResult.RuntimeError;
             }
             catch (Exception ex)
             {

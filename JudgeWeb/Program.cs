@@ -14,6 +14,8 @@ namespace JudgeWeb
     {
         public static void Main(string[] args)
         {
+            if (Directory.Exists("F:\\joj\\dest"))
+                Environment.CurrentDirectory = "F:\\joj\\dest";
             BuildWebHost(args).Run();
         }
 
