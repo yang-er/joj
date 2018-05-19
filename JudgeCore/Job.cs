@@ -126,7 +126,7 @@ namespace JudgeCore
         /// </summary>
         public void Judge(bool show_log = false)
         {
-            ActiveJob = Platform.Win32.SetupSandbox(128, 1000);
+            ActiveJob = Platform.Win32.SetupSandbox(128, 1000, 1);
             var pi = Helper.MakeJudgeInfo(RunID);
             if (pi != null)
             {

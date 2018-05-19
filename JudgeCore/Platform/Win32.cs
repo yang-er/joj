@@ -23,16 +23,16 @@ namespace JudgeCore.Platform
         public static extern UIntPtr PeakProcessMemoryInfo(IntPtr hProcess);
 
         [DllImport("JudgeW32.dll", SetLastError = true)]
-        public static extern IntPtr SetupSandbox(uint dwMemoryLimit, uint dwCPUTime);
+        public static extern IntPtr SetupSandbox(uint dwMemoryLimit, uint dwCPUTime, uint dwProcessLimit);
 
         [DllImport("JudgeW32.dll", SetLastError = true)]
         public static extern void UnsetSandbox(IntPtr hJob);
 
         [DllImport("JudgeW32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern int CreateJudgeProcess(ref JudgeInfo pJudgeInfo);
+        public static extern int CreateJudgeProcess(ref JudgeInfo pJudgeInfo);
 
         [StructLayout(LayoutKind.Sequential)]
-        struct JudgeInfo
+        public struct JudgeInfo
         {
             public IntPtr hJob;
             public IntPtr hStdIn;
@@ -52,10 +52,10 @@ namespace JudgeCore.Platform
         #region Stream Redirect from dotNetSrc
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, ref SecurityAttributes lpPipeAttributes, uint nSize);
+        public static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, ref SecurityAttributes lpPipeAttributes, uint nSize);
 
         [StructLayout(LayoutKind.Sequential)]
-        struct SecurityAttributes
+        public struct SecurityAttributes
         {
             public int nLength;
             public IntPtr lpSecurityDescriptor;
@@ -70,13 +70,13 @@ namespace JudgeCore.Platform
         }
         
         [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr GetStdHandle(int nStdHandle);
+        public static extern IntPtr GetStdHandle(int nStdHandle);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool DuplicateHandle(HandleRef hSourceProcessHandle, SafeFileHandle hSourceHandle, HandleRef hTargetProcessHandle, out SafeFileHandle lpTargetHandle, uint dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, uint dwOptions);
-        
-        static void CreatePipeWithSecurityAttributes(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, uint nSize)
+        public static extern bool DuplicateHandle(HandleRef hSourceProcessHandle, SafeFileHandle hSourceHandle, HandleRef hTargetProcessHandle, out SafeFileHandle lpTargetHandle, uint dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, uint dwOptions);
+
+        public static void CreatePipeWithSecurityAttributes(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, uint nSize)
         {
             bool ret = CreatePipe(out hReadPipe, out hWritePipe, ref lpPipeAttributes, nSize);
             if (!ret || hReadPipe.IsInvalid || hWritePipe.IsInvalid)
@@ -85,7 +85,7 @@ namespace JudgeCore.Platform
             }
         }
 
-        static void CreatePipe(out SafeFileHandle parentHandle, out SafeFileHandle childHandle, bool parentInputs)
+        public static void CreatePipe(out SafeFileHandle parentHandle, out SafeFileHandle childHandle, bool parentInputs)
         {
             var securityAttributesParent = new SecurityAttributes(true);
             SafeFileHandle hTmp = null;
@@ -122,10 +122,16 @@ namespace JudgeCore.Platform
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AssignProcessToJobObject(IntPtr hJob, IntPtr hProcess);
+        public static extern bool AssignProcessToJobObject(IntPtr hJob, IntPtr hProcess);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool IsProcessInJob(IntPtr hProcess, IntPtr hJob, out bool hResult);
+
+        [DllImport("kernel32.dll")]
+        public static extern bool CloseHandle(IntPtr hObject);
 
         [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        static extern int WerAddExcludedApplication(string pwzExeName, bool bAllUsers);
+        public static extern int WerAddExcludedApplication(string pwzExeName, bool bAllUsers);
         
         #endregion
         
