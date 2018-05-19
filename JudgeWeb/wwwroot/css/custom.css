@@ -1,0 +1,8 @@
+#code_area { height: 400px; font-family: Consolas; }
+.state { font-family: Tahoma; color: gray; }
+.state-ac { color: green; }
+.state-wa { color: red; }
+.state-ce { color: blue; }
+.state-le { color: purple; }
+.state-re { color: purple; }
+.state-pe { color: orange; }
