@@ -53,6 +53,11 @@
         /// <summary>
         /// 正在评测
         /// </summary>
-        Running
+        Running,
+
+        /// <summary>
+        /// 未指定的错误
+        /// </summary>
+        UndefinedError
     }
 }

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeCore", "JudgeCore\Judg
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeTest", "JudgeTest\JudgeTest.csproj", "{92FC80B2-2AA6-4F51-8EF7-4C575177E44A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeDeamon", "JudgeDeamon\JudgeDeamon.csproj", "{13CBFCF3-3EB5-425E-B6A1-C29366360794}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeDaemon", "JudgeDeamon\JudgeDaemon.csproj", "{13CBFCF3-3EB5-425E-B6A1-C29366360794}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeWeb", "JudgeWeb\JudgeWeb.csproj", "{BB3ACF92-F108-4C37-9DCD-425BCF33280F}"
 EndProject

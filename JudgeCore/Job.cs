@@ -37,6 +37,11 @@ namespace JudgeCore
         public long MemoryLimit { get; set; } = 128;
 
         /// <summary>
+        /// 最大运行时间限制
+        /// </summary>
+        public int TimeLimit { get; set; } = 1000;
+
+        /// <summary>
         /// 编译
         /// </summary>
         /// <param name="code"></param>
@@ -53,13 +58,13 @@ namespace JudgeCore
         /// </summary>
         public string CompileInfo;
 
-        public IntPtr ActiveJob;
+        // public IntPtr ActiveJob;
 
         private void CheckRuntime(Process pro, ref TestInfo ti, ref bool tle)
         {
             while (!pro.HasExited
-                && pro.TotalProcessorTime.TotalMilliseconds < 1000
-                && (DateTime.Now - pro.StartTime).TotalMilliseconds < 2000
+                && pro.TotalProcessorTime.TotalMilliseconds < TimeLimit
+                && (DateTime.Now - pro.StartTime).TotalMilliseconds < TimeLimit * 1.5
                 && (long)Platform.Win32.PeakProcessMemoryInfo(pro.Handle).ToUInt64() < MemoryLimit * 1048576L) ;
             if (!pro.HasExited) pro.Kill();
         }
@@ -87,7 +92,7 @@ namespace JudgeCore
                 // Judge process
                 if (Compiler.GetType().Name == "MinGW")
                     pi.Environment["PATH"] += $"C:\\MinGW\\bin;";
-                var pro = Platform.Win32.CreateJudgeProcess(ActiveJob, pi,
+                var pro = Platform.Win32.CreateJudgeProcess(IntPtr.Zero, pi,
                     out var stdout, out var stdin);
                 bool tle = false;
                 Task.Run(() => CheckRuntime(pro, ref ti, ref tle));
@@ -95,7 +100,7 @@ namespace JudgeCore
                 ti.Result = Judger[id].Judge(stdout);
                 pro.WaitForExit();
 
-                if (pro.ExitCode == -1) ti.Result = JudgeResult.Pending;
+                if (pro.ExitCode == -1) ti.Result = JudgeResult.UndefinedError;
 
                 // Judge extra info
                 ti.Time = pro.TotalProcessorTime.TotalMilliseconds;
@@ -126,13 +131,13 @@ namespace JudgeCore
         /// </summary>
         public void Judge(bool show_log = false)
         {
-            ActiveJob = Platform.Win32.SetupSandbox(128, 1000, 1);
+            // ActiveJob = Platform.Win32.SetupSandbox(128, 1000, 1);
             var pi = Helper.MakeJudgeInfo(RunID);
             if (pi != null)
             {
                 if (Compiler.GetType().Name == "MinGW")
                     pi.Environment["PATH"] += $"C:\\MinGW\\bin;";
-                var pro = Platform.Win32.CreateJudgeProcess(ActiveJob, pi, 
+                var pro = Platform.Win32.CreateJudgeProcess(IntPtr.Zero, pi, 
                     out var stdout, out var stdin);
                 stdin.Close();
                 stdout.Close();
@@ -149,7 +154,7 @@ namespace JudgeCore
                     State[i].Result.ToString());
             }
             
-            Platform.Win32.UnsetSandbox(ActiveJob);
+            // Platform.Win32.UnsetSandbox(ActiveJob);
         }
 
         /// <summary>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/custom.css">
-    <title>提交代码 - JOJ Test Project</title>
+    <title>提交详情 - JOJ Test Project</title>
   </head>
   <body>
     <div class="container pt-4">
@@ -32,7 +32,17 @@
         </div>
         <div class="form-group">
           <label for="code_area">输入你的代码</label>
-          <textarea class="form-control" id="code_area" name="code" placeholder="#include <loveyou>"></textarea>
+          <pre class="form-control" id="coded_area">
+#include &lt;cstdio&gt;
+
+int main()
+{
+    int a, b;
+    scanf("%d %d", &a, &b);
+    printf("%d\n", a + b);
+    return 0;
+}
+</pre>
         </div>
         <div class="form-group">
           <input class="btn btn-success" type="submit" value=" 提交 ">

@@ -171,7 +171,7 @@ namespace JudgeCore.Platform
 #else
             WerAddExcludedApplication(info.FileName, false);
             var ret = Process.Start(info);
-            if (!AssignProcessToJobObject(job, ret.Handle))
+            if (job != IntPtr.Zero && !AssignProcessToJobObject(job, ret.Handle))
                 throw new Win32Exception();
             stdout = ret.StandardOutput;
             stdin = ret.StandardInput;
