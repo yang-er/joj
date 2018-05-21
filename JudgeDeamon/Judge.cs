@@ -9,6 +9,7 @@ namespace JudgeDeamon
     partial class Program
     {
         static readonly Queue<int> WaitingQueue = new Queue<int>();
+        static long last_all = -1;
         
         static void JudgeQueue()
         {
@@ -16,7 +17,15 @@ namespace JudgeDeamon
             command.CommandText = "select count(1) from `submission` where `status`=8";
             TotalQueries++;
             long all = (long)command.ExecuteScalar();
-            Console.WriteLine("Current queue length : {0}", all);
+
+            if (last_all != all)
+            {
+                Console.WriteLine("Current queue length : {0}", all);
+                last_all = all;
+                if (all == 0)
+                    Console.WriteLine("Waiting for the next task...");
+            }
+
             if (all > 0)
             {
                 command.CommandText = "select `runid` from `submission` where `status`=8";

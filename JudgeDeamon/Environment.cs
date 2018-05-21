@@ -1,8 +1,7 @@
-﻿using JudgeCore;
-using JudgeCore.Judger;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 using System;
 using System.Diagnostics;
+using System.IO;
 using static JudgeCore.Platform.Win32;
 
 namespace JudgeDeamon
@@ -17,37 +16,26 @@ namespace JudgeDeamon
         {
             try
             {
+                Console.Title = "JLU Online Judge Daemon";
                 MySqlConnection = new MySqlConnection("server=localhost;User Id=root;password=root;Database=judge;SSLMode=none");
                 MySqlConnection.Open();
                 TotalQueries++;
+                Console.WriteLine("MySQL connected successfully.");
                 JobObject = SetupSandbox(128, 1000, 2);
                 Console.WriteLine("JobObject created successfully.");
                 AssignProcessToJobObject(JobObject, Process.GetCurrentProcess().Handle);
-                CompilerList.Add(new JudgeCore.Compiler.Msvc());
-                Problems.Add(1001, new Problem
-                {
-                    Title = "A + B Problem",
-                    ExecuteTimeLimit = 100,
-                    MemoryLimit = 32,
-                    ProblemId = 1001,
-                    Judger =
-                    {
-                        new CommonJudge("1 2\n", "3\n"),
-                        new CommonJudge("0 0\n", "0\n"),
-                        new CommonJudge("1 -1\n", "0\n"),
-                        new CommonJudge("145565 2\n", "145567\n"),
-                        new CommonJudge("145565 145565\n", "291130\n"),
-                        new CommonJudge("122 2\n", "124\n"),
-                        new CommonJudge("-1 2\n", "1\n"),
-                        new CommonJudge("10 2\n", "12\n"),
-                        new CommonJudge("01 2\n", "3\n"),
-                        new CommonJudge("1 200\n", "201\n")
-                    }
-                });
+                LoadCompilers();
+                Console.WriteLine("Compiler list created successfully.");
+                LoadProblems();
+                Console.WriteLine("Problem list loaded successfully.");
+                Console.WriteLine();
+                Console.WriteLine();
+                if (Directory.Exists("F:\\joj\\dest"))
+                    Environment.CurrentDirectory = "F:\\joj\\dest";
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine(ex.Message);
                 throw ex;
             }
         }

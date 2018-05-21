@@ -78,12 +78,17 @@ namespace JudgeCore.Compiler
                 $"{kit}\\bin\\{winv}\\x64"
             };
 
-            Console.WriteLine(ToString() + "\tloaded.");
+            var proc = Helper.MakeProcess(ToolchainPath[0] + "\\cl.exe", "");
+            proc.Start();
+            Console.WriteLine();
+            Console.WriteLine(proc.StandardError.ReadToEnd().Trim());
+
+            Console.WriteLine(ToString() + " loaded.");
         }
 
         public override string ToString()
         {
-            return $"Microsoft Visual C++ v{vcv} with Windows 10 SDK v{winv}";
+            return $"Microsoft Visual C++ Compiler v{vcv}";
         }
     }
 }

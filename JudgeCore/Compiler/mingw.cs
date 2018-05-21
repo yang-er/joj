@@ -56,10 +56,12 @@ namespace JudgeCore.Compiler
 
             var proc = Helper.MakeProcess(ToolchainPath[0] + "\\gcc.exe", "--version");
             proc.Start();
-            var ret = proc.StandardOutput.ReadToEnd().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            ver = ret[0].Split(") ")[1];
+            var tool_info = proc.StandardOutput.ReadToEnd();
+            Console.WriteLine();
+            Console.WriteLine(tool_info.Trim());
+            ver = tool_info.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0].Split(") ")[1];
 
-            Console.WriteLine(ToString() + "\tloaded.");
+            Console.WriteLine(ToString() + " loaded.");
         }
 
         public override string ToString()
