@@ -29,5 +29,24 @@
   <ItemGroup>
     <Compile Include="index.php" />
     <Compile Include="status.php" />
+    <Compile Include="view.php" />
+    <Compile Include="source\class_application.php" />
+    <Compile Include="source\class_base.php" />
+    <Compile Include="source\class_db.php" />
+    <Compile Include="source\class_table.php" />
+    <Compile Include="source\config_global.php" />
+    <Compile Include="source\config_log.php" />
+    <Compile Include="source\function_core.php" />
+    <Compile Include="source\function_discuz.php" />
+    <Compile Include="source\table_code.php" />
+    <Compile Include="source\table_details.php" />
+    <Compile Include="source\table_submission.php" />
+    <Compile Include="static\bootstrap.css" />
+    <Compile Include="static\bootstrap.bundle.min.js" />
+    <Compile Include="static\custom.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="source" />
+    <Folder Include="static" />
   </ItemGroup>
 </Project>

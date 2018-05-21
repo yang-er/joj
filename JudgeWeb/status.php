@@ -3,35 +3,35 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="css/bootstrap.css">
-    <link rel="stylesheet" href="css/custom.css">
-    <title>�ύ״̬ - JOJ Test Project</title>
+    <link rel="stylesheet" href="static/bootstrap.css">
+    <link rel="stylesheet" href="static/custom.css">
+    <title>提交状态 - JOJ Test Project</title>
 </head>
 <body>
     <div class="container pt-4">
         <ul class="nav nav-pills mb-4">
             <li class="nav-item">
-                <a class="nav-link" href="/">��ҳ</a>
+                <a class="nav-link" href="/">首页</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/submit.php?tid=">�����ύ</a>
+                <a class="nav-link" href="/submit.php?tid=">代码提交</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="status.php">״̬�鿴</a>
+                <a class="nav-link active" href="status.php">状态查看</a>
             </li>
         </ul>
         <table class="table table-responsive-lg">
             <thead>
                 <tr>
                     <th scope="col" style="width:7%;min-width:70px">#</th>
-                    <th scope="col" style="width:16%;min-width:160px">�ύʱ��</th>
-                    <th scope="col" style="width:25%;min-width:250px">���н��</th>
-                    <th scope="col" style="width:6%;min-width:60px">���</th>
-                    <th scope="col" style="width:10%;min-width:100px">ִ��ʱ��</th>
-                    <th scope="col" style="width:10%;min-width:100px">ִ���ڴ�</th>
-                    <th scope="col" style="width:10%;min-width:100px">���볤��</th>
-                    <th scope="col" style="width:6%;min-width:60px">����</th>
-                    <th scope="col" style="width:10%;min-width:100px">�ύ��</th>
+                    <th scope="col" style="width:16%;min-width:160px">提交时间</th>
+                    <th scope="col" style="width:25%;min-width:250px">运行结果</th>
+                    <th scope="col" style="width:6%;min-width:60px">题号</th>
+                    <th scope="col" style="width:10%;min-width:100px">执行时间</th>
+                    <th scope="col" style="width:10%;min-width:100px">执行内存</th>
+                    <th scope="col" style="width:10%;min-width:100px">代码长度</th>
+                    <th scope="col" style="width:6%;min-width:60px">语言</th>
+                    <th scope="col" style="width:10%;min-width:100px">提交者</th>
                 </tr>
             </thead>
             <tbody>
@@ -139,14 +139,14 @@
             <div class="col-md-6 order-0">
                 <div class="input-group justify-content-end">
                     <select class="custom-select" style="max-width:100px">
-                        <option selected>ɸѡ</option>
-                        <option value="1">��Ŀ���</option>
-                        <option value="2">ͨ�����</option>
-                        <option value="3">ѧ��</option>
+                        <option selected>筛选</option>
+                        <option value="1">题目编号</option>
+                        <option value="2">通过情况</option>
+                        <option value="3">学号</option>
                     </select>
-                    <input type="text" class="form-control" placeholder="ɸѡ����">
+                    <input type="text" class="form-control" placeholder="筛选条件">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button">��ѯ</button>
+                        <button class="btn btn-outline-secondary" type="button">查询</button>
                     </div>
                 </div>
             </div>

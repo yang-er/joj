@@ -1,3 +1,3 @@
 ﻿<?php
-
-echo 'Hello Framework!';
+define('IN_XYS', 'index');
+require './source/class_application.php';
