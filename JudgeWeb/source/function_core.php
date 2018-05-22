@@ -37,6 +37,11 @@ function get_client_ip() {
     }
 }
 
+function cur_ip($new) {
+    global $curip;
+    return $curip == '::1' || $curip == '127.0.0.1' || $curip == $new;
+}
+
 function check_update(array $origin, array $to_check) {
     $ret = array();
 

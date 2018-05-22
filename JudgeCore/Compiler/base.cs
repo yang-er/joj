@@ -41,7 +41,10 @@ namespace JudgeCore.Compiler
             file.Write(grp, 0, grp.Length);
             file.Close();
 
-            return Compile(file_name + ".cpp");
+            var ret = Compile(file_name + ".cpp");
+            StandardError = StandardError.Replace(file_name, "main");
+            StandardOutput = StandardOutput.Replace(file_name, "main");
+            return ret;
         }
 
         public abstract bool Compile(string file);

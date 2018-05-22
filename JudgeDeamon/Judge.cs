@@ -71,7 +71,8 @@ namespace JudgeDeamon
                 job = new Job(CompilerList[obj.GetInt32(2)], prob.Judger)
                 {
                     MemoryLimit = prob.MemoryLimit,
-                    TimeLimit = prob.ExecuteTimeLimit
+                    TimeLimit = prob.ExecuteTimeLimit,
+                    ActiveJob = JobObject,
                 };
                 Console.WriteLine();
                 Console.WriteLine("Judge RunID #" + runid);

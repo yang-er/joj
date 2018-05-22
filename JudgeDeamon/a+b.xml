@@ -6,7 +6,7 @@
 	<input><![CDATA[One line, which contain two integers A and B.]]></input>
 	<output><![CDATA[Output A + B in one line.]]></output>
 	<author><![CDATA[Online Judge Series]]></author>
-	<time_limit>100</time_limit>
+	<time_limit>1000</time_limit>
 	<memory_limit>32</memory_limit>
 
 	<samples>

@@ -21,9 +21,8 @@ namespace JudgeDeamon
                 MySqlConnection.Open();
                 TotalQueries++;
                 Console.WriteLine("MySQL connected successfully.");
-                JobObject = SetupSandbox(128, 1000, 2);
+                JobObject = SetupSandbox(128, 1000, 1);
                 Console.WriteLine("JobObject created successfully.");
-                AssignProcessToJobObject(JobObject, Process.GetCurrentProcess().Handle);
                 LoadCompilers();
                 Console.WriteLine("Compiler list created successfully.");
                 LoadProblems();

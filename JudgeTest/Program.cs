@@ -12,10 +12,13 @@ namespace JudgeTest
             if (Directory.Exists("F:\\joj\\dest"))
                 Environment.CurrentDirectory = "F:\\joj\\dest";
             Console.WriteLine("Hello World!");
+            JobObject = JudgeCore.Platform.Win32.SetupSandbox(128, 2000, 1);
             JobTest();
             Console.Write("Press any key to continue ... ");
             Console.ReadKey();
         }
+
+        static IntPtr JobObject;
 
         static void JudgerTest()
         {
@@ -56,6 +59,7 @@ namespace JudgeTest
             foreach (var file in Directory.GetFiles($"..\\source"))
             {
                 var job = new Job(compiler, pearl_out);
+                job.ActiveJob = JobObject;
                 job.Build(File.ReadAllText(file));
                 Console.WriteLine("Judge Result of " + file);
                 job.Judge(true);

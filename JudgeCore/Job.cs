@@ -58,13 +58,22 @@ namespace JudgeCore
         /// </summary>
         public string CompileInfo;
 
-        // public IntPtr ActiveJob;
+        /// <summary>
+        /// 当前的作业句柄
+        /// </summary>
+        public IntPtr ActiveJob = IntPtr.Zero;
 
+        /// <summary>
+        /// 检查运行时间
+        /// </summary>
+        /// <param name="pro">运行的进程</param>
+        /// <param name="ti">测试结果</param>
+        /// <param name="tle">是否超时</param>
         private void CheckRuntime(Process pro, ref TestInfo ti, ref bool tle)
         {
             while (!pro.HasExited
-                && pro.TotalProcessorTime.TotalMilliseconds < TimeLimit
-                && (DateTime.Now - pro.StartTime).TotalMilliseconds < TimeLimit * 1.5
+                && pro.UserProcessorTime.TotalMilliseconds < TimeLimit
+                && (DateTime.Now - pro.StartTime).TotalMilliseconds < 2000
                 && (long)Platform.Win32.PeakProcessMemoryInfo(pro.Handle).ToUInt64() < MemoryLimit * 1048576L) ;
             if (!pro.HasExited) pro.Kill();
         }
@@ -92,7 +101,7 @@ namespace JudgeCore
                 // Judge process
                 if (Compiler.GetType().Name == "MinGW")
                     pi.Environment["PATH"] += $"C:\\MinGW\\bin;";
-                var pro = Platform.Win32.CreateJudgeProcess(IntPtr.Zero, pi,
+                var pro = Platform.Win32.CreateJudgeProcess(ActiveJob, pi,
                     out var stdout, out var stdin);
                 bool tle = false;
                 Task.Run(() => CheckRuntime(pro, ref ti, ref tle));
@@ -103,7 +112,7 @@ namespace JudgeCore
                 if (pro.ExitCode == -1) ti.Result = JudgeResult.UndefinedError;
 
                 // Judge extra info
-                ti.Time = pro.TotalProcessorTime.TotalMilliseconds;
+                ti.Time = pro.UserProcessorTime.TotalMilliseconds;
                 Debug.WriteLine("Runtime: {0}ms", ti.Time);
                 if (ti.Time >= 1000)
                     ti.Result = JudgeResult.TimeLimitExceeded;
@@ -137,7 +146,7 @@ namespace JudgeCore
             {
                 if (Compiler.GetType().Name == "MinGW")
                     pi.Environment["PATH"] += $"C:\\MinGW\\bin;";
-                var pro = Platform.Win32.CreateJudgeProcess(IntPtr.Zero, pi, 
+                var pro = Platform.Win32.CreateJudgeProcess(ActiveJob, pi, 
                     out var stdout, out var stdin);
                 stdin.Close();
                 stdout.Close();
