@@ -29,6 +29,7 @@
   <ItemGroup>
     <Compile Include="index.php" />
     <Compile Include="status.php" />
+    <Compile Include="submit.php" />
     <Compile Include="view.php" />
     <Compile Include="source\class_application.php" />
     <Compile Include="source\class_base.php" />

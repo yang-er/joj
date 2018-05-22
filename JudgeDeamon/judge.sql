@@ -47,7 +47,7 @@ CREATE TABLE `submission` (
   `exemem` int(11) NOT NULL,
   `codelen` int(11) NOT NULL,
   `lang` int(11) NOT NULL,
-  `ip` int(11) NOT NULL,
+  `ip` varchar(20) NOT NULL,
   `grade` int(11) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

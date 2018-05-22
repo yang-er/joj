@@ -6,12 +6,12 @@
 
 defined("IN_XYS") || die("Access Denied");
 
-class table_resultl_ah extends table {
+class table_submission extends table {
 
 	public function __construct() {
 
 		$this->_table = 'submission';
-		$this->_pk    = 'term';
+		$this->_pk    = 'runid';
 
 		parent::__construct();
 	}

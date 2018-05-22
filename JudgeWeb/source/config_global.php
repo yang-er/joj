@@ -13,3 +13,6 @@ $_CONFIG['db']['charset'] = 'utf8';
 $_CONFIG['db']['pconnect'] = '0';
 $_CONFIG['db']['name'] = 'judge';
 $_CONFIG['db']['tablepre'] = '';
+
+$GLOBALS['compilers'] = [0 => 'Visual C++ Compiler (v14.1)', 1 => 'G++ (MinGW Toolchain 6.3.0)'];
+$GLOBALS['problems'] = [1001 => 'A + B Problem'];
