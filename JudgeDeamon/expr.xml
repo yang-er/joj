@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<problem>
+	<id>1002</id>
+	<title><![CDATA[Expression Calculate]]></title>
+	<description><![CDATA[Calculate an expression.]]></description>
+	<input><![CDATA[One line, which contains the expression, ended with =.]]></input>
+	<output><![CDATA[Output the result (integer) in one line.]]></output>
+	<author><![CDATA[fmgu2000]]></author>
+	<time_limit>1000</time_limit>
+	<memory_limit>32</memory_limit>
+
+	<samples>
+		<group>
+			<input><![CDATA[(1+30)/3=
+]]></input>
+			<output><![CDATA[10
+]]></output>
+		</group>
+	</samples>
+
+	<test_cases>
+		<group>
+			<input><![CDATA[1=
+]]></input>
+			<output><![CDATA[1
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[1+2-3=
+]]></input>
+			<output><![CDATA[0
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[(1+2)*3=
+]]></input>
+			<output><![CDATA[9
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[1-(2+3)*4/5=
+]]></input>
+			<output><![CDATA[-3
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[(9+8-7*6/5+(3-2))=
+]]></input>
+			<output><![CDATA[10
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[(100)=
+]]></input>
+			<output><![CDATA[100
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[(((0+31)-4)*50)/6=
+]]></input>
+			<output><![CDATA[225
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[(((100000000+31)-4)*50)/6000=
+]]></input>
+			<output><![CDATA[833333
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[(99999999-20)/300+365+24*12+(32767*5)=
+]]></input>
+			<output><![CDATA[497821
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[(((9*9)*9)*9)/10/10+(100*100*100*100-100)/900+1000000=
+]]></input>
+			<output><![CDATA[1111176
+]]></output>
+		</group>
+	</test_cases>
+
+	<hint><![CDATA[]]></hint>
+</problem>
