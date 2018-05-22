@@ -13,7 +13,7 @@ if (isset($_POST['submit'])) {
     if (!isset($_POST['compiler']) || !isset($compilers[intval($_POST['compiler'])]) || !isset($_POST['code']) || !isset($_POST['stuid'])) die('Arguments error.');
     $stuid = intval($_POST['stuid']);
     $code = $_POST['code'];
-    $cmp = intval($_GET['compiler']);
+    $cmp = intval($_POST['compiler']);
     
     $runid = C::t('submission')->insert([
         'time' => time(),

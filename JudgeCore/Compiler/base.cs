@@ -12,10 +12,10 @@ namespace JudgeCore.Compiler
         public List<string> LibraryPath { get; protected set; }
         public List<string> Options { get; protected set; }
         public List<string> ToolchainPath { get; protected set; }
-        public string MasterPath { get; protected set; }
-        public string StandardError { get; protected set; }
-        public string StandardOutput { get; protected set; }
-        public int ExitCode { get; protected set; }
+        public string MasterPath { get; protected set; } = "";
+        public string StandardError { get; protected set; } = "";
+        public string StandardOutput { get; protected set; } = "";
+        public int ExitCode { get; protected set; } = 0;
 
         /// <summary>
         /// 读取编译器进程的输出
@@ -23,12 +23,22 @@ namespace JudgeCore.Compiler
         /// <param name="proc">进程</param>
         protected void ReadCompileResult(Process proc)
         {
+            IntPtr hJob = Platform.Win32.SetupSandbox(128, 1000, 10);
             proc.Start();
-            proc.WaitForExit();
-            StandardOutput = proc.StandardOutput.ReadToEnd().Trim();
-            Debug.WriteLine(StandardOutput);
-            StandardError = proc.StandardError.ReadToEnd().Trim();
-            Debug.WriteLine(StandardError);
+            Platform.Win32.AssignProcessToJobObject(hJob, proc.Handle);
+            proc.WaitForExit(3000);
+            if (!proc.HasExited)
+            {
+                StandardOutput = "Compile Timeout, may have some bad codes.";
+            }
+            else
+            {
+                StandardOutput = proc.StandardOutput.ReadToEnd().Trim();
+                Debug.WriteLine(StandardOutput);
+                StandardError = proc.StandardError.ReadToEnd().Trim();
+                Debug.WriteLine(StandardError);
+            }
+            Platform.Win32.UnsetSandbox(hJob);
             ExitCode = proc.ExitCode;
             Debug.WriteLine($"Compiler exited with status code {ExitCode}. ");
         }

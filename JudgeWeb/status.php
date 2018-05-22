@@ -119,7 +119,3 @@ $curip = get_client_ip();
   </div>
 </body>
 </html>
-
-<?php
-print_r();
-

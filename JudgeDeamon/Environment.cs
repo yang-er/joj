@@ -17,7 +17,7 @@ namespace JudgeDeamon
             try
             {
                 Console.Title = "JLU Online Judge Daemon";
-                MySqlConnection = new MySqlConnection("server=localhost;User Id=root;password=root;Database=judge;SSLMode=none");
+                MySqlConnection = new MySqlConnection("server=localhost;User Id=root;password=root;Database=judge;SSLMode=none;Charset=utf8");
                 MySqlConnection.Open();
                 TotalQueries++;
                 Console.WriteLine("MySQL connected successfully.");
