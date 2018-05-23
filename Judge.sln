@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JudgeW32", "JudgeW32\JudgeW
 EndProject
 Project("{A0786B88-2ADB-4C21-ABE8-AA2D79766269}") = "JudgeWeb", "JudgeWeb\JudgeWeb.phpproj", "{7FC905A8-731B-4C8D-9105-223027A8EAD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JudgeProblemCreate", "JudgeProblemCreate\JudgeProblemCreate.csproj", "{AF230194-397C-40B7-A9A5-F9B15FB98421}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JudgeUtility", "JudgeUtility\JudgeUtility.csproj", "{AF230194-397C-40B7-A9A5-F9B15FB98421}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace JudgeDeamon
+namespace JudgeDaemon
 {
     partial class Program
     {

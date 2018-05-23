@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
-namespace JudgeDeamon
+namespace JudgeDaemon
 {
     partial class Program
     {

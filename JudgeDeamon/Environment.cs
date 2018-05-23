@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using static JudgeCore.Platform.Win32;
 
-namespace JudgeDeamon
+namespace JudgeDaemon
 {
     partial class Program
     {
