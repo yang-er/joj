@@ -16,6 +16,7 @@ $cur = C::t('submission')->fetch_by_runid($id);
   <script src="static/jquery.min.js"></script>
   <script src="static/popper.min.js"></script>
   <script src="static/bootstrap.bundle.min.js"></script>
+  <script src="static/highlight.min.js"></script>
   <title>提交详情 - JOJ Test Project</title>
 </head>
 <body>
@@ -35,19 +36,19 @@ $details = C::t('details')->fetch_by_runid($id);
     <div class="row">
       <div class="col-md-8">
         <h1 class="mb-4">代码提交 #<?php echo $cur['runid']; ?></h1>
-        <p><span class="mr-3">提交时间</span><?php echo cst_date("Y-m-d H:i:s", $cur['time']); ?></p>
         <p><span class="mr-3">运行结果</span><?php echo $judge_states[$cur['status']]; ?></p>
+        <p><span class="mr-3">编译语言</span><?php echo $compilers[$cur['lang']]; ?></p>
+        <pre class="form-control" id="coded_area"><code class="cpp"><?php echo htmlspecialchars($codes['code']); ?></code></pre>
+        <script>hljs.initHighlightingOnLoad();</script>
+      </div>
+      <div class="col-md-4">
+        <p><span class="mr-3">提交时间</span><?php echo cst_date("Y-m-d H:i:s", $cur['time']); ?></p>
         <p><span class="mr-3">题目</span><?php echo '<a href="submit.php?id='.$cur['proid'].'">'.$cur['proid'].'#</a> '.$problems[$cur['proid']]; ?></p>
-        <p><span class="mr-3">代码长度</span><?php echo $cur['codelen']; ?>B</p>
         <p><span class="mr-3">提交者</span><?php echo $cur['author']; ?></p>
 <?php if ($codes['ce']) { ?>
         <p><span class="mr-3">编译提示信息</span><br><span id="coded_area"><?php echo nl2br(htmlspecialchars($codes['ce'])); ?></span></p>
 <?php } ?>
-        <p><span class="mr-3">编译语言</span><?php echo $compilers[$cur['lang']]; ?></p>
-        <pre class="form-control" id="coded_area"><?php echo htmlspecialchars($codes['code']); ?></pre>
-      </div>
-      <div class="col-md-4">
-        <table class="table table-responsive">
+        <table class="table">
           <thead>
             <tr>
               <th scope="col">状态</th>
@@ -62,7 +63,11 @@ $details = C::t('details')->fetch_by_runid($id);
               <td><?php echo $detail['exemem']; ?>K</td>
               <td><?php echo $detail['exetime']; ?>ms</td>
             </tr>
-<?php }} ?>
+<?php if ($detail['status'] == 6) break; } } else { ?>
+            <tr>
+              <td colspan="3">目前没有运行记录。</td>
+            </tr>
+<?php } ?>
           </tbody>
         </table>
       </div>
