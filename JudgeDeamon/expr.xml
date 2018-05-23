@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <problem>
 	<id>1002</id>
-	<title><![CDATA[Expression Calculate]]></title>
-	<description><![CDATA[Calculate an expression.]]></description>
-	<input><![CDATA[One line, which contains the expression, ended with =.]]></input>
-	<output><![CDATA[Output the result (integer) in one line.]]></output>
+	<title><![CDATA[表达式计算]]></title>
+	<description><![CDATA[求算术表达式的值。算术表达式按中缀给出，以=号结束，包括+,-,*,/四种运算和(、)分隔符。运算数的范围是非负整数，小于等于10^9。输入保证语法正确。]]></description>
+	<input><![CDATA[一行，包括1个算术表达式。]]></input>
+	<output><![CDATA[一行，算术表达式的值]]></output>
 	<author><![CDATA[fmgu2000]]></author>
 	<time_limit>1000</time_limit>
-	<memory_limit>32</memory_limit>
+	<memory_limit>64</memory_limit>
 
 	<samples>
 		<group>
@@ -81,5 +81,5 @@
 		</group>
 	</test_cases>
 
-	<hint><![CDATA[]]></hint>
+	<hint><![CDATA[算术表达式的长度小于等于1000]]></hint>
 </problem>

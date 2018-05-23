@@ -87,5 +87,5 @@
 		</group>
 	</test_cases>
 
-	<hint><![CDATA[]]></hint>
+	<hint><![CDATA[All the results will be in -2^31 ~ 2^31-1.]]></hint>
 </problem>
