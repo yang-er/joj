@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using static JudgeCore.Helper;
+using static JudgeCore.Platform.Win32;
 
 namespace JudgeCore.Compiler
 {
@@ -23,10 +25,11 @@ namespace JudgeCore.Compiler
         /// <param name="proc">进程</param>
         protected void ReadCompileResult(Process proc)
         {
-            IntPtr hJob = Platform.Win32.SetupSandbox(128, 1000, 10);
+            IntPtr hJob = SetupSandbox(128, 1000, 10);
             proc.Start();
-            Platform.Win32.AssignProcessToJobObject(hJob, proc.Handle);
+            AssignProcessToJobObject(hJob, proc.Handle);
             proc.WaitForExit(3000);
+
             if (!proc.HasExited)
             {
                 StandardOutput = "Compile Timeout, may have some bad codes.";
@@ -34,13 +37,14 @@ namespace JudgeCore.Compiler
             else
             {
                 StandardOutput = proc.StandardOutput.ReadToEnd().Trim();
-                Debug.WriteLine(StandardOutput);
+                if (StandardOutput != "") WriteDebug(StandardOutput);
                 StandardError = proc.StandardError.ReadToEnd().Trim();
-                Debug.WriteLine(StandardError);
+                if (StandardError != "") WriteDebug(StandardError);
             }
-            Platform.Win32.UnsetSandbox(hJob);
+
+            UnsetSandbox(hJob);
             ExitCode = proc.ExitCode;
-            Debug.WriteLine($"Compiler exited with status code {ExitCode}. ");
+            WriteDebug($"Compiler exited with status code {ExitCode}. ");
         }
 
         public bool Compile(string ans, Guid identify)

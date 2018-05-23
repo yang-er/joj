@@ -6,8 +6,29 @@ using System.Text;
 
 namespace JudgeCore
 {
-    class Helper
+    public class Helper
     {
+        static Action<string> writeDbg;
+
+        /// <summary>
+        /// 输出调试信息的函数
+        /// </summary>
+        public static Action<string> WriteDebug
+        {
+            get
+            {
+                if (writeDbg is null)
+                {
+                    if (Console.IsErrorRedirected)
+                        writeDbg = Console.Error.WriteLine;
+                    else
+                        writeDbg = (str) => Debug.WriteLine(str);
+                }
+
+                return writeDbg;
+            }
+        }
+
         /// <summary>
         /// 创建内部进程，不受限制的那种
         /// </summary>
@@ -16,7 +37,7 @@ namespace JudgeCore
         /// <returns>等待启动的进程</returns>
         public static Process MakeProcess(string filename, string arguments = "")
         {
-            Debug.WriteLine(filename + " " + arguments);
+            WriteDebug(filename + " " + arguments);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var ret = new Process();
             ret.StartInfo.RedirectStandardOutput = true;

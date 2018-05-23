@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using static JudgeCore.Helper;
 
 namespace JudgeCore
 {
@@ -89,7 +90,7 @@ namespace JudgeCore
             {
                 ti.Result = JudgeResult.Pending;
 
-                var pi = Helper.MakeJudgeInfo(RunID);
+                var pi = MakeJudgeInfo(RunID);
                 if (pi is null)
                 {
                     ti.Result = JudgeResult.CompileError;
@@ -113,20 +114,20 @@ namespace JudgeCore
 
                 // Judge extra info
                 ti.Time = pro.UserProcessorTime.TotalMilliseconds;
-                Debug.WriteLine("Runtime: {0}ms", ti.Time);
+                WriteDebug($"Runtime: {ti.Time}ms");
                 if (ti.Time >= 1000)
                     ti.Result = JudgeResult.TimeLimitExceeded;
                 ti.Memory = Platform.Win32.PeakProcessMemoryInfo(pro.Handle).ToUInt32();
-                Debug.WriteLine("Memory: {0}kb", ti.Memory / 1024);
+                WriteDebug($"Memory: {ti.Memory / 1024}kb");
                 if (ti.Memory > MemoryLimit << 20)
                     ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = pro.ExitCode;
-                Debug.WriteLine("ExitCode: 0x" + ti.ExitCode.ToString("x"));
+                WriteDebug("ExitCode: 0x" + ti.ExitCode.ToString("x"));
                 if (ti.ExitCode != 0 && ti.ExitCode != -1) ti.Result = JudgeResult.RuntimeError;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                WriteDebug(ex.ToString());
                 ti.Result = JudgeResult.RuntimeError;
             }
             finally
