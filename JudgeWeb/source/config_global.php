@@ -24,9 +24,7 @@ $GLOBALS['build_langs'] = [
     1 => 'G++',
 ];
 
-$GLOBALS['problems'] = [
-    1001 => 'A + B Problem',
-];
+include APP_ROOT.'./source/config_prob.php';
 
 $GLOBALS['judge_states'] = [
     0 => '<span class="state state-ac">Accepted</span>',

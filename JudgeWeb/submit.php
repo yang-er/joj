@@ -48,6 +48,9 @@ if (isset($_POST['submit'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="static/bootstrap.css">
   <link rel="stylesheet" href="static/custom.css">
+  <script src="static/jquery.min.js"></script>
+  <script src="static/popper.min.js"></script>
+  <script src="static/bootstrap.bundle.min.js"></script>
   <title>提交代码 - JOJ Test Project</title>
 </head>
 <body>

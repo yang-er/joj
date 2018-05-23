@@ -18,6 +18,9 @@ $curip = get_client_ip();
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="static/bootstrap.css">
   <link rel="stylesheet" href="static/custom.css">
+  <script src="static/jquery.min.js"></script>
+  <script src="static/popper.min.js"></script>
+  <script src="static/bootstrap.bundle.min.js"></script>
   <meta http-equiv="refresh" content="30">
   <title>提交状态 - JOJ Test Project</title>
 </head>
