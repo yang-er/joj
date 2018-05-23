@@ -2,11 +2,23 @@
 using System.IO;
 using System.Text;
 
-namespace JudgeProblemCreate
+namespace JudgeUtility
 {
-    class Program
+    partial class Program
     {
-        static readonly string prefix = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        static void ProblemCreator()
+        {
+            Console.WriteLine("Usage: Judge Problem Create");
+            Console.WriteLine(" - Files like aaaa1.in, aaaa1.out, aaaa2.in, aaaa2.out, etc.");
+            Console.WriteLine();
+            Console.Write("The folder you want to read (like `F:\\Judge\\aaaa\\`) : ");
+            var folder = Console.ReadLine();
+            Console.Write("The problem appendix (like `aaaa` above) : ");
+            var name = Console.ReadLine();
+            Console.WriteLine();
+
+            var sb = new StringBuilder();
+            sb.Append(@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <problem>
 	<id>1002</id>
 	<title><![CDATA[Expression Calculate]]></title>
@@ -26,28 +38,7 @@ namespace JudgeProblemCreate
 		</group>
 	</samples>
 
-	<test_cases>";
-        static readonly string postfix = @"
-	</test_cases>
-
-	<hint><![CDATA[]]></hint>
-</problem>
-";
-
-        static void Main(string[] args)
-        {
-            Console.Title = "JOJ Problem Creator";
-            Console.WriteLine("Usage: dotnet.exe JudgeProblemCreate.dll");
-            Console.WriteLine(" - Files like aaaa1.in, aaaa1.out, aaaa2.in, aaaa2.out, etc.");
-            Console.WriteLine();
-            Console.Write("The folder you want to read (like `F:\\Judge\\aaaa\\`) : ");
-            var folder = Console.ReadLine();
-            Console.Write("The problem appendix (like `aaaa` above) : ");
-            var name = Console.ReadLine();
-            Console.WriteLine();
-
-            var sb = new StringBuilder();
-            sb.Append(prefix);
+	<test_cases>");
             int p = 0;
             try
             {
@@ -61,7 +52,12 @@ namespace JudgeProblemCreate
                 }
             }
             catch { }
-            sb.Append(postfix);
+            sb.Append(@"
+	</test_cases>
+
+	<hint><![CDATA[]]></hint>
+</problem>
+");
 
             Console.WriteLine($"{p} entries added to the file. \nPlease modify the descriptions and samples.");
             File.WriteAllText($"{folder}\\{name}.xml", sb.ToString());
