@@ -40,6 +40,20 @@ $GLOBALS['judge_states'] = [
    10 => '<span class="state state-re">Undefined Error</span>',
 ];
 
+$GLOBALS['judge_states_simple'] = [
+    0 => 'Accepted',
+    1 => 'Wrong Answer',
+    2 => 'Time Limit Exceeded',
+    3 => 'Memory Limit Exceeded',
+    4 => 'Output Limit Exceeded',
+    5 => 'Runtime Error',
+    6 => 'Compile Error',
+    7 => 'Presentation Error',
+    8 => 'Pending',
+    9 => 'Running',
+   10 => 'Undefined Error',
+];
+
 $GLOBALS['runtime_errors'] = [
     -1073741676 => 'INTEGER_DIVIDE_BY_ZERO',
     -1073740940 => 'SEGMENTATION_FAULT',

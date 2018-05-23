@@ -4,10 +4,38 @@ require './source/class_application.php';
 if (!isset($_GET['page'])) $_GET['page'] = '1';
 $page = intval($_GET['page']);
 if ($page < 1) $page = 1;
-$all_count = C::t('submission')->count();
+
+$wheres = [];
+if (isset($_GET['proid']) && $_GET['proid']) $wheres[] = '`proid`='.intval($_GET['proid']);
+if (isset($_GET['author']) && $_GET['author']) $wheres[] = '`author`='.intval($_GET['author']);
+isset($_GET['state']) || $_GET['state'] = '-1';
+$find_state = intval($_GET['state']);
+if ($find_state >= 0) $wheres[] = '`status`='.$find_state;
+$where = implode(' AND ', $wheres);
+$all_count = C::t('submission')->count($where);
 $max_page = ceil($all_count / 10);
 $start_limit = ($page - 1) * 10;
-$mrc = C::t('submission')->range($start_limit, 10, 'dsc');
+$page_url_base = $_SERVER['REQUEST_URI'];
+
+function build_page($page) {
+	$ret = '';
+	if (isset($_GET['page'])) {
+		$old = $_GET['page'];
+		$_GET['page'] = $page;
+		$ret = http_build_query($_GET);
+	} else {
+		$_GET['page'] = $page;
+		$ret = http_build_query($_GET);
+		unset($_GET['page']);
+	}
+	return $_SERVER['SCRIPT_NAME'].'?'.$ret;
+}
+
+if (!strchr($page_url_base, '?'))
+	$page_url_base .= '?';
+else
+	$page_url_base .= '&';
+$mrc = C::t('submission')->range($start_limit, 10, 'dsc', $where);
 $curip = get_client_ip();
 ?>
 
@@ -74,7 +102,7 @@ $curip = get_client_ip();
         <nav class="float-md-right">
           <ul class="pagination">
             <li class="page-item<?php if($page==1) { ?> disabled<?php } ?>">
-              <a class="page-link" href="status.php?page=<?php echo $page-1; ?>" aria-label="前一页">
+              <a class="page-link" href="<?php echo build_page($page-1); ?>" aria-label="前一页">
                 <span aria-hidden="true">&laquo;</span>
                 <span class="sr-only">前一页</span>
               </a>
@@ -82,7 +110,7 @@ $curip = get_client_ip();
 <?php if ($page > 3) {
     $min_page = $page - 3;
 ?>
-            <li class="page-item"><a class="page-link" href="status.php?page=1">1</a></li>
+            <li class="page-item"><a class="page-link" href="<?php echo build_page(1); ?>">1</a></li>
             <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
 <?php } else {
     $min_page = 1;
@@ -90,13 +118,13 @@ $curip = get_client_ip();
     $mmax_page = $max_page;
     $max_page = $page + 3;
 } for ($i = $min_page; $i <= $max_page; $i++) { ?>
-            <li class="page-item<?php if($page==$i) { ?> active<?php } ?>"><a class="page-link" href="status.php?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+            <li class="page-item<?php if($page==$i) { ?> active<?php } ?>"><a class="page-link" href="<?php echo build_page($i); ?>"><?php echo $i; ?></a></li>
 <?php } if (isset($mmax_page)) { ?>
             <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-            <li class="page-item"><a class="page-link" href="status.php?page=<?php echo $mmax_page; ?>"><?php echo $mmax_page; ?></a></li>
+            <li class="page-item"><a class="page-link" href="<?php echo build_page($mmax_page); ?>"><?php echo $mmax_page; ?></a></li>
 <?php } ?>
             <li class="page-item<?php if($page==$max_page) { ?> disabled<?php } ?>">
-              <a class="page-link" href="status.php?page=<?php echo $page+1; ?>" aria-label="后一页">
+              <a class="page-link" href="<?php echo build_page($page+1); ?>" aria-label="后一页">
                 <span aria-hidden="true">&raquo;</span>
                 <span class="sr-only">后一页</span>
               </a>
@@ -106,19 +134,25 @@ $curip = get_client_ip();
       </div>
       <div class="col-md-6 order-0">
         <div class="input-group justify-content-end">
-          <select class="custom-select" style="max-width:100px">
-            <option selected>筛选</option>
-            <option value="1">题目编号</option>
-            <option value="2">通过情况</option>
-            <option value="3">学号</option>
+          <input type="text" class="form-control" id="filter_proid" placeholder="问题编号" <?php if (isset($_GET['proid'])) echo 'value="'.$_GET['proid'].'"'; ?>>
+          <select class="form-control custom-select" id="filter_stat">
+            <option value="-1" <?php if ($find_state == -1) echo 'selected'; ?>>All Status</option>
+<?php foreach ($judge_states_simple as $key => $value) { ?>
+            <option value="<?php echo $key; ?>" <?php if ($find_state == $key) echo 'selected'; ?>><?php echo $value; ?></option>
+<?php } ?>
           </select>
-          <input type="text" class="form-control" placeholder="筛选条件">
+          <input type="text" class="form-control" id="filter_author" placeholder="提交者" <?php if (isset($_GET['author'])) echo 'value="'.$_GET['author'].'"'; ?>>
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button">查询</button>
+            <button class="btn btn-outline-secondary" id="filter_btn" type="button">查询</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+<script>
+$('#filter_btn').on('click', function() {
+window.location = '<?php echo $_SERVER['SCRIPT_NAME']; ?>?proid=' + $('#filter_proid').val() + '&state=' + $('#filter_stat').val() + '&author=' + $('#filter_author').val(); });
+$('#filter_value').keydown(function(event) { if (event.which == 13) $('#filter_btn').click(); });
+</script>
 </body>
 </html>

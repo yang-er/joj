@@ -35,8 +35,8 @@ class table extends base {
 		return $this->_table = $name;
 	}
 
-	public function count() {
-		$count = (int) DB::result_first("SELECT count(*) FROM ".DB::table($this->_table));
+	public function count($where = '') {
+		$count = (int) DB::result_first("SELECT count(*) FROM ".DB::table($this->_table).($where ? ' WHERE '.$where : ''));
 		return $count;
 	}
 
@@ -119,11 +119,11 @@ class table extends base {
 		return $data;
 	}
 
-	public function range($start = 0, $limit = 0, $sort = '') {
+	public function range($start = 0, $limit = 0, $sort = '', $where = '') {
 		if($sort) {
 			$this->checkpk();
 		}
-		return DB::fetch_all('SELECT * FROM '.DB::table($this->_table).($sort ? ' ORDER BY '.DB::order($this->_pk, $sort) : '').DB::limit($start, $limit), null, $this->_pk ? $this->_pk : '');
+		return DB::fetch_all('SELECT * FROM '.DB::table($this->_table).($where ? ' WHERE '.$where : '').($sort ? ' ORDER BY '.DB::order($this->_pk, $sort) : '').DB::limit($start, $limit), null, $this->_pk ? $this->_pk : '');
 	}
 
 	public function optimize() {
