@@ -21,8 +21,12 @@ namespace JudgeCore.Judger
 
         public JudgeResult Judge(StreamReader stream)
         {
-            char[] tojudge = new char[128 * 1024];
-            stream.Read(tojudge, 0, 128 * 1024);
+            char[] tojudge = new char[256 * 1024];
+            var read_len = 0;
+            while (256 * 1024 > read_len && !stream.EndOfStream)
+            {
+                read_len += stream.Read(tojudge, read_len, 256 * 1024 - read_len);
+            }
             
             if (!stream.EndOfStream)
             {
