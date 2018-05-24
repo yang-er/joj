@@ -77,7 +77,7 @@ namespace JudgeCore
                 && pro.UserProcessorTime.TotalMilliseconds < TimeLimit
                 && (DateTime.Now - pro.StartTime).TotalMilliseconds < TimeLimit * 3
                 && PeakProcessMemoryInfo(pro) < MemoryLimit << 20) ;
-            if (!pro.HasExited) pro.Kill();
+            if (!pro.HasExited) UnsetSandbox(ref ActiveJob);
         }
 
         /// <summary>
@@ -103,6 +103,7 @@ namespace JudgeCore
                 // Judge process
                 if (Compiler.GetType().Name == "MinGW")
                     pi.Environment["PATH"] = $"C:\\MinGW\\bin;";
+                ActiveJob = SetupSandbox((uint)MemoryLimit, (uint)TimeLimit, 1);
                 var pro = CreateJudgeProcess(ActiveJob, pi,
                     out var stdout, out var stdin);
                 bool tle = false;
@@ -110,6 +111,7 @@ namespace JudgeCore
                 Task.Run(() => Judger[id].Input(stdin));
                 ti.Result = Judger[id].Judge(stdout);
                 pro.WaitForExit();
+                UnsetSandbox(ref ActiveJob);
 
                 if (pro.ExitCode == -1) ti.Result = JudgeResult.UndefinedError;
 
@@ -124,7 +126,7 @@ namespace JudgeCore
                     ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = pro.ExitCode;
                 WriteDebug("ExitCode: 0x" + ti.ExitCode.ToString("x"));
-                if (ti.ExitCode != 0 && ti.ExitCode != -1) ti.Result = JudgeResult.RuntimeError;
+                if (ti.ExitCode != 0 && ti.ExitCode != -1 && ti.ExitCode != -2) ti.Result = JudgeResult.RuntimeError;
             }
             catch (Exception ex)
             {
@@ -143,17 +145,26 @@ namespace JudgeCore
         public void Judge(bool show_log = false)
         {
             var pi = MakeJudgeInfo(RunID);
-            if (pi != null)
+
+            if (pi is null)
             {
-                if (Compiler.GetType().Name == "MinGW")
-                    pi.Environment["PATH"] = $"C:\\MinGW\\bin;";
-                var pro = CreateJudgeProcess(ActiveJob, pi, 
-                    out var stdout, out var stdin);
-                stdin.Close();
-                stdout.Close();
-                pro.WaitForExit(1000);
-                if (!pro.HasExited) pro.Kill();
+                State.Add(new TestInfo { Result = JudgeResult.CompileError });
+                if (show_log) Console.WriteLine("0ms\t0mb\tCompileError");
+                return;
             }
+            
+            // Open privilige to JudgeUser for HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\ExcludedApplications
+            WerAddExcludedApplication(pi.FileName, true);
+
+            if (Compiler.GetType().Name == "MinGW")
+                pi.Environment["PATH"] = $"C:\\MinGW\\bin;";
+            ActiveJob = SetupSandbox((uint)MemoryLimit, (uint)TimeLimit, 1);
+            var pro = CreateJudgeProcess(ActiveJob, pi, 
+                out var stdout, out var stdin);
+            stdin.Close();
+            stdout.Close();
+            pro.WaitForExit(1000);
+            UnsetSandbox(ref ActiveJob);
 
             for (int i = 0; i < Judger.Count; i++)
             {
@@ -163,6 +174,8 @@ namespace JudgeCore
                     (int)Math.Round(State[i].Memory / 1048576.0), 
                     State[i].Result.ToString());
             }
+            
+            WerRemoveExcludedApplication(pi.FileName, true);
         }
 
         /// <summary>

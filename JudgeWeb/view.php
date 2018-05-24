@@ -30,6 +30,7 @@ $cur = C::t('submission')->fetch_by_runid($id);
       </li>
     </ul>
 <?php if ($cur && cur_ip($cur['ip'])) {
+if (isset($_GET['reset']) && cur_ip('0.0.0.0')) C::t('submission')->reset('`runid`='.$id);
 $codes = C::t('code')->fetch_by_runid($id);
 $details = C::t('details')->fetch_by_runid($id);
 ?>

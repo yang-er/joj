@@ -22,4 +22,8 @@ class table_submission extends table {
 		return $name ? DB::fetch_first('SELECT * FROM %t WHERE `runid`=%d', array($this->_table, $name)) : false;
 	}
 
+	public function reset($where = '') {
+		DB::query('UPDATE `submission` SET `status`=8'.($where ? ' WHERE '.$where : ''));
+	}
+
 }

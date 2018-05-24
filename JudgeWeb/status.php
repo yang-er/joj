@@ -1,42 +1,31 @@
 <?php
 define('IN_XYS', 'index');
 require './source/class_application.php';
-if (!isset($_GET['page'])) $_GET['page'] = '1';
-$page = intval($_GET['page']);
-if ($page < 1) $page = 1;
 
+// IP detect
+$curip = get_client_ip();
+
+// Condition query
 $wheres = [];
 if (isset($_GET['proid']) && $_GET['proid']) $wheres[] = '`proid`='.intval($_GET['proid']);
 if (isset($_GET['author']) && $_GET['author']) $wheres[] = '`author`='.intval($_GET['author']);
 isset($_GET['state']) || $_GET['state'] = '-1';
 $find_state = intval($_GET['state']);
+if ($_GET['state'] == '-1') unset($_GET['state']);
 if ($find_state >= 0) $wheres[] = '`status`='.$find_state;
 $where = implode(' AND ', $wheres);
+unset($wheres);
+if (isset($_GET['reset']) && cur_ip('0.0.0.0')) C::t('submission')->reset($where);
+
+// Multi-page
+if (!isset($_GET['page'])) $_GET['page'] = '1';
+$page = intval($_GET['page']);
+if ($page < 1) $page = 1;
 $all_count = C::t('submission')->count($where);
 $max_page = ceil($all_count / 10);
 $start_limit = ($page - 1) * 10;
-$page_url_base = $_SERVER['REQUEST_URI'];
 
-function build_page($page) {
-	$ret = '';
-	if (isset($_GET['page'])) {
-		$old = $_GET['page'];
-		$_GET['page'] = $page;
-		$ret = http_build_query($_GET);
-	} else {
-		$_GET['page'] = $page;
-		$ret = http_build_query($_GET);
-		unset($_GET['page']);
-	}
-	return $_SERVER['SCRIPT_NAME'].'?'.$ret;
-}
-
-if (!strchr($page_url_base, '?'))
-	$page_url_base .= '?';
-else
-	$page_url_base .= '&';
 $mrc = C::t('submission')->range($start_limit, 10, 'dsc', $where);
-$curip = get_client_ip();
 ?>
 
 <!doctype html>
@@ -99,38 +88,7 @@ $curip = get_client_ip();
     </table>
     <div class="row">
       <div class="col-md-6 order-1">
-        <nav class="float-md-right">
-          <ul class="pagination">
-            <li class="page-item<?php if($page==1) { ?> disabled<?php } ?>">
-              <a class="page-link" href="<?php echo build_page($page-1); ?>" aria-label="前一页">
-                <span aria-hidden="true">&laquo;</span>
-                <span class="sr-only">前一页</span>
-              </a>
-            </li>
-<?php if ($page > 5) {
-    $min_page = $page - 3;
-?>
-            <li class="page-item"><a class="page-link" href="<?php echo build_page(1); ?>">1</a></li>
-            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-<?php } else {
-    $min_page = 1;
-} if ($max_page - $page > 4) {
-    $mmax_page = $max_page;
-    $max_page = $page + 3;
-} for ($i = $min_page; $i <= $max_page; $i++) { ?>
-            <li class="page-item<?php if($page==$i) { ?> active<?php } ?>"><a class="page-link" href="<?php echo build_page($i); ?>"><?php echo $i; ?></a></li>
-<?php } if (isset($mmax_page)) { ?>
-            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-            <li class="page-item"><a class="page-link" href="<?php echo build_page($mmax_page); ?>"><?php echo $mmax_page; ?></a></li>
-<?php } ?>
-            <li class="page-item<?php if($page==$max_page) { ?> disabled<?php } ?>">
-              <a class="page-link" href="<?php echo build_page($page+1); ?>" aria-label="后一页">
-                <span aria-hidden="true">&raquo;</span>
-                <span class="sr-only">后一页</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
+        <nav class="float-md-right"><?php echo multipage($page, $max_page); ?></nav>
       </div>
       <div class="col-md-6 order-0">
         <div class="input-group justify-content-end">
@@ -150,9 +108,7 @@ $curip = get_client_ip();
     </div>
   </div>
 <script>
-$('#filter_btn').on('click', function() {
-window.location = '<?php echo $_SERVER['SCRIPT_NAME']; ?>?proid=' + $('#filter_proid').val() + '&state=' + $('#filter_stat').val() + '&author=' + $('#filter_author').val(); });
-$('#filter_value').keydown(function(event) { if (event.which == 13) $('#filter_btn').click(); });
+$('#filter_btn').on('click', function() {window.location = '<?php echo $_SERVER['SCRIPT_NAME']; ?>?proid=' + $('#filter_proid').val() + '&state=' + $('#filter_stat').val() + '&author=' + $('#filter_author').val(); });
 </script>
 </body>
 </html>

@@ -132,9 +132,12 @@ namespace JudgeCore.Platform
 
         [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern int WerAddExcludedApplication(string pwzExeName, bool bAllUsers);
-        
+
+        [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int WerRemoveExcludedApplication(string pwzExeName, bool bAllUsers);
+
         #endregion
-        
+
         static object cjp_lock = new object();
 
         public static Process CreateJudgeProcess(IntPtr job, ProcessStartInfo info, out StreamReader stdout, out StreamWriter stdin)
@@ -169,9 +172,6 @@ namespace JudgeCore.Platform
             var hdl = ret.Handle;
             return ret;
 #else
-            // We can turn off the WerSvc in services.msc
-            // If bAllUsers is FALSE, the list of excluded applications is stored under the HKEY_CURRENT_USER registry hive.
-            WerAddExcludedApplication(info.FileName, false);
             var ret = Process.Start(info);
             if (job != IntPtr.Zero && !AssignProcessToJobObject(job, ret.Handle))
                 throw new Win32Exception();
@@ -184,6 +184,13 @@ namespace JudgeCore.Platform
         public static long PeakProcessMemoryInfo(Process proc)
         {
             return (long)PeakProcessMemoryInfo(proc.Handle).ToUInt64();
+        }
+
+        public static void UnsetSandbox(ref IntPtr hJob)
+        {
+            if (hJob == IntPtr.Zero) return;
+            UnsetSandbox(hJob);
+            hJob = IntPtr.Zero;
         }
 
         internal static class EnvironmentBlock

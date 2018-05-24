@@ -72,7 +72,6 @@ namespace JudgeDaemon
                 {
                     MemoryLimit = prob.MemoryLimit,
                     TimeLimit = prob.ExecuteTimeLimit,
-                    ActiveJob = JobObject,
                 };
                 Console.WriteLine();
                 Console.WriteLine("Judge RunID #" + runid);

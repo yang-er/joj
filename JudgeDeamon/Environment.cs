@@ -8,7 +8,6 @@ namespace JudgeDaemon
 {
     partial class Program
     {
-        static IntPtr JobObject;
         static MySqlConnection MySqlConnection;
         static int TotalQueries = 0;
 
@@ -21,8 +20,6 @@ namespace JudgeDaemon
                 MySqlConnection.Open();
                 TotalQueries++;
                 Console.WriteLine("MySQL connected successfully.");
-                JobObject = SetupSandbox(128, 1000, 1);
-                Console.WriteLine("JobObject created successfully.");
                 LoadCompilers();
                 Console.WriteLine("Compiler list created successfully.");
                 LoadProblems();
@@ -43,7 +40,6 @@ namespace JudgeDaemon
         {
             Console.WriteLine("Total Queries : " + TotalQueries);
             MySqlConnection.Close();
-            UnsetSandbox(JobObject);
         }
     }
 }

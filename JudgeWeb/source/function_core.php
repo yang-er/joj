@@ -57,3 +57,61 @@ function check_update(array $origin, array $to_check) {
 
     return $ret;
 }
+
+function build_page($page) {
+	$ret = '';
+	if (isset($_GET['page'])) {
+		$old = $_GET['page'];
+		$_GET['page'] = $page;
+		$ret = http_build_query($_GET);
+	} else {
+		$_GET['page'] = $page;
+		$ret = http_build_query($_GET);
+		unset($_GET['page']);
+	}
+	return $_SERVER['SCRIPT_NAME'].'?'.$ret;
+}
+
+function multipage($page, $max_page) {
+	$ret = '<ul class="pagination">';
+	
+	# First Page Button
+	$ret .= '<li class="page-item'.($page==1 ? ' disabled' : '').'">';
+	$ret .= '<a class="page-link" href="'.build_page($page-1).'" aria-label="前一页">';
+	$ret .= '<span aria-hidden="true">&laquo;</span><span class="sr-only">前一页</span>';
+	$ret .= '</a></li>';
+	
+	# Previous Page Button
+    if ($page > 5) {
+		$min_page = $page - 3;
+		$ret .= '<li class="page-item"><a class="page-link" href="'.build_page(1).'">1</a></li>';
+		$ret .= '<li class="page-item disabled"><a class="page-link" href="#">...</a></li>';
+	} else {
+		$min_page = 1;
+	}
+	
+	if ($max_page - $page > 4) {
+		$mmax_page = $max_page;
+		$max_page = $page + 3;
+	}
+	
+	// Middle Page Button
+	for ($i = $min_page; $i <= $max_page; $i++) {
+		$ret .= '<li class="page-item'.($page==$i ? ' active' : '').'">';
+		$ret .= '<a class="page-link" href="'.build_page($i).'">'.$i.'</a></li>';
+	}
+	
+	if (isset($mmax_page)) {
+		$ret .= '<li class="page-item disabled"><a class="page-link" href="#">...</a></li>';
+		$ret .= '<li class="page-item"><a class="page-link" href="'.build_page($mmax_page).'">'.$mmax_page.'</a></li>';
+    }
+
+	// Forward Page Button
+	$ret .= '<li class="page-item'.($page==$max_page ? ' disabled' : '').'">';
+	$ret .= '<a class="page-link" href="'.build_page($page+1).'" aria-label="后一页">';
+	$ret .= '<span aria-hidden="true">&raquo;</span><span class="sr-only">后一页</span>';
+	$ret .= '</a></li>';
+	
+	$ret .= '</ul>';
+	return $ret;
+}
