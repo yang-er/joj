@@ -169,11 +169,9 @@ namespace JudgeCore.Platform
             var hdl = ret.Handle;
             return ret;
 #else
-            Console.WriteLine(info.FileName);
+            // We can turn off the WerSvc in services.msc
             // If bAllUsers is FALSE, the list of excluded applications is stored under the HKEY_CURRENT_USER registry hive.
-            int rert = WerAddExcludedApplication(info.FileName, false);
-            Console.WriteLine(rert);
-            Console.WriteLine(Marshal.GetLastWin32Error());
+            WerAddExcludedApplication(info.FileName, false);
             var ret = Process.Start(info);
             if (job != IntPtr.Zero && !AssignProcessToJobObject(job, ret.Handle))
                 throw new Win32Exception();
