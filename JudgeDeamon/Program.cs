@@ -29,7 +29,8 @@ namespace JudgeDaemon
 
         static void Main2ACL()
         {
-            Console.WriteLine("Please press Ctrl-C to exit this daemon.");
+            Console.WriteLine("Please turn WerSvc to disabled in services.msc.");
+            Console.WriteLine("Press Ctrl-C to exit this daemon.");
             Console.WriteLine();
             var start = new ProcessStartInfo
             {
