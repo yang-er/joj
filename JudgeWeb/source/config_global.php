@@ -55,10 +55,10 @@ $GLOBALS['judge_states_simple'] = [
 ];
 
 $GLOBALS['runtime_errors'] = [
-    -1073741676 => 'INTEGER_DIVIDE_BY_ZERO',
-    -1073740940 => 'SEGMENTATION_FAULT',
-    -1073741819 => 'ACCESS_VIOLATION',
-    -1073741571 => 'STACK_OVERFLOW',
-	-1073741515 => 'UNABLE_TO_LOCATE_DLL',
+    -1073741676 => '<span class="state state-re">Integer Divide By Zero</span>',
+    -1073740940 => '<span class="state state-re">Segmentation Fault</span>',
+    -1073741819 => '<span class="state state-re">Access Violation</span>',
+    -1073741571 => '<span class="state state-re">Stack Overflow</span>',
+	-1073741515 => '<span class="state state-re">Unable To Locate DLL</span>',
     -1 => 'UNDEFINED',
 ];

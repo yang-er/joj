@@ -59,7 +59,7 @@ $details = C::t('details')->fetch_by_runid($id);
           <tbody>
 <?php if ($details) { foreach ($details as $detail) { ?>
             <tr>
-              <td><?php echo $judge_states[$detail['status']]; if ($detail['status'] == 5) echo '<br>'.$runtime_errors[$detail['exitcode']]; ?></td>
+              <td><?php if ($detail['status'] == 5 && isset($runtime_errors[$detail['exitcode']])) echo $runtime_errors[$detail['exitcode']]; else echo $judge_states[$detail['status']]; ?></td>
               <td><?php echo $detail['exemem']; ?>K</td>
               <td><?php echo $detail['exetime']; ?>ms</td>
             </tr>
