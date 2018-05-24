@@ -107,14 +107,14 @@ $curip = get_client_ip();
                 <span class="sr-only">前一页</span>
               </a>
             </li>
-<?php if ($page > 3) {
+<?php if ($page > 5) {
     $min_page = $page - 3;
 ?>
             <li class="page-item"><a class="page-link" href="<?php echo build_page(1); ?>">1</a></li>
             <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
 <?php } else {
     $min_page = 1;
-} if ($max_page - $page > 3) {
+} if ($max_page - $page > 4) {
     $mmax_page = $max_page;
     $max_page = $page + 3;
 } for ($i = $min_page; $i <= $max_page; $i++) { ?>

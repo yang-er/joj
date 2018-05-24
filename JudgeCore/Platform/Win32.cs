@@ -169,7 +169,11 @@ namespace JudgeCore.Platform
             var hdl = ret.Handle;
             return ret;
 #else
-            WerAddExcludedApplication(info.FileName, false);
+            Console.WriteLine(info.FileName);
+            // If bAllUsers is FALSE, the list of excluded applications is stored under the HKEY_CURRENT_USER registry hive.
+            int rert = WerAddExcludedApplication(info.FileName, false);
+            Console.WriteLine(rert);
+            Console.WriteLine(Marshal.GetLastWin32Error());
             var ret = Process.Start(info);
             if (job != IntPtr.Zero && !AssignProcessToJobObject(job, ret.Handle))
                 throw new Win32Exception();
@@ -179,6 +183,11 @@ namespace JudgeCore.Platform
 #endif
         }
         
+        public static long PeakProcessMemoryInfo(Process proc)
+        {
+            return (long)PeakProcessMemoryInfo(proc.Handle).ToUInt64();
+        }
+
         internal static class EnvironmentBlock
         {
             public static byte[] ToByteArray(StringDictionary sd, bool unicode)

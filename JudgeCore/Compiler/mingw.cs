@@ -16,7 +16,8 @@ namespace JudgeCore.Compiler
             Options.ForEach((str) => cl_args += $" {str}");
             cl_args += $" -c {file} -o{file_name}.o";
             var cl = Helper.MakeProcess(ToolchainPath[0] + "\\g++.exe", cl_args);
-            cl.StartInfo.Environment["PATH"] += $"{MasterPath}\\bin;";
+            var path_env = $"{MasterPath}\\bin;" + cl.StartInfo.Environment["PATH"];
+            cl.StartInfo.Environment["PATH"] = path_env;
             ReadCompileResult(cl);
             if (ExitCode != 0) return false;
 
@@ -24,7 +25,7 @@ namespace JudgeCore.Compiler
             string link_args = "";
             link_args += $" -o {file_name}.exe {file_name}.o";
             var link = Helper.MakeProcess(ToolchainPath[0] + "\\g++.exe", link_args);
-            link.StartInfo.Environment["PATH"] += $"{MasterPath}\\bin;";
+            link.StartInfo.Environment["PATH"] = path_env;
             ReadCompileResult(link);
             if (ExitCode != 0) return false;
 

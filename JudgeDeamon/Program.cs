@@ -8,9 +8,8 @@ namespace JudgeDaemon
     {
         static void Main(string[] args)
         {
-            if (args.Length == 2 && args[0] == "acled")
+            if (args.Length == 1 && args[0] == "acled")
             {
-                // Process.GetProcessById(int.Parse(args[1])).Exited += (sender, e) => Process.GetCurrentProcess().Kill();
                 MainACLed();
             }
             else
@@ -30,10 +29,11 @@ namespace JudgeDaemon
 
         static void Main2ACL()
         {
-            var refer = Assembly.GetExecutingAssembly();
+            Console.WriteLine("Please press Ctrl-C to exit this daemon.");
+            Console.WriteLine();
             var start = new ProcessStartInfo
             {
-                Arguments = refer.Location + " acled " + Process.GetCurrentProcess().Id,
+                Arguments = Assembly.GetExecutingAssembly().Location + " acled",
                 FileName = Process.GetCurrentProcess().MainModule.FileName,
                 UserName = "Judge",
                 Password = new System.Security.SecureString(),
@@ -52,8 +52,14 @@ namespace JudgeDaemon
             start.RedirectStandardOutput = true;
             
             var proc = Process.Start(start);
-            proc.OutputDataReceived += RedirectStdin;
-            proc.ErrorDataReceived += RedirectStderr;
+            Console.CancelKeyPress += (sender, e) => 
+            {
+                Console.WriteLine("Ctrl-C detected.");
+                proc.Kill();
+                e.Cancel = true;
+            };
+            proc.OutputDataReceived += (sender, e) => Console.WriteLine(e.Data);
+            proc.ErrorDataReceived += (sender, e) => Debug.WriteLine(e.Data);
             proc.BeginErrorReadLine();
             proc.BeginOutputReadLine();
             proc.WaitForExit();
@@ -61,17 +67,7 @@ namespace JudgeDaemon
             Console.Write("Main thread gone. Press any key to exit...");
             Console.ReadKey();
         }
-
-        static void RedirectStdin(object sender, DataReceivedEventArgs e)
-        {
-            Console.WriteLine(e.Data);
-        }
-
-        static void RedirectStderr(object sender, DataReceivedEventArgs e)
-        {
-            Debug.WriteLine(e.Data);
-        }
-
+        
         static void MainACLed()
         {
             try
