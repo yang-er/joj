@@ -38,7 +38,6 @@ namespace JudgeDaemon
                 FileName = Process.GetCurrentProcess().MainModule.FileName,
                 UserName = "Judge",
                 Password = new System.Security.SecureString(),
-                WorkingDirectory = "F:\\joj\\",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,

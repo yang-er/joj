@@ -102,7 +102,7 @@ namespace JudgeCore
 
                 // Judge process
                 if (Compiler.GetType().Name == "MinGW")
-                    pi.Environment["PATH"] = $"C:\\MinGW\\bin;" + pi.Environment["PATH"];
+                    pi.Environment["PATH"] = $"C:\\MinGW\\bin;";
                 var pro = CreateJudgeProcess(ActiveJob, pi,
                     out var stdout, out var stdin);
                 bool tle = false;
@@ -146,7 +146,7 @@ namespace JudgeCore
             if (pi != null)
             {
                 if (Compiler.GetType().Name == "MinGW")
-                    pi.Environment["PATH"] = $"C:\\MinGW\\bin;" + pi.Environment["PATH"];
+                    pi.Environment["PATH"] = $"C:\\MinGW\\bin;";
                 var pro = CreateJudgeProcess(ActiveJob, pi, 
                     out var stdout, out var stdin);
                 stdin.Close();
