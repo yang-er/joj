@@ -19,13 +19,14 @@ namespace JudgeUtility
                 Console.WriteLine(" 3. Program Clean");
                 Console.WriteLine("-------------------");
                 Console.Write("Your Choice : [ ]\b\b");
-                var op = Console.ReadKey();
+                var op = Console.ReadLine();
                 Console.WriteLine();
-                switch (op.KeyChar)
+                switch (op)
                 {
-                    case '0': return;
-                    case '1': ProblemCreator(); break;
-                    case '2': ConfigCache(); break;
+                    case "0": return;
+                    case "1": ProblemCreator(); break;
+                    case "2": ConfigCache(); break;
+                    case "3": CleanUp(); break;
                     default: break;
                 }
                 Console.WriteLine("Press any key to continue...");
