@@ -60,5 +60,6 @@ $GLOBALS['runtime_errors'] = [
     -1073741819 => '<span class="state state-re">Access Violation</span>',
     -1073741571 => '<span class="state state-re">Stack Overflow</span>',
 	-1073741515 => '<span class="state state-re">Unable To Locate DLL</span>',
+	4194432 => '<span class="state state-re">Segmentation Fault</span>',
     -1 => 'UNDEFINED',
 ];
