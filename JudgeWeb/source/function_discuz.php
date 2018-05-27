@@ -4,6 +4,8 @@
  * Some code from Discuz!X thanks to nemohou
  */
 
+defined("IN_XYS") || die("Access Denied");
+
 function dstrlen($str) {
 	$count = 0;
 	for($i = 0; $i < strlen($str); $i++){

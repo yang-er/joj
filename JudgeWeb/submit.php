@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 define('IN_XYS', 'index');
 require './source/class_application.php';
 
@@ -8,8 +8,9 @@ if (!isset($_GET['id']) || !isset($problems[intval($_GET['id'])])) {
 }
 
 $id = intval($_GET['id']);
+session_start();
 
-if (isset($_POST['submit'])) {
+/* if (isset($_POST['submit'])) {
     if (!isset($_POST['compiler']) || !isset($compilers[intval($_POST['compiler'])]) || !isset($_POST['code']) || !isset($_POST['stuid'])) die('Arguments error.');
     $stuid = intval($_POST['stuid']);
     $code = $_POST['code'];
@@ -39,7 +40,7 @@ if (isset($_POST['submit'])) {
     header("Location: status.php");
     exit();
     
-} else {
+} else {*/
 ?>
 <!doctype html>
 <html lang="cn">
@@ -51,6 +52,7 @@ if (isset($_POST['submit'])) {
   <script src="static/jquery.min.js"></script>
   <script src="static/popper.min.js"></script>
   <script src="static/bootstrap.bundle.min.js"></script>
+  <script src="static/xylab.js"></script>
   <title>提交代码 - JOJ Test Project</title>
 </head>
 <body>
@@ -64,7 +66,8 @@ if (isset($_POST['submit'])) {
       </li>
     </ul>
     <h1 class="mb-4"><small class="mr-3"><?php echo $id; ?>#</small><?php echo $problems[$id]; ?></h1>
-    <form action="submit.php?mod=ajax&id=<?php echo $id; ?>" method="post">
+    <form action="misc.php?mod=ajaxpost" method="post" onsubmit="return ajaxpost(this, 'ajaxpost')">
+      <input type="hidden" name="id" value="<?php echo $id; ?>">
       <div class="form-group">
         <label for="stuid">提交学号</label>
         <input class="form-control" type="number" placeholder="八位教学号，不好意思就写0吧" name="stuid" id="stuid">
@@ -83,12 +86,16 @@ foreach ($compilers as $key => $value) {?>
         <textarea class="form-control" id="code_area" name="code" placeholder="#include <bits/stdc++.h>"></textarea>
       </div>
       <div class="form-group">
+        <label for="code_area" class="mr-3">验证码</label>
+        <img src="misc.php?mod=seccode" id="seccode" class="mr-3">
+        <input class="form-control mr-3" style="display:inline-block;max-width:8em" name="seccode" type="text">
         <input class="btn btn-success" name="submit" type="submit" value=" 提交 ">
       </div>
     </form>
   </div>
+  <div id="append-parent"></div>
 </body>
 </html>
 
 <?php
-}
+//}

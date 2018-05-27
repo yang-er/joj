@@ -13,6 +13,7 @@ $_CONFIG['db']['charset'] = 'utf8';
 $_CONFIG['db']['pconnect'] = '0';
 $_CONFIG['db']['name'] = 'judge';
 $_CONFIG['db']['tablepre'] = '';
+define('APP_KEY', md5($_CONFIG['db']['user'].'@'.$_CONFIG['db']['host'].'-'.$_CONFIG['db']['password']));
 
 $GLOBALS['compilers'] = [
     0 => 'Visual C++ Compiler (v14.1)',

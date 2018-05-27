@@ -33,7 +33,9 @@ $cur = C::t('submission')->fetch_by_runid($id);
 if (isset($_GET['reset']) && cur_ip('0.0.0.0')) C::t('submission')->reset('`runid`='.$id);
 $codes = C::t('code')->fetch_by_runid($id);
 $details = C::t('details')->fetch_by_runid($id);
-?>
+if ($cur['status'] == 8 || $cur['status'] == 9) { ?>
+<meta http-equiv="Refresh" content="<?php echo $cur['status'] == 8 ? '30' : '5'; ?>">
+<?php } ?>
     <div class="row">
       <div class="col-md-8">
         <h1 class="mb-4">代码提交 #<?php echo $cur['runid']; ?></h1>

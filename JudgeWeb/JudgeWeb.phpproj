@@ -28,6 +28,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="index.php" />
+    <Compile Include="misc.php" />
+    <Compile Include="source\class_seccode.php" />
+    <Compile Include="source\template_showmessage.php" />
     <Compile Include="status.php" />
     <Compile Include="submit.php" />
     <Compile Include="view.php" />
