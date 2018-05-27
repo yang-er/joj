@@ -118,7 +118,7 @@ namespace JudgeCore
                 // Judge extra info
                 ti.Time = pro.UserProcessorTime.TotalMilliseconds;
                 WriteDebug($"Runtime: {ti.Time}ms");
-                if (ti.Time >= 1000)
+                if (ti.Time >= TimeLimit)
                     ti.Result = JudgeResult.TimeLimitExceeded;
                 ti.Memory = PeakProcessMemoryInfo(pro);
                 WriteDebug($"Memory: {ti.Memory / 1024}kb");
