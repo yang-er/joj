@@ -8,6 +8,7 @@ namespace JudgeDaemon
     {
         static void Main(string[] args)
         {
+            Console.Title = "JLU Online Judge Daemon";
             if (args.Length == 1 && args[0] == "acled")
             {
                 MainACLed();
