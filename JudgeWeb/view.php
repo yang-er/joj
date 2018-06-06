@@ -66,7 +66,7 @@ if ($cur['status'] == 8 || $cur['status'] == 9) { ?>
               <td><?php echo $detail['exemem']; ?>K</td>
               <td><?php echo $detail['exetime']; ?>ms</td>
             </tr>
-<?php if ($detail['status'] == 6) break; } } else { ?>
+<?php } } else { ?>
             <tr>
               <td colspan="3">目前没有运行记录。</td>
             </tr>

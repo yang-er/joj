@@ -11,8 +11,6 @@ namespace JudgeCore
 
         static Action<string> writeDbg;
         static readonly Helper intel = new Helper();
-        static string startDir = "";
-        static string appedix = "";
 
         public Helper()
         {
@@ -24,13 +22,14 @@ namespace JudgeCore
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 OS = new Platform.Linux();
-                startDir = "/usr/judge/";
+                WorkingDirectory = "/usr/judge/";
+                Appedix = ".out";
             }
             else
             {
                 OS = new Platform.Win32();
-                startDir = "F:\\joj";
-                appedix = ".exe";
+                WorkingDirectory = "F:\\joj";
+                Appedix = ".exe";
             }
         }
 
@@ -40,6 +39,16 @@ namespace JudgeCore
         /// 平台相关函数
         /// </summary>
         public static IPlatform OS { get; private set; }
+
+        /// <summary>
+        /// 文件名后缀
+        /// </summary>
+        public static string Appedix { get; private set; }
+
+        /// <summary>
+        /// 工作目录
+        /// </summary>
+        public static string WorkingDirectory { get; private set; }
 
         /// <summary>
         /// 输出调试信息的函数
@@ -74,7 +83,7 @@ namespace JudgeCore
         /// <returns>等待启动的进程</returns>
         public static ProcessStartInfo MakeJudgeInfo(Guid guid)
         {
-            var filename = new FileInfo(guid.ToString("D") + appedix).FullName;
+            var filename = new FileInfo(guid.ToString("D") + Appedix).FullName;
             if (!File.Exists(filename)) return null;
             var ret = new ProcessStartInfo
             {
@@ -84,9 +93,10 @@ namespace JudgeCore
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 FileName = filename,
+                WorkingDirectory = Directory.Exists(WorkingDirectory) 
+                    ? WorkingDirectory 
+                    : Environment.CurrentDirectory,
             };
-            
-            ret.WorkingDirectory = Directory.Exists(startDir) ? startDir : Environment.CurrentDirectory;
             return ret;
         }
     }
