@@ -119,8 +119,8 @@ namespace JudgeDaemon
             }
 
             command.CommandText = "update `submission` set" +
-                $" `exetime` = {exetime}," +
-                $" `exemem` = {exemem}," +
+                $" `exetime` = {exetime / job.Judger.Count}," +
+                $" `exemem` = {exemem / job.Judger.Count}," +
                 $" `grade` = {(int)(100.0 / job.Judger.Count * acs)}," +
                 $" `status` = {(int)final}" +
                 $" where `runid`={runid}";

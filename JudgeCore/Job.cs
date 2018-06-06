@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using static JudgeCore.Helper;
-using static JudgeCore.Platform.Win32;
 
 namespace JudgeCore
 {
@@ -76,8 +74,8 @@ namespace JudgeCore
             while (!pro.HasExited
                 && pro.UserProcessorTime.TotalMilliseconds < TimeLimit
                 && (DateTime.Now - pro.StartTime).TotalMilliseconds < TimeLimit * 3
-                && PeakProcessMemoryInfo(pro) < MemoryLimit << 20) ;
-            if (!pro.HasExited) UnsetSandbox(ref ActiveJob);
+                && OS.PeakProcessMemoryInfo(pro) < MemoryLimit << 20) ;
+            if (!pro.HasExited) OS.UnsetSandbox(ref ActiveJob);
         }
 
         /// <summary>
@@ -103,15 +101,15 @@ namespace JudgeCore
                 // Judge process
                 if (Compiler.GetType().Name == "MinGW")
                     pi.Environment["PATH"] = $"C:\\MinGW\\bin;";
-                ActiveJob = SetupSandbox((uint)MemoryLimit, (uint)TimeLimit, 1);
-                var pro = CreateJudgeProcess(ActiveJob, pi,
+                ActiveJob = OS.SetupSandbox(MemoryLimit, TimeLimit, 1);
+                var pro = OS.CreateJudgeProcess(ActiveJob, pi,
                     out var stdout, out var stdin);
                 bool tle = false;
                 Task.Run(() => CheckRuntime(pro, ref ti, ref tle));
                 Task.Run(() => Judger[id].Input(stdin));
                 ti.Result = Judger[id].Judge(stdout);
                 pro.WaitForExit();
-                UnsetSandbox(ref ActiveJob);
+                OS.UnsetSandbox(ref ActiveJob);
 
                 if (pro.ExitCode == -1) ti.Result = JudgeResult.UndefinedError;
 
@@ -120,7 +118,7 @@ namespace JudgeCore
                 WriteDebug($"Runtime: {ti.Time}ms");
                 if (ti.Time >= TimeLimit)
                     ti.Result = JudgeResult.TimeLimitExceeded;
-                ti.Memory = PeakProcessMemoryInfo(pro);
+                ti.Memory = OS.PeakProcessMemoryInfo(pro);
                 WriteDebug($"Memory: {ti.Memory / 1024}kb");
                 if (ti.Memory > MemoryLimit << 20)
                     ti.Result = JudgeResult.MemoryLimitExceeded;
@@ -152,19 +150,27 @@ namespace JudgeCore
                 if (show_log) Console.WriteLine("0ms\t0mb\tCompileError");
                 return;
             }
-            
-            // Open privilige to JudgeUser for HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\ExcludedApplications
-            WerAddExcludedApplication(pi.FileName, true);
+
+            /**********************************************************
+             *  Old ways: Windows Error Reporting APIs
+             *  - Open privilige to JudgeUser for
+             *      HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\ExcludedApplications
+             *  # WerAddExcludedApplication(pi.FileName, true);
+             *  # WerRemoveExcludedApplication(pi.FileName, true);
+             * 
+             *  New ways:
+             *  - Setup the flag JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION
+             **********************************************************/
 
             if (Compiler.GetType().Name == "MinGW")
                 pi.Environment["PATH"] = $"C:\\MinGW\\bin;";
-            ActiveJob = SetupSandbox((uint)MemoryLimit, (uint)TimeLimit, 1);
-            var pro = CreateJudgeProcess(ActiveJob, pi, 
+            ActiveJob = OS.SetupSandbox(MemoryLimit, TimeLimit, 1);
+            var pro = OS.CreateJudgeProcess(ActiveJob, pi, 
                 out var stdout, out var stdin);
             stdin.Close();
             stdout.Close();
             pro.WaitForExit(1000);
-            UnsetSandbox(ref ActiveJob);
+            OS.UnsetSandbox(ref ActiveJob);
 
             for (int i = 0; i < Judger.Count; i++)
             {
@@ -174,8 +180,6 @@ namespace JudgeCore
                     (int)Math.Round(State[i].Memory / 1048576.0), 
                     State[i].Result.ToString());
             }
-            
-            WerRemoveExcludedApplication(pi.FileName, true);
         }
 
         /// <summary>

@@ -1,33 +1,50 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace JudgeCore
 {
     public class Helper
     {
+        #region Startup Functions
+
         static Action<string> writeDbg;
+        static readonly Helper intel = new Helper();
+        static string startDir = "";
+        static string appedix = "";
+
+        public Helper()
+        {
+            if (Console.IsErrorRedirected)
+                writeDbg = Console.Error.WriteLine;
+            else
+                writeDbg = (str) => Debug.WriteLine(str);
+
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                OS = new Platform.Linux();
+                startDir = "/usr/judge/";
+            }
+            else
+            {
+                OS = new Platform.Win32();
+                startDir = "F:\\joj";
+                appedix = ".exe";
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 平台相关函数
+        /// </summary>
+        public static IPlatform OS { get; private set; }
 
         /// <summary>
         /// 输出调试信息的函数
         /// </summary>
-        public static Action<string> WriteDebug
-        {
-            get
-            {
-                if (writeDbg is null)
-                {
-                    if (Console.IsErrorRedirected)
-                        writeDbg = Console.Error.WriteLine;
-                    else
-                        writeDbg = (str) => Debug.WriteLine(str);
-                }
-
-                return writeDbg;
-            }
-        }
+        public static void WriteDebug(string str) => writeDbg(str);
 
         /// <summary>
         /// 创建内部进程，不受限制的那种
@@ -57,7 +74,7 @@ namespace JudgeCore
         /// <returns>等待启动的进程</returns>
         public static ProcessStartInfo MakeJudgeInfo(Guid guid)
         {
-            var filename = new FileInfo(guid.ToString("D") + ".exe").FullName;
+            var filename = new FileInfo(guid.ToString("D") + appedix).FullName;
             if (!File.Exists(filename)) return null;
             var ret = new ProcessStartInfo
             {
@@ -67,12 +84,9 @@ namespace JudgeCore
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 FileName = filename,
-                // UserName = "Judge",
-                // Password = new System.Security.SecureString()
             };
-
-            /* ret.Environment["Path"] = "\\;"; */
-            ret.WorkingDirectory = Directory.Exists("F:\\joj") ? "F:\\joj" : Environment.CurrentDirectory;
+            
+            ret.WorkingDirectory = Directory.Exists(startDir) ? startDir : Environment.CurrentDirectory;
             return ret;
         }
     }

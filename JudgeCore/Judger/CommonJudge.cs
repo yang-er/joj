@@ -38,26 +38,22 @@ namespace JudgeCore.Judger
             string r2 = result.Replace("\n", "").Replace("\t", "").Replace(" ", "");
 
             if (r2 != _realthing)
-            {
                 return JudgeResult.WrongAnswer;
-            }
-            
-            if (result == _correct)
-            {
+            else if (result == _correct)
                 return JudgeResult.Accepted;
-            }
-
-            if (result.EndsWith('\n') && !_correct.EndsWith('\n') && result.Substring(0, result.Length - 1) == _correct)
-            {
+            else if (CheckWithoutLn(result, _correct))
                 return JudgeResult.Accepted;
-            }
-
-            if (_correct.EndsWith('\n') && !result.EndsWith('\n') && _correct.Substring(0, _correct.Length - 1) == result)
-            {
+            else if (CheckWithoutLn(_correct, result))
                 return JudgeResult.Accepted;
-            }
+            else
+                return JudgeResult.PresentationError;
+        }
 
-            return JudgeResult.PresentationError;
+        private static bool CheckWithoutLn(string a, string b)
+        {
+            return a.EndsWith('\n')
+                    && !b.EndsWith('\n')
+                    && a.Substring(0, a.Length - 1) == b;
         }
 
         public CommonJudge(string inp, string ans)

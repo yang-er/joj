@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using static JudgeCore.Helper;
-using static JudgeCore.Platform.Win32;
 
 namespace JudgeCore.Compiler
 {
@@ -25,9 +24,7 @@ namespace JudgeCore.Compiler
         /// <param name="proc">进程</param>
         protected void ReadCompileResult(Process proc)
         {
-            IntPtr hJob = SetupSandbox(128, 1000, 10);
-            proc.Start();
-            AssignProcessToJobObject(hJob, proc.Handle);
+            var callback = OS.StartCompilerProcess(proc);
             proc.WaitForExit(3000);
 
             if (!proc.HasExited)
@@ -42,7 +39,7 @@ namespace JudgeCore.Compiler
                 if (StandardError != "") WriteDebug(StandardError);
             }
 
-            UnsetSandbox(hJob);
+            callback();
             ExitCode = proc.ExitCode;
             WriteDebug($"Compiler exited with status code {ExitCode}. ");
         }

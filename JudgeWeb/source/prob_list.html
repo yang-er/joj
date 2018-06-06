@@ -6,7 +6,7 @@
 <div class="card"><div class="card-body">
 <h3 class="card-title">表达式计算</h3>
 <p class="card-text">时间限制：1000ms，内存限制：64MB。</p>
-<p class="card-text">求算术表达式的值。算术表达式按中缀给出，以=号结束，包括 <code>+</code>、<code>-</code>、<code>*</code>、<code>/</code> 四种运算和 <code>(</code>、<code>)</code> 分隔符。运算数的范围是非负整数，小于等于10^9。输入保证语法正确。</p>
+<p class="card-text">求算术表达式的值。算术表达式按中缀给出，以=号结束，包括+,-,*,/四种运算和(、)分隔符。运算数的范围是非负整数，小于等于10^9。输入保证语法正确。</p>
 <a href="submit.php?id=1002" class="btn btn-primary mr-3">尝试提交</a><button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#Modal1002">样例与提示</button></div></div>
 <div class="card"><div class="card-body">
 <h3 class="card-title">成绩统计</h3>
@@ -38,6 +38,17 @@
 <p class="card-text">蚌神要献给龙王一颗大珍珠。它现在有 n 颗小珍珠。它每次可以把任意两颗珍珠融合成一个新的珍珠，消耗的河蚌之力等于两颗珍珠的重量之和。融合珍珠时总共消耗的河蚌之力等于每次融合所消耗的河蚌之力之和。
 任务是设计出融合的次序方案，使总共消耗的河蚌之力最少，输出这个最小值。</p>
 <a href="submit.php?id=1006" class="btn btn-primary mr-3">尝试提交</a><button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#Modal1006">样例与提示</button></div></div>
+<div class="card"><div class="card-body">
+<h3 class="card-title">开会通知</h3>
+<p class="card-text">时间限制：1000ms，内存限制：32MB。</p>
+<p class="card-text">OI 组织有 n 个同学，每个人可以通知其余若干人，通知不是相互的（a 能通知 b，b 不一定能通知 a），通知的过程不会出现环（x 如果能通知 y，则 x 通知 y 的方式是唯一的； x只要能直接或间接通知到 y，y 一定不能直接或间接通知到 x ） 。
+现在，OI 领导要下一个重要的通知，必须通知所有同学，问最少需要通知几人 就能通知到所有人。</p>
+<a href="submit.php?id=1007" class="btn btn-primary mr-3">尝试提交</a><button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#Modal1007">样例与提示</button></div></div>
+<div class="card"><div class="card-body">
+<h3 class="card-title">国家</h3>
+<p class="card-text">时间限制：1000ms，内存限制：32MB。</p>
+<p class="card-text">一个国家有 n 个城镇，分别标号 1…n。这 n 个城镇互不相连。严重影响人们的正常生活。为了使国家富强，彻底贯彻要想富先修路的方针，决定建造一些公路（这些公路是无向的），把国家分为 k 个部分，各个部分之间没有任何道路相通，但是每个部分内部的任意两点直接或者间接相通。对于一个部分，它可以有一个点，两个 点……n 个点，但不能没有点。在下图中，则 1,2,3 属于同一部分，4,5 属于同一部 分。这个图有 2 个部分。现在有 m 条公路可供选建，但是每条公路都有一定的花费，想知道在满足上述条件下，最小花费是多少？ </p>
+<a href="submit.php?id=1008" class="btn btn-primary mr-3">尝试提交</a><button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#Modal1008">样例与提示</button></div></div>
 <div class="modal fade" id="Modal1001" tabindex="-1" role="dialog"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">A + B Problem</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div><div class="modal-body"><h4>样例</h4>
 <p class="mb-1 ml-2 mt-2">输入</p><pre class="sample_io_area mb-0">1 1
 </pre><p class="mb-1 ml-2 mt-2">输出</p><pre class="sample_io_area">2
@@ -91,3 +102,23 @@
 对于 30% 的数据，保证有 n <= 100；<br>
 对于 50% 的数据，保证有 n <= 5000；<br>
 对于全部的数据，保证有 n <= 30000。</p></div><div class="modal-footer"><button type="button" class="btn btn-success" data-dismiss="modal">关闭</button></div></div></div></div>
+<div class="modal fade" id="Modal1007" tabindex="-1" role="dialog"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">开会通知</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div><div class="modal-body"><h4>样例</h4>
+<p class="mb-1 ml-2 mt-2">输入</p><pre class="sample_io_area mb-0">6 4
+1 2
+1 3
+4 5
+6 5
+</pre><p class="mb-1 ml-2 mt-2">输出</p><pre class="sample_io_area">3
+</pre>
+<h4>提示</h4><p>n<=500</p></div><div class="modal-footer"><button type="button" class="btn btn-success" data-dismiss="modal">关闭</button></div></div></div></div>
+<div class="modal fade" id="Modal1008" tabindex="-1" role="dialog"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">国家</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div><div class="modal-body"><h4>样例</h4>
+<p class="mb-1 ml-2 mt-2">输入</p><pre class="sample_io_area mb-0">4 5 2
+1 2 1
+2 3 20
+3 4 1
+1 3 30
+3 4 2
+</pre><p class="mb-1 ml-2 mt-2">输出</p><pre class="sample_io_area">2
+</pre>
+<h4>提示</h4><p>对于 70%的数据：1≤n≤1000,1≤m≤10000，且其中 30%的数据保证不存在重边和环；<br>
+对于 100%的数据：1≤n≤100000,1≤m≤200000，1≤k≤n；所有数据保证不存在自环。 </p></div><div class="modal-footer"><button type="button" class="btn btn-success" data-dismiss="modal">关闭</button></div></div></div></div>
