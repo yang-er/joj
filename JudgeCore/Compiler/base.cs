@@ -24,7 +24,13 @@ namespace JudgeCore.Compiler
         /// <param name="proc">进程</param>
         protected void ReadCompileResult(Process proc)
         {
+            var stdout = new StringBuilder();
+            var stderr = new StringBuilder();
             var callback = OS.StartCompilerProcess(proc);
+            proc.OutputDataReceived += (sender, e) => stdout.AppendLine(e.Data);
+            proc.ErrorDataReceived += (sender, e) => stderr.AppendLine(e.Data);
+            proc.BeginOutputReadLine();
+            proc.BeginErrorReadLine();
             proc.WaitForExit(3000);
 
             if (!proc.HasExited)
@@ -33,9 +39,9 @@ namespace JudgeCore.Compiler
             }
             else
             {
-                StandardOutput = proc.StandardOutput.ReadToEnd().Trim();
+                StandardOutput = stdout.ToString().Trim();
                 if (StandardOutput != "") WriteDebug(StandardOutput);
-                StandardError = proc.StandardError.ReadToEnd().Trim();
+                StandardError = stderr.ToString().Trim();
                 if (StandardError != "") WriteDebug(StandardError);
             }
 
@@ -53,8 +59,12 @@ namespace JudgeCore.Compiler
             file.Close();
 
             var ret = Compile(file_name + ".cpp");
-            StandardError = StandardError.Replace(file_name, "main");
-            StandardOutput = StandardOutput.Replace(file_name, "main");
+            StandardError = StandardError
+                .Replace(file_name, "main")
+                .Replace(MasterPath, GetType().Name);
+            StandardOutput = StandardOutput
+                .Replace(file_name, "main")
+                .Replace(MasterPath, GetType().Name);
             return ret;
         }
 

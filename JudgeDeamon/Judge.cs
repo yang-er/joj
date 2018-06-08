@@ -111,6 +111,7 @@ namespace JudgeDaemon
             // Set when compile error
             if (job.State[0].Result == JudgeResult.CompileError)
             {
+                if (job.CompileInfo.Length > 4096) job.CompileInfo = job.CompileInfo.Substring(0, 4090) + "...";
                 command.CommandText = "update `code` set `ce` = \"" +
                     MySqlHelper.DoubleQuoteString(job.CompileInfo) +
                     "\" where `runid`=" + runid;
