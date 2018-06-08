@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 
 namespace JudgeCore.Compiler
 {
-    public sealed class Msvc : CompilerBase
+    public sealed class Msvc : ICompiler
     {
-        private string vcv = "";
-        private string winv = "";
-        private string sku = "";
-        private string kit = "C:\\Program Files (x86)\\Windows Kits\\10";
-        private string vsdir => $"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\{sku}";
-        
         public override bool Compile(string file)
         {
             var file_name = file.Split('.')[0];
@@ -38,12 +32,15 @@ namespace JudgeCore.Compiler
 
         public Msvc()
         {
+            var vsdir = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\";
             var vs = new DirectoryInfo(vsdir);
-            sku = vs.GetDirectories()[0].Name;
+            var kit = "C:\\Program Files (x86)\\Windows Kits\\10";
+            var sku = vs.GetDirectories()[0].Name;
+            vsdir = vsdir + sku;
             var vc = new DirectoryInfo(vsdir + "\\VC\\Tools\\MSVC\\");
-            vcv = vc.GetDirectories()[0].Name;
+            var vcv = vc.GetDirectories()[0].Name;
             var sdk = new DirectoryInfo(kit + "\\Source\\");
-            winv = sdk.GetDirectories()[0].Name;
+            var winv = sdk.GetDirectories()[0].Name;
 
             MasterPath = $"{vsdir}\\VC\\Tools\\MSVC\\{vcv}";
 
@@ -78,17 +75,13 @@ namespace JudgeCore.Compiler
                 $"{kit}\\bin\\{winv}\\x64"
             };
 
-            var proc = Helper.MakeProcess(ToolchainPath[0] + "\\cl.exe", "");
-            proc.Start();
-            Console.WriteLine();
-            Console.WriteLine(proc.StandardError.ReadToEnd().Trim());
-
-            Console.WriteLine(ToString() + " loaded.");
+            CompilerName = $"Microsoft Visual C++ Compiler v{vcv}";
         }
 
-        public override string ToString()
+        public Msvc(XmlNode root)
         {
-            return $"Microsoft Visual C++ Compiler v{vcv}";
+            LoadFromXml(root.SelectSingleNode("msvc"));
+            Test("cl.exe");
         }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml;
 
 namespace JudgeCore.Compiler
 {
-    public sealed class MinGW : CompilerBase
+    public sealed class MinGW : ICompiler
     {
-        private string ver;
-
         public override bool Compile(string file)
         {
             var file_name = file.Split('.')[0];
@@ -32,6 +31,12 @@ namespace JudgeCore.Compiler
             return true;
         }
 
+        public MinGW(XmlNode xml)
+        {
+            LoadFromXml(xml);
+            Test("gcc.exe", "--version");
+        }
+
         public MinGW()
         {
             MasterPath = "C:\\MinGW";
@@ -55,19 +60,9 @@ namespace JudgeCore.Compiler
                 $"{MasterPath}\\bin",
             };
 
-            var proc = Helper.MakeProcess(ToolchainPath[0] + "\\gcc.exe", "--version");
-            proc.Start();
-            var tool_info = proc.StandardOutput.ReadToEnd();
-            Console.WriteLine();
-            Console.WriteLine(tool_info.Trim());
-            ver = tool_info.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0].Split(") ")[1];
-
-            Console.WriteLine(ToString() + " loaded.");
-        }
-
-        public override string ToString()
-        {
-            return $"MinGW Toolchain v{ver}";
+            var ret = Test("gcc.exe", "--version");
+            var ver = ret.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0].Split(") ")[1];
+            CompilerName = $"MinGW Toolchain v{ver}";
         }
     }
 }

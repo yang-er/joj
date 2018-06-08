@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<compilers>
+ <Msvc>
+  <name>Microsoft Visual C++ Compiler v19.14.26429.4</name>
+  <args>
+   <arg name="VSDir">C:\Program Files (x86)\Microsoft Visual Studio\2017\Community</arg>
+   <arg name="VCVer">14.14.26428</arg>
+   <arg name="KitDir">C:\Program Files (x86)\Windows Kits\10</arg>
+   <arg name="WinVer">10.0.16299.0</arg>
+  </args>
+  <master>{VSDir}\VC\Tools\MSVC\{VCVer}</master>
+  <options>
+   <option>/nologo</option>
+   <option>/EHsc</option>
+   <option>/DDEBUG</option>
+  </options>
+  <toolchain>
+   <path>{Master}\bin\Hostx64\x64</path>
+   <path>{KitDir}\bin\{WinVer}\x64</path>
+  </toolchain>
+  <library>
+   <path>{Master}\lib\x64</path>
+   <path>{KitDir}\Lib\{winv}\ucrt\x64</path>
+   <path>{KitDir}\Lib\{winv}\um\x64</path>
+  </library>
+  <include>
+   <path>{Master}\include</path>
+   <path>{KitDir}\Include\{WinVer}\ucrt</path>
+  </include>
+ </Msvc>
+ <MinGW>
+  <name>MinGW Toolchain v6.3.0</name>
+  <args>
+   <arg name="Ver">6.3.0</arg>
+  </args>
+  <master>C:\MinGW</master>
+  <options>
+   <option>-std=c++11</option>
+   <option>-fmax-errors=5</option>
+  </options>
+  <toolchain>
+   <path>{Master}\bin</path>
+  </toolchain>
+  <library>
+   <path>{Master}\lib\x64</path>
+   <path>{Master}\lib\gcc\mingw32\{Ver}</path>
+  </library>
+  <include>
+   <path>{Master}\include</path>
+   <path>{Master}\lib\gcc\mingw32\{Ver}\include\c++</path>
+  </include>
+ </MinGW>
+</compilers>
