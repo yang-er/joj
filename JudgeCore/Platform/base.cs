@@ -89,7 +89,7 @@ namespace JudgeCore
         /// <summary>
         /// 是否超过沙盒的限制
         /// </summary>
-        public bool OutOfLimit => TotalTime >= TimeLimit || RunningTime >= TimeLimit * 3 || (long)MaxMemory > MemoryLimit << 20;
+        public bool OutOfLimit => TotalTime >= TimeLimit || RunningTime >= TimeLimit * 10 || (long)MaxMemory > MemoryLimit << 20;
 
         internal SandboxProcess()
         {
@@ -104,10 +104,11 @@ namespace JudgeCore
         /// <param name="stderr">是否重定向stderr</param>
         /// <param name="stdin">是否重定向stdin</param>
         /// <returns>新的沙盒进程实例</returns>
-        public static SandboxProcess Create(string file, string args = "", bool stderr = false, bool stdin = false)
+        public static SandboxProcess Create(string file, string args = "", bool stderr = false, bool stdin = false, bool cd = false)
         {
             if (!File.Exists(file)) return null;
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             var ret = new SandboxProcess();
             ret.info.RedirectStandardOutput = true;
             ret.info.StandardOutputEncoding = Encoding.GetEncoding(936);
@@ -118,25 +119,53 @@ namespace JudgeCore
             ret.info.UseShellExecute = false;
             ret.info.FileName = file;
             ret.info.Arguments = args;
-            ret.info.WorkingDirectory = Directory.Exists(WorkingDirectory) ? 
-                WorkingDirectory : Environment.CurrentDirectory;
-            ret.info.Environment.Clear();
-            ret.info.Environment["PATH"] = "";
+            ret.info.WorkingDirectory = 
+                cd && Directory.Exists(WorkingDirectory) ? 
+                    WorkingDirectory : Environment.CurrentDirectory;
+            
             return ret;
         }
 
         /// <summary>
         /// 启动沙盒进程
         /// </summary>
-        public void Start()
+        /// <param name="_err">如果异步流，则将stderr写入此</param>
+        /// <param name="_out">如果异步流，则将stdout写入此</param>
+        public void Start(StringBuilder _out = null, StringBuilder _err = null)
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 inside = Process.Start(info);
                 WinNT.AssignProcessToJobObject(job_obj, inside.Handle);
-                if (info.RedirectStandardError) stderr = inside.StandardError;
-                if (info.RedirectStandardInput) stdin = inside.StandardInput;
-                if (info.RedirectStandardOutput) stdout = inside.StandardOutput;
+
+                if (info.RedirectStandardInput)
+                    stdin = inside.StandardInput;
+
+                if (info.RedirectStandardError)
+                {
+                    if (_err is null)
+                    {
+                        stderr = inside.StandardError;
+                    }
+                    else
+                    {
+                        inside.ErrorDataReceived += (s, e) => StreamPipe(_err, e);
+                        inside.BeginErrorReadLine();
+                    }
+                }
+
+                if (info.RedirectStandardOutput)
+                {
+                    if (_out is null)
+                    {
+                        stdout = inside.StandardOutput;
+                    }
+                    else
+                    {
+                        inside.OutputDataReceived += (s, e) => StreamPipe(_out, e);
+                        inside.BeginOutputReadLine();
+                    }
+                }
             }
             else
             {
@@ -151,34 +180,14 @@ namespace JudgeCore
         /// <param name="e">元数据</param>
         private void StreamPipe(StringBuilder dest, DataReceivedEventArgs e)
         {
-            dest.Append(e.Data);
+            dest.AppendLine(e.Data);
             if (dest.Length > 4096)
             {
-                inside.CancelErrorRead();
-                inside.CancelOutputRead();
+                dest.Append(", ......");
+                Kill();
             }
         }
-
-        /// <summary>
-        /// 启动异步流
-        /// </summary>
-        /// <param name="_out">stdout目标</param>
-        /// <param name="_err">stderr目标</param>
-        public void SetAsyncStream(StringBuilder _out, StringBuilder _err)
-        {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                inside.ErrorDataReceived += (s, e) => StreamPipe(_err, e);
-                inside.OutputDataReceived += (s, e) => StreamPipe(_out, e);
-                inside.BeginErrorReadLine();
-                inside.BeginOutputReadLine();
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-        }
-
+        
         /// <summary>
         /// 设置沙盒参数
         /// </summary>

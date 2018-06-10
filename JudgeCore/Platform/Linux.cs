@@ -4,7 +4,7 @@ using System.IO;
 
 namespace JudgeCore.Platform
 {
-    public class Linux : IPlatform
+    public class Linux
     {
         public Process CreateJudgeProcess(IntPtr job, ProcessStartInfo info, out StreamReader stdout, out StreamWriter stdin)
         {

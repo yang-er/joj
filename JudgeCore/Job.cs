@@ -81,7 +81,7 @@ namespace JudgeCore
             {
                 ti.Result = JudgeResult.Pending;
 
-                var proc = SandboxProcess.Create(RunID.ToString("D") + Appedix, stdin: true);
+                var proc = SandboxProcess.Create(RunID.ToString("D") + Appedix, stdin: true, cd: true);
                 if (proc is null) return ti.Result = JudgeResult.CompileError;
                 
                 ti.Result = JudgeResult.Running;
@@ -133,7 +133,7 @@ namespace JudgeCore
         /// </summary>
         public void Judge(bool show_log = false)
         {
-            var proc = SandboxProcess.Create(RunID.ToString("D") + Appedix);
+            var proc = SandboxProcess.Create(RunID.ToString("D") + Appedix, cd: true);
 
             if (proc is null)
             {
@@ -153,8 +153,11 @@ namespace JudgeCore
              *  - Setup the flag JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION
              **********************************************************/
 
+            proc.StartInfo.Environment.Clear();
             if (Compiler.GetType().Name == "MinGW")
                 proc.StartInfo.Environment["PATH"] = Compiler.ToolchainPath[0] + ";";
+            else
+                proc.StartInfo.Environment["PATH"] = "";
             
             proc.Setup(MemoryLimit, TimeLimit, 1);
             proc.Start();

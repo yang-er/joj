@@ -65,8 +65,7 @@ namespace JudgeCore
             var stdout = new StringBuilder();
             var stderr = new StringBuilder();
             proc.Setup(128, 1000, 10);
-            proc.Start();
-            proc.SetAsyncStream(stdout, stderr);
+            proc.Start(stdout, stderr);
             proc.WaitForExit(3000);
 
             if (!proc.HasExited)
