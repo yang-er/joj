@@ -60,15 +60,13 @@ namespace JudgeCore
         /// 读取编译器进程的输出
         /// </summary>
         /// <param name="proc">进程</param>
-        protected void ReadCompileResult(Process proc)
+        protected void ReadCompileResult(SandboxProcess proc)
         {
             var stdout = new StringBuilder();
             var stderr = new StringBuilder();
-            var callback = OS.StartCompilerProcess(proc);
-            proc.OutputDataReceived += (sender, e) => stdout.AppendLine(e.Data);
-            proc.ErrorDataReceived += (sender, e) => stderr.AppendLine(e.Data);
-            proc.BeginOutputReadLine();
-            proc.BeginErrorReadLine();
+            proc.Setup(128, 1000, 10);
+            proc.Start();
+            proc.SetAsyncStream(stdout, stderr);
             proc.WaitForExit(3000);
 
             if (!proc.HasExited)
@@ -83,7 +81,7 @@ namespace JudgeCore
                 if (StandardError != "") WriteDebug(StandardError);
             }
 
-            callback();
+            proc.Kill();
             ExitCode = proc.ExitCode;
             WriteDebug($"Compiler exited with status code {ExitCode}. ");
         }
