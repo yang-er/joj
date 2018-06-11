@@ -24,9 +24,18 @@ namespace JudgeDaemon
 
         static void LoadCompilers()
         {
-            LoadCompiler<JudgeCore.Compiler.Msvc>();
-            LoadCompiler<JudgeCore.Compiler.MinGW>();
-            // LoadCompiler<JudgeCore.Compiler.ClangC2>();
+            if (!File.Exists("compilers.xml"))
+            {
+                Console.WriteLine("No compiler found, please check.");
+                throw new Exception("No compiler found, please check.");
+            }
+
+            var compiler_xml = new XmlDocument();
+            compiler_xml.Load("compilers.xml");
+            var xml_root = compiler_xml.SelectSingleNode("compilers");
+            foreach (XmlNode sub_node in xml_root.ChildNodes)
+                LoadCompiler(sub_node);
+            
             if (CompilerList.Count == 0)
             {
                 Console.WriteLine("No compiler found, please check.");
@@ -40,6 +49,15 @@ namespace JudgeDaemon
             try
             {
                 CompilerList.Add(new T());
+            }
+            catch { }
+        }
+
+        static void LoadCompiler(XmlNode node)
+        {
+            try
+            {
+                CompilerList.Add(ICompiler.GetFromXml(node));
             }
             catch { }
         }

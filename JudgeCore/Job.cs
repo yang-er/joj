@@ -76,6 +76,7 @@ namespace JudgeCore
         /// <param name="id"></param>
         public JudgeResult Judge(int id)
         {
+            WriteDebugTimestamp();
             var ti = new TestInfo();
             try
             {
@@ -182,6 +183,8 @@ namespace JudgeCore
         /// <param name="o">评测器</param>
         public Job(ICompiler cl, List<IJudger> o)
         {
+            WriteDebugTimestamp();
+            WriteDebug("New judge job entered.");
             Compiler = cl;
             RunID = Guid.NewGuid();
             Judger = o;

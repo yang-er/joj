@@ -137,6 +137,7 @@ namespace JudgeCore
                 Arguments[sub.Attributes["name"].InnerText] = sub.InnerText;
 
             MasterPath = Replace(xml.SelectSingleNode("master").InnerText);
+            Arguments["Master"] = MasterPath;
 
             Options = new List<string>();
             foreach (XmlNode sub in xml.SelectSingleNode("options").ChildNodes)
@@ -153,6 +154,16 @@ namespace JudgeCore
                 IncludePath.Add(Replace(sub.InnerText));
         }
 
+        public static ICompiler GetFromXml(XmlNode node)
+        {
+            if (node.Name == "Msvc")
+                return new Compiler.Msvc(node);
+            else if (node.Name == "MinGW")
+                return new Compiler.MinGW(node);
+            else
+                throw new NotImplementedException("This kind Compiler not supported.");
+        }
+
         public override string ToString()
         {
             return CompilerName;
@@ -162,9 +173,9 @@ namespace JudgeCore
         {
             var proc = MakeProcess(ToolchainPath[0] + "\\" + main, args);
             proc.Start();
-            Console.WriteLine();
+            WriteDebug("");
             var val = proc.StandardError.ReadToEnd() + "\n" + proc.StandardOutput.ReadToEnd();
-            Console.WriteLine(val.Trim());
+            WriteDebug(val.Trim());
             return val;
         }
     }

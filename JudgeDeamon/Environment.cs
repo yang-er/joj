@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.IO;
+using static JudgeCore.Helper;
 
 namespace JudgeDaemon
 {
@@ -23,8 +24,9 @@ namespace JudgeDaemon
                 Console.WriteLine("Problem list loaded successfully.");
                 Console.WriteLine();
                 Console.WriteLine();
-                if (Directory.Exists("F:\\joj\\dest"))
-                    Environment.CurrentDirectory = "F:\\joj\\dest";
+                var judged_wd = Path.Combine(WorkingDirectory, "dest");
+                if (Directory.Exists(judged_wd))
+                    Environment.CurrentDirectory = judged_wd;
             }
             catch (MySqlException ex)
             {

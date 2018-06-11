@@ -20,8 +20,8 @@
   </toolchain>
   <library>
    <path>{Master}\lib\x64</path>
-   <path>{KitDir}\Lib\{winv}\ucrt\x64</path>
-   <path>{KitDir}\Lib\{winv}\um\x64</path>
+   <path>{KitDir}\Lib\{WinVer}\ucrt\x64</path>
+   <path>{KitDir}\Lib\{WinVer}\um\x64</path>
   </library>
   <include>
    <path>{Master}\include</path>

@@ -80,7 +80,7 @@ namespace JudgeCore.Compiler
 
         public Msvc(XmlNode root)
         {
-            LoadFromXml(root.SelectSingleNode("msvc"));
+            LoadFromXml(root);
             Test("cl.exe");
         }
     }

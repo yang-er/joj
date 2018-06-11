@@ -49,6 +49,11 @@ namespace JudgeCore
         public static void WriteDebug(string str) => writeDbg(str);
 
         /// <summary>
+        /// 写入调试时间戳
+        /// </summary>
+        public static void WriteDebugTimestamp() => writeDbg("[" + DateTime.Now.ToLongTimeString() + "]");
+
+        /// <summary>
         /// 创建内部进程，不受限制的那种
         /// </summary>
         /// <param name="filename">文件名</param>
