@@ -60,7 +60,7 @@ namespace JudgeDaemon
                 e.Cancel = true;
             };
             proc.OutputDataReceived += (sender, e) => Console.WriteLine(e.Data);
-            proc.ErrorDataReceived += (sender, e) => Debug.WriteLine(e.Data);
+            proc.ErrorDataReceived += (sender, e) => JudgeCore.Helper.WriteDebug(e.Data);
             proc.BeginErrorReadLine();
             proc.BeginOutputReadLine();
             proc.WaitForExit();
