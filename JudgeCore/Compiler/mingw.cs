@@ -14,7 +14,7 @@ namespace JudgeCore.Compiler
             string cl_args = "";
             Options.ForEach((str) => cl_args += $" {str}");
             cl_args += $" -c {file} -o{file_name}.o";
-            var cl = Helper.MakeProcess(ToolchainPath[0] + "\\g++.exe", cl_args);
+            var cl = MakeProcess(ToolchainPath[0] + "\\g++.exe", cl_args);
             var path_env = $"{MasterPath}\\bin;" + cl.StartInfo.Environment["PATH"];
             cl.StartInfo.Environment["PATH"] = path_env;
             ReadCompileResult(cl);
@@ -23,7 +23,7 @@ namespace JudgeCore.Compiler
             // Link
             string link_args = "";
             link_args += $" -o {file_name}.exe {file_name}.o";
-            var link = Helper.MakeProcess(ToolchainPath[0] + "\\g++.exe", link_args);
+            var link = MakeProcess(ToolchainPath[0] + "\\g++.exe", link_args);
             link.StartInfo.Environment["PATH"] = path_env;
             ReadCompileResult(link);
             if (ExitCode != 0) return false;
@@ -37,6 +37,7 @@ namespace JudgeCore.Compiler
             Test("gcc.exe", "--version");
         }
 
+        [Obsolete("This kind of access is not flexible", true)]
         public MinGW()
         {
             MasterPath = "C:\\MinGW";

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -9,6 +8,9 @@ using static JudgeCore.Helper;
 
 namespace JudgeCore
 {
+    /// <summary>
+    /// 提供编译器对应方法
+    /// </summary>
     public abstract class ICompiler
     {
         /// <summary>
@@ -55,6 +57,11 @@ namespace JudgeCore
         /// 进程退出代码
         /// </summary>
         public int ExitCode { get; protected set; } = 0;
+
+        /// <summary>
+        /// XML 中的编译器参数
+        /// </summary>
+        public NameValueCollection Arguments { get; set; }
 
         /// <summary>
         /// 读取编译器进程的输出
@@ -116,8 +123,11 @@ namespace JudgeCore
         /// <returns>是否编译成功</returns>
         public abstract bool Compile(string file);
         
-        internal ICompiler() { }
-
+        /// <summary>
+        /// XML 参数转化为实际值
+        /// </summary>
+        /// <param name="inn">输入的字符串</param>
+        /// <returns>输出</returns>
         private string Replace(string inn)
         {
             if (Arguments is null) return inn;
@@ -126,8 +136,10 @@ namespace JudgeCore
             return inn;
         }
 
-        private NameValueCollection Arguments { get; set; }
-
+        /// <summary>
+        /// 从 XML 中加载编译器信息
+        /// </summary>
+        /// <param name="xml">XML节点</param>
         protected void LoadFromXml(XmlNode xml)
         {
             CompilerName = xml.SelectSingleNode("name").InnerText;
@@ -154,6 +166,13 @@ namespace JudgeCore
                 IncludePath.Add(Replace(sub.InnerText));
         }
 
+        /// <summary>
+        /// 从对应 XML 节点中选择编译器。
+        /// </summary>
+        /// <param name="node">XML 节点</param>
+        /// <returns>编译器实例</returns>
+        /// <exception cref="NotImplementedException" />
+        /// <exception cref="FileNotFoundException" />
         public static ICompiler GetFromXml(XmlNode node)
         {
             if (node.Name == "Msvc")
@@ -164,11 +183,21 @@ namespace JudgeCore
                 throw new NotImplementedException("This kind Compiler not supported.");
         }
 
+        /// <summary>
+        /// 返回编译器的表示串
+        /// </summary>
+        /// <returns>编译器名称</returns>
         public override string ToString()
         {
             return CompilerName;
         }
 
+        /// <summary>
+        /// 测试编译器是否可用
+        /// </summary>
+        /// <param name="main">主程序名称</param>
+        /// <param name="args">传入参数</param>
+        /// <returns>调用结果</returns>
         protected string Test(string main, string args = "")
         {
             var proc = MakeProcess(ToolchainPath[0] + "\\" + main, args);
@@ -177,6 +206,18 @@ namespace JudgeCore
             var val = proc.StandardError.ReadToEnd() + "\n" + proc.StandardOutput.ReadToEnd();
             WriteDebug(val.Trim());
             return val;
+        }
+        
+        /// <summary>
+        /// 创建编译器进程实例
+        /// </summary>
+        /// <param name="filename">编译器文件</param>
+        /// <param name="arguments">编译器参数</param>
+        /// <returns>进程实例</returns>
+        protected SandboxProcess MakeProcess(string filename, string arguments = "")
+        {
+            WriteDebug(filename + " " + arguments);
+            return SandboxProcess.Create(filename, arguments, true, true);
         }
     }
 }

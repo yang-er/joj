@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -15,7 +16,7 @@ namespace JudgeCore.Compiler
             Options.ForEach((str) => cl_args += $" {str}");
             IncludePath.ForEach((str) => cl_args += $" /I\"{str}\"");
             cl_args += $" /c {file} /Fo{file_name}.obj";
-            var cl = Helper.MakeProcess(ToolchainPath[0] + "\\cl.exe", cl_args);
+            var cl = MakeProcess(ToolchainPath[0] + "\\cl.exe", cl_args);
             ReadCompileResult(cl);
             if (ExitCode != 0) return false;
 
@@ -23,13 +24,20 @@ namespace JudgeCore.Compiler
             string link_args = " " + Options[0];
             LibraryPath.ForEach((str) => link_args += $" /LIBPATH:\"{str}\"");
             link_args += $" /out:{file_name}.exe {file_name}.obj";
-            var link = Helper.MakeProcess(ToolchainPath[0] + "\\link.exe", link_args);
+            var link = MakeProcess(ToolchainPath[0] + "\\link.exe", link_args);
             ReadCompileResult(link);
             if (ExitCode != 0) return false;
 
             return true;
         }
 
+        public Msvc(XmlNode root)
+        {
+            LoadFromXml(root);
+            Test("cl.exe");
+        }
+
+        [Obsolete("This kind of access is not flexible", true)]
         public Msvc()
         {
             var vsdir = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\";
@@ -76,12 +84,6 @@ namespace JudgeCore.Compiler
             };
 
             CompilerName = $"Microsoft Visual C++ Compiler v{vcv}";
-        }
-
-        public Msvc(XmlNode root)
-        {
-            LoadFromXml(root);
-            Test("cl.exe");
         }
     }
 }

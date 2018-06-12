@@ -52,17 +52,5 @@ namespace JudgeCore
         /// 写入调试时间戳
         /// </summary>
         public static void WriteDebugTimestamp() => writeDbg("[" + DateTime.Now.ToLongTimeString() + "]");
-
-        /// <summary>
-        /// 创建内部进程，不受限制的那种
-        /// </summary>
-        /// <param name="filename">文件名</param>
-        /// <param name="arguments">参数</param>
-        /// <returns>等待启动的进程</returns>
-        public static SandboxProcess MakeProcess(string filename, string arguments = "")
-        {
-            WriteDebug(filename + " " + arguments);
-            return SandboxProcess.Create(filename, arguments, true, true);
-        }
     }
 }

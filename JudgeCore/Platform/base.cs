@@ -7,6 +7,9 @@ using static JudgeCore.Helper;
 
 namespace JudgeCore
 {
+    /// <summary>
+    /// 沙盒进程
+    /// </summary>
     public class SandboxProcess
     {
         private Process inside;

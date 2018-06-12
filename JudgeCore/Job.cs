@@ -76,7 +76,6 @@ namespace JudgeCore
         /// <param name="id"></param>
         public JudgeResult Judge(int id)
         {
-            WriteDebugTimestamp();
             var ti = new TestInfo();
             try
             {
