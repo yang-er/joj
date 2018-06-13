@@ -110,13 +110,13 @@ namespace JudgeCore
         public static SandboxProcess Create(string file, string args = "", bool stderr = false, bool stdin = false, bool cd = false)
         {
             if (!File.Exists(file)) return null;
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             var ret = new SandboxProcess();
             ret.info.RedirectStandardOutput = true;
-            ret.info.StandardOutputEncoding = Encoding.GetEncoding(936);
+            ret.info.StandardOutputEncoding = Console.Out.Encoding;
             ret.info.RedirectStandardError = stderr;
-            if (stderr) ret.info.StandardErrorEncoding = Encoding.GetEncoding(936);
+            if (stderr) ret.info.StandardErrorEncoding = Console.Error.Encoding;
             ret.info.RedirectStandardInput = stdin;
             ret.info.CreateNoWindow = true;
             ret.info.UseShellExecute = false;

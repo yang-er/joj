@@ -9,6 +9,8 @@ namespace JudgeDaemon
         static void Main(string[] args)
         {
             Console.Title = "JLU Online Judge Daemon";
+            JudgeCore.Helper.WriteDebugTimestamp();
+            JudgeCore.Helper.WriteDebug("Welcome to JLU Online Judge Daemon.\n");
             if (args.Length == 1 && args[0] == "acled")
             {
                 MainACLed();

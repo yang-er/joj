@@ -104,16 +104,14 @@ namespace JudgeCore
 
                 // Judge extra info
                 ti.Time = proc.TotalTime;
-                WriteDebug($"Runtime: {ti.Time}ms");
                 if (ti.Time >= TimeLimit)
                     ti.Result = JudgeResult.TimeLimitExceeded;
                 ti.Memory = (long)proc.MaxMemory;
-                WriteDebug($"Memory: {ti.Memory / 1024}kb");
                 if (ti.Memory > MemoryLimit << 20)
                     ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = proc.ExitCode;
-                WriteDebug("ExitCode: 0x" + ti.ExitCode.ToString("x"));
                 if (ti.ExitCode != 0 && ti.ExitCode != -1 && ti.ExitCode != -2) ti.Result = JudgeResult.RuntimeError;
+                WriteDebug($"Runtime: {ti.Time}ms, Memory: {ti.Memory / 1024}kb, ExitCode: 0x" + ti.ExitCode.ToString("x"));
             }
             catch (Exception ex)
             {

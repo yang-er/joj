@@ -51,6 +51,6 @@ namespace JudgeCore
         /// <summary>
         /// 写入调试时间戳
         /// </summary>
-        public static void WriteDebugTimestamp() => writeDbg("[" + DateTime.Now.ToLongTimeString() + "]");
+        public static void WriteDebugTimestamp() => writeDbg("[" + DateTime.Now.ToString() + "]");
     }
 }

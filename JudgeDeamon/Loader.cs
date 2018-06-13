@@ -24,24 +24,17 @@ namespace JudgeDaemon
 
         static void LoadCompilers()
         {
-            if (!File.Exists("compilers.xml"))
-            {
-                Console.WriteLine("No compiler found, please check.");
-                throw new Exception("No compiler found, please check.");
-            }
-
             var compiler_xml = new XmlDocument();
             compiler_xml.Load("compilers.xml");
             var xml_root = compiler_xml.SelectSingleNode("compilers");
             foreach (XmlNode sub_node in xml_root.ChildNodes)
                 LoadCompiler(sub_node);
-            
+            Helper.WriteDebug("");
+
             if (CompilerList.Count == 0)
             {
-                Console.WriteLine("No compiler found, please check.");
-                throw new Exception("No compiler found, please check.");
+                throw new NotImplementedException("No compiler found, please check.");
             }
-            Console.WriteLine();
         }
 
         static void LoadCompiler<T>() where T : ICompiler, new()

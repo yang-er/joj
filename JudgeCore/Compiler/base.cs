@@ -200,10 +200,10 @@ namespace JudgeCore
         /// <returns>调用结果</returns>
         protected string Test(string main, string args = "")
         {
+            WriteDebug("");
             var proc = MakeProcess(ToolchainPath[0] + "\\" + main, args);
             proc.Start();
-            WriteDebug("");
-            var val = proc.StandardError.ReadToEnd() + "\n" + proc.StandardOutput.ReadToEnd();
+            var val = proc.StandardError.ReadToEnd() + proc.StandardOutput.ReadToEnd();
             WriteDebug(val.Trim());
             return val;
         }
