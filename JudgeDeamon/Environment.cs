@@ -12,7 +12,8 @@ namespace JudgeDaemon
 
         static void Init()
         {
-            MySqlConnection = new MySqlConnection("server=localhost;User Id=root;password=root;Database=judge;SSLMode=none;Charset=utf8");
+            WorkingDirectory = WorkDir;
+            MySqlConnection = new MySqlConnection(SqlConnect);
             MySqlConnection.Open();
             TotalQueries++;
             Console.Error.WriteLine("MySQL connected successfully.");

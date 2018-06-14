@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 
 namespace JudgeCore
 {
@@ -18,15 +16,6 @@ namespace JudgeCore
                 writeDbg = Console.Error.WriteLine;
             else
                 writeDbg = (str) => Debug.WriteLine(str);
-
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                WorkingDirectory = "/usr/judge/";
-            }
-            else
-            {
-                WorkingDirectory = "F:\\joj";
-            }
         }
 
         #endregion
@@ -34,8 +23,8 @@ namespace JudgeCore
         /// <summary>
         /// 工作目录
         /// </summary>
-        public static string WorkingDirectory { get; private set; }
-
+        public static string WorkingDirectory { get; set; }
+        
         /// <summary>
         /// 输出调试信息的函数
         /// </summary>

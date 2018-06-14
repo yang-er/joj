@@ -8,7 +8,7 @@ namespace JudgeDaemon
 {
     partial class Program
     {
-        static readonly List<ICompiler> CompilerList = new List<ICompiler>();
+        static readonly Dictionary<int, ICompiler> CompilerList = new Dictionary<int, ICompiler>();
         static readonly Dictionary<int, Problem> Problems = new Dictionary<int, Problem>();
 
         static void LoadProblems()
@@ -37,11 +37,12 @@ namespace JudgeDaemon
             }
         }
 
+        [Obsolete("Old fashioned way", true)]
         static void LoadCompiler<T>() where T : ICompiler, new()
         {
             try
             {
-                CompilerList.Add(new T());
+                CompilerList.Add(CompilerList.Count, new T());
             }
             catch { }
         }
@@ -50,7 +51,7 @@ namespace JudgeDaemon
         {
             try
             {
-                CompilerList.Add(ICompiler.GetFromXml(node));
+                CompilerList.Add(int.Parse(node.SelectSingleNode("id").InnerText), ICompiler.GetFromXml(node));
             }
             catch { }
         }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <compilers>
  <Msvc>
+  <id>1</id>
   <name>Microsoft Visual C++ Compiler v19.14.26429.4</name>
   <args>
    <arg name="VSDir">C:\Program Files (x86)\Microsoft Visual Studio\2017\Community</arg>
@@ -29,6 +30,7 @@
   </include>
  </Msvc>
  <MinGW>
+  <id>2</id>
   <name>MinGW Toolchain v6.3.0</name>
   <args>
    <arg name="Ver">6.3.0</arg>

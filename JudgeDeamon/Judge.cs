@@ -14,7 +14,7 @@ namespace JudgeDaemon
         static void JudgeQueue()
         {
             var command = MySqlConnection.CreateCommand();
-            command.CommandText = "select count(1) from `submission` where `status`=8";
+            command.CommandText = $"select count(1) from `submission` where `status`='8' and `server`='{ServerID}'";
             TotalQueries++;
             long all = (long)command.ExecuteScalar();
 
@@ -28,7 +28,7 @@ namespace JudgeDaemon
 
             if (all > 0)
             {
-                command.CommandText = "select `runid` from `submission` where `status`=8";
+                command.CommandText = $"select `runid` from `submission` where `status`='8' and `server`='{ServerID}'";
                 TotalQueries++;
                 var vlist = command.ExecuteReader();
                 while (vlist.Read())

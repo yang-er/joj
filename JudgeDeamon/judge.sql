@@ -26,7 +26,7 @@ CREATE TABLE `code` (
   `code` varchar(16384) NOT NULL,
   `lang` int(11) NOT NULL,
   `ce` varchar(4096) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `details` (
   `testid` int(11) NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE `details` (
   `exemem` int(11) NOT NULL,
   `exetime` int(11) NOT NULL,
   `exitcode` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `submission` (
   `runid` int(11) NOT NULL,
@@ -48,8 +48,9 @@ CREATE TABLE `submission` (
   `codelen` int(11) NOT NULL,
   `lang` int(11) NOT NULL,
   `ip` varchar(20) NOT NULL,
+  `server` tinyint NOT NULL DEFAULT 0,
   `grade` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `code`
   ADD PRIMARY KEY (`runid`);
@@ -59,7 +60,8 @@ ALTER TABLE `details`
   ADD KEY `runid` (`runid`);
 
 ALTER TABLE `submission`
-  ADD PRIMARY KEY (`runid`);
+  ADD PRIMARY KEY (`runid`),
+  ADD KEY `server` (`server`);
 
 ALTER TABLE `details`
   MODIFY `testid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
