@@ -59,6 +59,11 @@ namespace JudgeCore
         public int ExitCode { get; protected set; } = 0;
 
         /// <summary>
+        /// 文件后缀名
+        /// </summary>
+        public string Appendix { get; protected set; } = ".exe";
+
+        /// <summary>
         /// XML 中的编译器参数
         /// </summary>
         public NameValueCollection Arguments { get; set; }
@@ -218,6 +223,32 @@ namespace JudgeCore
         {
             WriteDebug(filename + " " + arguments);
             return SandboxProcess.Create(filename, arguments, true, true);
+        }
+
+        /// <summary>
+        /// 设置测评进程的参数
+        /// </summary>
+        /// <param name="proc">测评进程</param>
+        public virtual void SetJudgeEnv(SandboxProcess proc) { }
+
+        /// <summary>
+        /// 创建评测进程
+        /// </summary>
+        /// <param name="guid">唯一标识符</param>
+        /// <returns>评测进程</returns>
+        public SandboxProcess CreateJudgeProcess(Guid guid)
+        {
+            return CreateJudgeProcess(guid.ToString("D"));
+        }
+
+        /// <summary>
+        /// 创建评测进程
+        /// </summary>
+        /// <param name="filename">文件名称</param>
+        /// <returns>评测进程</returns>
+        public virtual SandboxProcess CreateJudgeProcess(string filename)
+        {
+            return SandboxProcess.Create(filename + Appendix, stdin: true, cd: true);
         }
     }
 }

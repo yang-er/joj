@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<core>
+ <server_id>1</server_id>
+ <mysql>server=localhost;User Id=root;password=root;Database=judge;SSLMode=none;Charset=utf8</mysql>
+ <platform>Win32NT</platform>
+ <workdir>F:\joj</workdir>
+ <show_log>true</show_log>
+</core>

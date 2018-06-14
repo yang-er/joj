@@ -22,22 +22,15 @@ namespace JudgeCore
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 WorkingDirectory = "/usr/judge/";
-                Appedix = ".out";
             }
             else
             {
                 WorkingDirectory = "F:\\joj";
-                Appedix = ".exe";
             }
         }
 
         #endregion
-        
-        /// <summary>
-        /// 文件名后缀
-        /// </summary>
-        public static string Appedix { get; private set; }
-
+       
         /// <summary>
         /// 工作目录
         /// </summary>

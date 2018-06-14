@@ -37,6 +37,13 @@ namespace JudgeCore.Compiler
             Test("gcc.exe", "--version");
         }
 
+        public override SandboxProcess CreateJudgeProcess(string filename)
+        {
+            var ret = base.CreateJudgeProcess(filename);
+            ret.StartInfo.Environment["PATH"] = ToolchainPath[0] + ";";
+            return ret;
+        }
+        
         [Obsolete("This kind of access is not flexible", true)]
         public MinGW()
         {
