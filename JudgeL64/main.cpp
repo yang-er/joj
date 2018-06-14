@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <assert.h>
+#include <errno.h>
 
 #define IGNORE_ESOL   //ignore the ending space char of lines while comparing
 #define STD_MB 1048576LL
@@ -44,7 +45,7 @@
 /**/
 
 #define USERNAME "judge"
-#define USERID 1001
+#define USERID 1000
 
 const char *HELP = 
 "Judge Sandbox version 1.0\n"
@@ -60,7 +61,7 @@ const char *HELP =
 "NOTICE: All ENV will be passed!\n"
 "        UID will be set to " USERNAME "'s\n"
 "        NEED all param in order.\n"
-"\n";
+;
 
 // Switch the uid to `USERID`
 inline bool switch_uid()
@@ -119,7 +120,7 @@ bool set_ptrace()
 // Setup chroot
 bool set_chroot()
 {
-	chroot(".");
+	chroot("/mnt/c/Users/tlylz/Source/Repos/joj/JudgeL64");
 	return true;
 }
 
@@ -127,18 +128,18 @@ bool set_chroot()
 bool solve_arg(char *arg)
 {
 	ulong tmp;
-	printf("Solving %s..\n", arg);
+	//printf("Solving %s..\n", arg);
 
 	// Detect whether flags
 	if (strcmp(arg, "-ptrace") == 0)
 		return set_ptrace();
 	else if (strcmp(arg, "-chroot") == 0)
 		return set_chroot();
-	else if (sscanf(arg, "-m%u", &tmp) == 1)
+	else if (sscanf(arg, "-m%lu", &tmp) == 1)
 		return limit_memory(tmp);
-	else if (sscanf(arg, "-t%u", &tmp) == 1)
+	else if (sscanf(arg, "-t%lu", &tmp) == 1)
 		return limit_time(tmp);
-	else if (sscanf(arg, "-p%u", &tmp) == 1)
+	else if (sscanf(arg, "-p%lu", &tmp) == 1)
 		return limit_proc(tmp);
 
 	// Indicates left things are args
@@ -156,7 +157,7 @@ int main(int argc, char **argv)
 
 	if (argc <= 1)
 	{
-		printf(HELP);
+		puts(HELP);
 		return 0;
 	}
 
@@ -169,6 +170,5 @@ int main(int argc, char **argv)
 	for (int i = 0; i < new_argc - 1; i++)
 		new_argv[i] = argv[argf + i];
 	new_argv[new_argc - 1] = NULL;
-	execv(new_argv[0], new_argv);
-    return 0;
+	return execv(new_argv[0], new_argv);
 }
