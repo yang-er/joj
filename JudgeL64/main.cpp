@@ -1,55 +1,9 @@
-// JudgeL64
-// Copied from HUSTOJ
-// GNU GPLv2
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <time.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <sys/wait.h>
-#include <sys/ptrace.h>
-#include <sys/types.h>
-#include <sys/user.h>
-#include <sys/syscall.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/signal.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <assert.h>
-#include <errno.h>
-
-#define IGNORE_ESOL   //ignore the ending space char of lines while comparing
-#define STD_MB 1048576LL
-#define STD_T_LIM 2
-#define STD_F_LIM (STD_MB<<5)  //default file size limit 32m ,2^5=32
-#define STD_M_LIM (STD_MB<<7)  //default memory limit 128m ,2^7=128
-#define BUFFER_SIZE 5120       //default size of char buffer 5120 bytes
-
-#ifdef __i386
-#define REG_SYSCALL orig_eax
-#define REG_RET eax
-#define REG_ARG0 ebx
-#define REG_ARG1 ecx
-#else
-#define REG_SYSCALL orig_rax
-#define REG_RET rax
-#define REG_ARG0 rdi
-#define REG_ARG1 rsi
-#endif
-
-/**/
-
-#define USERNAME "judge"
-#define USERID 1000
+#include "stdafx.h"
 
 const char *HELP = 
 "Judge Sandbox version 1.0\n"
 "usage: JudgeL64 [OPTIONS] FILE\n"
+"       JudgeL64 -init\n"
 "\n"
 "Avaliable Options: \n"
 "  -m128    128M Memory Limit\n"
@@ -63,68 +17,6 @@ const char *HELP =
 "        NEED all param in order.\n"
 ;
 
-// Switch the uid to `USERID`
-inline bool switch_uid()
-{
-	setreuid(USERID, USERID);
-	uid_t r, e, s;
-	getresuid(&r, &e, &s);
-	if (r && e && s) return true;
-	else exit(-1);
-}
-
-// Set Memory Limit
-inline bool limit_memory(rlim_t mem)
-{
-	rlimit limits;
-	limits.rlim_cur = limits.rlim_max = mem << 20;
-	int ret = setrlimit(RLIMIT_DATA, &limits);
-	if (ret != 0) exit(ret);
-	ret = setrlimit(RLIMIT_STACK, &limits);
-	if (ret != 0) exit(ret);
-	limits.rlim_cur = limits.rlim_max = 0;
-	ret = setrlimit(RLIMIT_AS, &limits);
-	if (ret == 0) return true;
-	else exit(ret);
-}
-
-// Set CPU Time Limit
-inline bool limit_time(rlim_t time)
-{
-	rlimit limits;
-	limits.rlim_cur = limits.rlim_max = time;
-	int ret = setrlimit(RLIMIT_CPU, &limits);
-	if (ret == 0) return true;
-	else exit(ret);
-}
-
-// Set Process Limit
-inline bool limit_proc(rlim_t proc)
-{
-	rlimit limits;
-	limits.rlim_cur = limits.rlim_max = proc;
-	int ret = setrlimit(RLIMIT_NPROC, &limits);
-	if (ret != 0) exit(ret);
-	limits.rlim_cur = limits.rlim_max = 0;
-	ret = setrlimit(RLIMIT_CORE, &limits);
-	if (ret == 0) return true;
-	else exit(ret);
-}
-
-// Setup PTRACE
-bool set_ptrace()
-{
-	return false;
-}
-
-// Setup chroot
-bool set_chroot()
-{
-	chroot("/mnt/c/Users/tlylz/Source/Repos/joj/JudgeL64");
-	return true;
-}
-
-// Solve arguments
 bool solve_arg(char *arg)
 {
 	ulong tmp;
