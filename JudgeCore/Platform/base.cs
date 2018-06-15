@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.IO.Pipes;
 using static JudgeCore.Helper;
 
 namespace JudgeCore
@@ -172,6 +173,10 @@ namespace JudgeCore
             }
             else
             {
+                var stderr_pipe = new AnonymousPipeServerStream(PipeDirection.In);
+                var stdin_pipe = new AnonymousPipeServerStream(PipeDirection.Out);
+                var stdout_pipe = new AnonymousPipeServerStream(PipeDirection.In);
+                stdout_pipe.ClientSafePipeHandle.DangerousGetHandle();
                 throw new NotImplementedException();
             }
         }

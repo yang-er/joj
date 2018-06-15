@@ -45,6 +45,14 @@ extern char *workdir;
 
 bool kill_ptrace();
 
+pid_t setup_sandbox(
+    rlim_t mem, rlim_t time, rlim_t proc,
+    bool to_chroot, const char *chdir,
+    bool to_ptrace,
+    const char *argv,
+    FILE **std_in, FILE **std_out, FILE **std_err
+);
+
 
 /****************************
  *    Sandbox Setting up    *
@@ -71,7 +79,7 @@ bool set_ptrace();
 void watch_ptrace();
 
 // Setup chroot
-bool set_chroot();
+bool set_chroot(const char *to_chdir);
 
 // Solve arguments
 bool solve_arg(char *arg);

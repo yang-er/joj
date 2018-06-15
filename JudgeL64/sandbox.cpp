@@ -61,9 +61,9 @@ void watch_ptrace()
 
 }
 
-bool set_chroot()
+bool set_chroot(const char *to_chdir)
 {
 	chroot("/home/judge");
-	chdir("/dest");
+	chdir(to_chdir ? to_chdir : "/");
 	return true;
 }
