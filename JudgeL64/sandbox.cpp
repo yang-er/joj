@@ -53,7 +53,7 @@ bool set_ptrace()
 {
 	use_ptrace = true;
 	ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-	return false;
+	return true;
 }
 
 bool set_chroot(const char *to_chdir)
