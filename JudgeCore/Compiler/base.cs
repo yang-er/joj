@@ -184,6 +184,8 @@ namespace JudgeCore
                 return new Compiler.Msvc(node);
             else if (node.Name == "MinGW")
                 return new Compiler.MinGW(node);
+            else if (node.Name == "GNU")
+                return new Compiler.GNU(node);
             else
                 throw new NotImplementedException("This kind Compiler not supported.");
         }

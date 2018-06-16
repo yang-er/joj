@@ -22,7 +22,7 @@ namespace JudgeCore.Compiler
 
             // Link
             string link_args = "";
-            link_args += $" -o {file_name}.exe {file_name}.o";
+            link_args += $" -o {file_name}.exe {file_name}.o -lm";
             var link = MakeProcess(ToolchainPath[0] + "\\g++.exe", link_args);
             link.StartInfo.Environment["PATH"] = path_env;
             ReadCompileResult(link);

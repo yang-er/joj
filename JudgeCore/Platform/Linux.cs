@@ -29,8 +29,55 @@ namespace JudgeCore.Platform
         
         public override void Start(StringBuilder _out = null, StringBuilder _err = null)
         {
-            throw new NotImplementedException();
             pid_t = inside.Id;
+            var tmp_args = StartInfo.Arguments;
+            var tmp_fn = StartInfo.FileName;
+            var ch_pt = info.RedirectStandardInput;
+
+            if (ch_pt)
+            {
+                StartInfo.WorkingDirectory = "/";
+                StartInfo.Arguments = $"-m{mem_l} -t{time_l/1000+1} -p{proc_l} -ptrace -chroot {tmp_fn} {tmp_args}";
+                StartInfo.FileName = "/bin/JudgeL64.out";
+            }
+            else
+            {
+                StartInfo.Arguments = "-p1 " + tmp_fn + " " + tmp_args;
+                StartInfo.FileName = "/usr/judge/bin/JudgeL64.out";
+            }
+
+            inside = Process.Start(StartInfo);
+            StartInfo.FileName = tmp_fn;
+            StartInfo.Arguments = tmp_args;
+
+            if (info.RedirectStandardInput)
+                stdin = inside.StandardInput;
+
+            if (info.RedirectStandardError)
+            {
+                if (_err is null)
+                {
+                    stderr = inside.StandardError;
+                }
+                else
+                {
+                    inside.ErrorDataReceived += (s, e) => StreamPipe(_err, e);
+                    inside.BeginErrorReadLine();
+                }
+            }
+
+            if (info.RedirectStandardOutput)
+            {
+                if (_out is null)
+                {
+                    stdout = inside.StandardOutput;
+                }
+                else
+                {
+                    inside.OutputDataReceived += (s, e) => StreamPipe(_out, e);
+                    inside.BeginOutputReadLine();
+                }
+            }
         }
 
         public override bool WaitForExit(int len = -1) => inside.WaitForExit(len);
