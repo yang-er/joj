@@ -20,6 +20,18 @@
 #include <assert.h>
 #include <errno.h>
 
+#define DLL extern "C"
+
+/****************************
+ *    Common Definitions    *
+ ****************************/
+// Env adapt
+#define USERNAME "judge"
+#define USERID 1001
+#define USERHOME "/home/" USERNAME
+extern char *workdir;
+
+// Register
 #ifdef __i386
 #define REG_SYSCALL orig_eax
 #define REG_RET eax
@@ -32,25 +44,42 @@
 #define REG_ARG1 rsi
 #endif
 
-// Common Definitions
-#define USERNAME "judge"
-#define USERID 1001
-#define USERHOME "/home/" USERNAME
-extern char *workdir;
-
+// Status
+#define JOJ_AC  0
+#define JOJ_WA  1
+#define JOJ_TLE 2
+#define JOJ_MLE 3
+#define JOJ_OLE 4
+#define JOJ_RE  5
+#define JOJ_CE  6
+#define JOJ_PE  7
+#define JOJ_PND 8
+#define JOJ_RUN 9
+#define JOJ_UE  10
 
 /****************************
 *   Environment Prepares   *
 ****************************/
 
-bool kill_ptrace();
+// Create a pipe
+DLL int create_pipe(int *fd, int std);
 
-pid_t setup_sandbox(
+// Watch for PTRACE
+DLL void watch_sandbox(
+	rlim_t mem, rlim_t time, pid_t app,
+	int *max_mem, int *max_time, int *exitcode, bool pf
+);
+
+// Unset sandbox
+DLL void unset_sandbox(pid_t app);
+
+// Setup a sandbox
+DLL pid_t setup_sandbox(
     rlim_t mem, rlim_t time, rlim_t proc,
     bool to_chroot, const char *chdir,
     bool to_ptrace,
-    const char *argv,
-    FILE **std_in, FILE **std_out, FILE **std_err
+	const char *fn, const char *argv,
+	int *std_in, int *std_out, int *std_err
 );
 
 
@@ -58,28 +87,25 @@ pid_t setup_sandbox(
  *    Sandbox Setting up    *
  ****************************/
 
-extern bool use_ptrace;
+DLL bool use_ptrace;
 
 // Switch the uid to `USERID`
-bool switch_uid();
+DLL bool switch_uid();
 
 // Set Memory Limit
-bool limit_memory(rlim_t mem);
+DLL bool limit_memory(rlim_t mem);
 
 // Set CPU Time Limit
-bool limit_time(rlim_t time);
+DLL bool limit_time(rlim_t time);
 
 // Set Process Limit
-bool limit_proc(rlim_t proc);
+DLL bool limit_proc(rlim_t proc);
 
 // Setup PTRACE
-bool set_ptrace();
-
-// Watch for PTRACE
-void watch_ptrace();
+DLL bool set_ptrace();
 
 // Setup chroot
-bool set_chroot(const char *to_chdir);
+DLL bool set_chroot(const char *to_chdir);
 
 // Solve arguments
-bool solve_arg(char *arg);
+DLL bool solve_arg(char *arg);

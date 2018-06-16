@@ -59,18 +59,6 @@ namespace JudgeCore
         public string CompileInfo;
         
         /// <summary>
-        /// 检查运行时间
-        /// </summary>
-        /// <param name="pro">运行的进程</param>
-        /// <param name="ti">测试结果</param>
-        /// <param name="tle">是否超时</param>
-        private void CheckRuntime(SandboxProcess pro, ref TestInfo ti, ref bool tle)
-        {
-            while (!pro.HasExited && !pro.OutOfLimit) ;
-            if (!pro.HasExited) pro.Kill();
-        }
-
-        /// <summary>
         /// 对某一次进行评价
         /// </summary>
         /// <param name="id"></param>
@@ -91,8 +79,7 @@ namespace JudgeCore
                 proc.Setup(MemoryLimit, TimeLimit, 1);
                 proc.Start();
                 
-                bool tle = false;
-                Task.Run(() => CheckRuntime(proc, ref ti, ref tle));
+                Task.Run(() => proc.Watch());
                 Task.Run(() => Judger[id].Input(proc.StandardInput));
                 ti.Result = Judger[id].Judge(proc.StandardOutput);
                 proc.WaitForExit();

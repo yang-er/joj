@@ -26,7 +26,7 @@ bool solve_arg(char *arg)
 	if (strcmp(arg, "-ptrace") == 0)
 		return set_ptrace();
 	else if (strcmp(arg, "-chroot") == 0)
-		return set_chroot();
+		return set_chroot(NULL);
 	else if (sscanf(arg, "-m%lu", &tmp) == 1)
 		return limit_memory(tmp);
 	else if (sscanf(arg, "-t%lu", &tmp) == 1)
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	int argf = 1;
 	for (; argf <= argc && solve_arg(argv[argf]); argf++);
 	switch_uid();
-	
+
 	int new_argc = argc - argf + 2;
 	char *new_argv[new_argc];
 	for (int i = 0; i < new_argc - 1; i++)

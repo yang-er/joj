@@ -64,9 +64,11 @@
     <ClCompile Include="environment.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sandbox.cpp" />
+    <ClCompile Include="trace_call.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="trace_call.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.IO.Pipes;
 using static JudgeCore.Helper;
 
 namespace JudgeCore
@@ -11,20 +10,21 @@ namespace JudgeCore
     /// <summary>
     /// 沙盒进程
     /// </summary>
-    public class SandboxProcess
+    public abstract class SandboxProcess
     {
-        private Process inside;
-        private ProcessStartInfo info;
-        private long mem_l;
-        private int time_l, proc_l;
-        private IntPtr job_obj;
-        private StreamReader stdout, stderr;
-        private StreamWriter stdin;
-
+        protected Process inside;
+        protected ProcessStartInfo info;
+        protected long mem_l;
+        protected int time_l, proc_l;
+        protected StreamReader stdout, stderr;
+        protected StreamWriter stdin;
+        protected abstract ulong MaxMemoryCore();
+        protected abstract int ExitCodeCore();
+        
         /// <summary>
         /// 退出状态码
         /// </summary>
-        public int ExitCode => inside.ExitCode;
+        public int ExitCode => ExitCodeCore();
 
         /// <summary>
         /// 是否已经退出
@@ -79,21 +79,17 @@ namespace JudgeCore
         /// <summary>
         /// 已经使用的最大内存
         /// </summary>
-        public ulong MaxMemory
-        {
-            get
-            {
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                    return WinNT.PeakProcessMemoryInfo(inside.Handle).ToUInt64();
-                else
-                    return (ulong)inside.PeakWorkingSet64;
-            }
-        }
+        public ulong MaxMemory => MaxMemoryCore();
+
+        /// <summary>
+        /// 监控进程状态
+        /// </summary>
+        public abstract void Watch();
 
         /// <summary>
         /// 是否超过沙盒的限制
         /// </summary>
-        public bool OutOfLimit => TotalTime >= TimeLimit || RunningTime >= TimeLimit * 10 || (long)MaxMemory > MemoryLimit << 20;
+        public abstract bool OutOfLimit();
 
         internal SandboxProcess()
         {
@@ -113,7 +109,11 @@ namespace JudgeCore
             if (!File.Exists(file)) return null;
             // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            var ret = new SandboxProcess();
+            SandboxProcess ret;
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+                ret = new Linux();
+            else
+                ret = new WinNT();
             ret.info.RedirectStandardOutput = true;
             ret.info.StandardOutputEncoding = Console.Out.Encoding;
             ret.info.RedirectStandardError = stderr;
@@ -135,58 +135,14 @@ namespace JudgeCore
         /// </summary>
         /// <param name="_err">如果异步流，则将stderr写入此</param>
         /// <param name="_out">如果异步流，则将stdout写入此</param>
-        public void Start(StringBuilder _out = null, StringBuilder _err = null)
-        {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                inside = Process.Start(info);
-                WinNT.AssignProcessToJobObject(job_obj, inside.Handle);
-
-                if (info.RedirectStandardInput)
-                    stdin = inside.StandardInput;
-
-                if (info.RedirectStandardError)
-                {
-                    if (_err is null)
-                    {
-                        stderr = inside.StandardError;
-                    }
-                    else
-                    {
-                        inside.ErrorDataReceived += (s, e) => StreamPipe(_err, e);
-                        inside.BeginErrorReadLine();
-                    }
-                }
-
-                if (info.RedirectStandardOutput)
-                {
-                    if (_out is null)
-                    {
-                        stdout = inside.StandardOutput;
-                    }
-                    else
-                    {
-                        inside.OutputDataReceived += (s, e) => StreamPipe(_out, e);
-                        inside.BeginOutputReadLine();
-                    }
-                }
-            }
-            else
-            {
-                var stderr_pipe = new AnonymousPipeServerStream(PipeDirection.In);
-                var stdin_pipe = new AnonymousPipeServerStream(PipeDirection.Out);
-                var stdout_pipe = new AnonymousPipeServerStream(PipeDirection.In);
-                stdout_pipe.ClientSafePipeHandle.DangerousGetHandle();
-                throw new NotImplementedException();
-            }
-        }
+        public abstract void Start(StringBuilder _out = null, StringBuilder _err = null);
 
         /// <summary>
         /// 引导异步流内容
         /// </summary>
         /// <param name="dest">目标</param>
         /// <param name="e">元数据</param>
-        private void StreamPipe(StringBuilder dest, DataReceivedEventArgs e)
+        protected void StreamPipe(StringBuilder dest, DataReceivedEventArgs e)
         {
             dest.AppendLine(e.Data);
             if (dest.Length > 4096)
@@ -195,7 +151,7 @@ namespace JudgeCore
                 Kill();
             }
         }
-        
+
         /// <summary>
         /// 设置沙盒参数
         /// </summary>
@@ -203,13 +159,11 @@ namespace JudgeCore
         /// <param name="cpu">CPU时间限制</param>
         /// <param name="pl">进程数量限制</param>
         /// <returns>无意义</returns>
-        public bool Setup(long mem, int time, int proc)
+        public virtual bool Setup(long mem, int time, int proc)
         {
             mem_l = mem;
             time_l = time;
             proc_l = proc;
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                job_obj = WinNT.SetupSandbox((uint)mem, (uint)time, (uint)proc);
             return true;
         }
 
@@ -218,34 +172,11 @@ namespace JudgeCore
         /// </summary>
         /// <param name="len">时间长度</param>
         /// <returns>是否退出</returns>
-        public bool WaitForExit(int len)
-        {
-            return inside.WaitForExit(len);
-        }
-
-        /// <summary>
-        /// 等待退出
-        /// </summary>
-        public void WaitForExit()
-        {
-            inside.WaitForExit();
-        }
-
+        public abstract bool WaitForExit(int len = -1);
+        
         /// <summary>
         /// 结束沙盒进程
         /// </summary>
-        public void Kill()
-        {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                if (job_obj == IntPtr.Zero) return;
-                WinNT.UnsetSandbox(job_obj);
-                job_obj = IntPtr.Zero;
-            }
-            else
-            {
-                inside.Kill();
-            }
-        }
+        public abstract void Kill();
     }
 }

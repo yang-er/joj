@@ -56,11 +56,6 @@ bool set_ptrace()
 	return false;
 }
 
-void watch_ptrace()
-{
-
-}
-
 bool set_chroot(const char *to_chdir)
 {
 	chroot("/home/judge");
