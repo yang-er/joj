@@ -11,10 +11,10 @@ namespace JudgeCore.Platform
     {
         private int pid_t, memp, timep, ec;
 
-        [DllImport("JudgeL64.out", EntryPoint = "watch_sandbox")]
+        [DllImport("JudgeL64.so", EntryPoint = "watch_sandbox")]
         public static extern void WatchSandbox(uint mem, uint time, int app, ref int max_mem, ref int max_time, ref int exitcode, bool pf);
 
-        [DllImport("JudgeL64.out", EntryPoint = "unset_sandbox")]
+        [DllImport("JudgeL64.so", EntryPoint = "unset_sandbox")]
         public static extern void UnsetSandbox(int app);
         
         public override void Kill()
@@ -29,24 +29,24 @@ namespace JudgeCore.Platform
         
         public override void Start(StringBuilder _out = null, StringBuilder _err = null)
         {
-            pid_t = inside.Id;
             var tmp_args = StartInfo.Arguments;
             var tmp_fn = StartInfo.FileName;
-            var ch_pt = info.RedirectStandardInput;
 
-            if (ch_pt)
+            if (PTrace)
             {
                 StartInfo.WorkingDirectory = "/";
                 StartInfo.Arguments = $"-m{mem_l} -t{time_l/1000+1} -p{proc_l} -ptrace -chroot {tmp_fn} {tmp_args}";
-                StartInfo.FileName = "/bin/JudgeL64.out";
+                StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
             else
             {
-                StartInfo.Arguments = "-p1 " + tmp_fn + " " + tmp_args;
-                StartInfo.FileName = "/usr/judge/bin/JudgeL64.out";
+                StartInfo.Arguments = $"-p{proc_l} {tmp_fn} {tmp_args}";
+                StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
 
+            Helper.WriteDebug(StartInfo.FileName + " " + StartInfo.Arguments);
             inside = Process.Start(StartInfo);
+            pid_t = inside.Id;
             StartInfo.FileName = tmp_fn;
             StartInfo.Arguments = tmp_args;
 
@@ -84,6 +84,13 @@ namespace JudgeCore.Platform
         protected override int ExitCodeCore() => ec;
         protected override ulong MaxMemoryCore() => (ulong)memp;
         public override void Watch() => WatchSandbox((uint)mem_l, (uint)time_l, pid_t, ref memp, ref timep, ref ec, false);
+
+        protected override double TotalTimeCore() => timep;
+
+        protected override double RunningTimeCore()
+        {
+            throw new NotImplementedException();
+        }
 
         public Linux()
         {

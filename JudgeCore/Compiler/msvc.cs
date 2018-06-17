@@ -33,6 +33,7 @@ namespace JudgeCore.Compiler
 
         public Msvc(XmlNode root)
         {
+            Appendix = ".exe";
             LoadFromXml(root);
             Test("cl.exe");
         }

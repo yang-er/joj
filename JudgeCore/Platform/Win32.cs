@@ -53,9 +53,9 @@ namespace JudgeCore.Platform
             }
         }
         
-        public override bool Setup(long mem, int time, int proc)
+        public override bool Setup(long mem, int time, int proc, bool trace)
         {
-            base.Setup(mem, time, proc);
+            base.Setup(mem, time, proc, trace);
             job_obj = SetupSandbox((uint)mem, (uint)time, (uint)proc);
             return true;
         }
@@ -99,6 +99,10 @@ namespace JudgeCore.Platform
             while (!HasExited && !OutOfLimit()) ;
             if (!HasExited) Kill();
         }
+
+        protected override double TotalTimeCore() => inside.UserProcessorTime.TotalMilliseconds;
+
+        protected override double RunningTimeCore() => (DateTime.Now - inside.StartTime).TotalMilliseconds;
 
         public WinNT()
         {

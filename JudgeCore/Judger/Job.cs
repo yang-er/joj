@@ -76,7 +76,7 @@ namespace JudgeCore
 
                 // Judge process
                 // Compiler.SetJudgeEnv(proc);
-                proc.Setup(MemoryLimit, TimeLimit, 1);
+                proc.Setup(MemoryLimit, TimeLimit, 1, true);
                 proc.Start();
                 
                 Task.Run(() => proc.Watch());
@@ -142,7 +142,7 @@ namespace JudgeCore
             else
                 proc.StartInfo.Environment["PATH"] = "";
             
-            proc.Setup(MemoryLimit, TimeLimit, 1);
+            proc.Setup(MemoryLimit, TimeLimit, 1, true);
             proc.Start();
             proc.StandardOutput.Close();
             proc.WaitForExit(1000);

@@ -20,6 +20,10 @@ namespace JudgeCore
         protected StreamWriter stdin;
         protected abstract ulong MaxMemoryCore();
         protected abstract int ExitCodeCore();
+        protected abstract double TotalTimeCore();
+        protected abstract double RunningTimeCore();
+
+        public bool PTrace { get; set; } = false;
         
         /// <summary>
         /// 退出状态码
@@ -69,12 +73,12 @@ namespace JudgeCore
         /// <summary>
         /// 运行总时间
         /// </summary>
-        public double TotalTime => inside.UserProcessorTime.TotalMilliseconds;
+        public double TotalTime => TotalTimeCore();
 
         /// <summary>
         /// 启动后的时间
         /// </summary>
-        public double RunningTime => (DateTime.Now - inside.StartTime).TotalMilliseconds;
+        public double RunningTime => RunningTimeCore();
 
         /// <summary>
         /// 已经使用的最大内存
@@ -106,8 +110,11 @@ namespace JudgeCore
         /// <returns>新的沙盒进程实例</returns>
         public static SandboxProcess Create(string file, string args = "", bool stderr = false, bool stdin = false, bool cd = false)
         {
-            if (!File.Exists(file)) return null;
-            // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            if (!File.Exists(file)) 
+            {
+                WriteDebug($"File doesn't exist: {file}");
+                return null;
+            }
 
             SandboxProcess ret;
             if (Environment.OSVersion.Platform == PlatformID.Unix)
@@ -159,11 +166,12 @@ namespace JudgeCore
         /// <param name="cpu">CPU时间限制</param>
         /// <param name="pl">进程数量限制</param>
         /// <returns>无意义</returns>
-        public virtual bool Setup(long mem, int time, int proc)
+        public virtual bool Setup(long mem, int time, int proc, bool trace = false)
         {
             mem_l = mem;
             time_l = time;
             proc_l = proc;
+            PTrace = trace;
             return true;
         }
 

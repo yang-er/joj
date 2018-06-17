@@ -61,7 +61,7 @@ namespace JudgeCore
         /// <summary>
         /// 文件后缀名
         /// </summary>
-        public string Appendix { get; protected set; } = ".exe";
+        public string Appendix { get; protected set; } = "";
 
         /// <summary>
         /// XML 中的编译器参数
@@ -208,7 +208,7 @@ namespace JudgeCore
         protected string Test(string main, string args = "")
         {
             WriteDebug("");
-            var proc = MakeProcess(ToolchainPath[0] + "\\" + main, args);
+            var proc = MakeProcess(Path.Combine(ToolchainPath[0], main), args);
             proc.Start();
             var val = proc.StandardError.ReadToEnd() + proc.StandardOutput.ReadToEnd();
             WriteDebug(val.Trim());
@@ -224,7 +224,9 @@ namespace JudgeCore
         protected SandboxProcess MakeProcess(string filename, string arguments = "")
         {
             WriteDebug(filename + " " + arguments);
-            return SandboxProcess.Create(filename, arguments, true, true);
+            var ret = SandboxProcess.Create(filename, arguments, true, true);
+            ret.Setup(128, 5, 10);
+            return ret;
         }
 
         /// <summary>

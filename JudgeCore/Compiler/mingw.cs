@@ -40,7 +40,8 @@ namespace JudgeCore.Compiler
         public override SandboxProcess CreateJudgeProcess(string filename)
         {
             var ret = base.CreateJudgeProcess(filename);
-            ret.StartInfo.Environment["PATH"] = ToolchainPath[0] + ";";
+            if (ret != null)
+                ret.StartInfo.Environment["PATH"] = ToolchainPath[0] + ";";
             return ret;
         }
         
@@ -48,6 +49,7 @@ namespace JudgeCore.Compiler
         public MinGW()
         {
             MasterPath = "C:\\MinGW";
+            Appendix = ".exe";
 
             // Compiler Options
             Options = new List<string>

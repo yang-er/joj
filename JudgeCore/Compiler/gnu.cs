@@ -32,14 +32,8 @@ namespace JudgeCore.Compiler
         public GNU(XmlNode xml)
         {
             LoadFromXml(xml);
+            Appendix = ".out";
             Test("gcc", "--version");
-        }
-
-        public override SandboxProcess CreateJudgeProcess(string filename)
-        {
-            var ret = base.CreateJudgeProcess(filename);
-            ret.StartInfo.Environment["PATH"] = ToolchainPath[0] + ";";
-            return ret;
         }
     }
 }
