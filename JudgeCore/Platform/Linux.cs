@@ -35,7 +35,7 @@ namespace JudgeCore.Platform
             if (PTrace)
             {
                 StartInfo.WorkingDirectory = "/";
-                StartInfo.Arguments = $"-m{mem_l} -t{time_l/1000+1} -p{proc_l} -ptrace -chroot {tmp_fn} {tmp_args}";
+                StartInfo.Arguments = $"-p{proc_l} -ptrace -chroot /dest/{tmp_fn} {tmp_args}";
                 StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
             else

@@ -130,6 +130,7 @@ void watch_sandbox(
 		{
 			ptrace(PTRACE_SETOPTIONS, app, NULL,
 				PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACEEXIT);
+			signal(SIGCHLD, SIG_IGN);
 			first = false;
 		}
 		
@@ -178,6 +179,8 @@ void watch_sandbox(
 			unset_sandbox(app);
 			break;
 		}
+
+		ptrace(PTRACE_SYSCALL, app, NULL, NULL);
 	}
 }
 
