@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using static JudgeCore.Helper;
 
 namespace JudgeCore
 {
@@ -96,11 +95,11 @@ namespace JudgeCore
                     ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = proc.ExitCode;
                 if (ti.ExitCode != 0 && ti.ExitCode != -1 && ti.ExitCode != -2) ti.Result = JudgeResult.RuntimeError;
-                WriteDebug($"Runtime: {ti.Time}ms, Memory: {ti.Memory / 1024}kb, ExitCode: 0x" + ti.ExitCode.ToString("x"));
+                Trace.WriteLine($"Runtime: {ti.Time}ms, Memory: {ti.Memory / 1024}kb, ExitCode: 0x" + ti.ExitCode.ToString("x"));
             }
             catch (Exception ex)
             {
-                WriteDebug(ex.ToString());
+                Trace.WriteLine(ex.ToString());
                 ti.Result = JudgeResult.RuntimeError;
             }
             finally
@@ -165,8 +164,8 @@ namespace JudgeCore
         /// <param name="o">评测器</param>
         public Job(ICompiler cl, List<IJudger> o)
         {
-            WriteDebugTimestamp();
-            WriteDebug("New judge job entered.");
+            Trace.WriteLine($"[{DateTime.Now}]");
+            Trace.WriteLine("New judge job entered.");
             Compiler = cl;
             RunID = Guid.NewGuid();
             Judger = o;

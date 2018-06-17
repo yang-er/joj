@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using static JudgeCore.Helper;
 
 namespace JudgeCore
 {
@@ -23,8 +22,16 @@ namespace JudgeCore
         protected abstract double TotalTimeCore();
         protected abstract double RunningTimeCore();
 
+        /// <summary>
+        /// 跟踪进程执行状态
+        /// </summary>
         public bool PTrace { get; set; } = false;
-        
+
+        /// <summary>
+        /// 沙盒进程工作目录
+        /// </summary>
+        public static string WorkingDirectory { get; set; } = Environment.CurrentDirectory;
+
         /// <summary>
         /// 退出状态码
         /// </summary>
@@ -112,7 +119,7 @@ namespace JudgeCore
         {
             if (!File.Exists(file)) 
             {
-                WriteDebug($"File doesn't exist: {file}");
+                Trace.WriteLine($"File doesn't exist: {file}");
                 return null;
             }
 

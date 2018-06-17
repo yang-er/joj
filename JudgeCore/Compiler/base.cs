@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml;
-using static JudgeCore.Helper;
 
 namespace JudgeCore
 {
@@ -87,14 +87,14 @@ namespace JudgeCore
             else
             {
                 StandardOutput = stdout.ToString().Trim();
-                if (StandardOutput != "") WriteDebug(StandardOutput);
+                if (StandardOutput != "") Trace.WriteLine(StandardOutput);
                 StandardError = stderr.ToString().Trim();
-                if (StandardError != "") WriteDebug(StandardError);
+                if (StandardError != "") Trace.WriteLine(StandardError);
             }
 
             proc.Kill();
             ExitCode = proc.ExitCode;
-            WriteDebug($"Compiler exited with status code {ExitCode}. ");
+            Trace.WriteLine($"Compiler exited with status code {ExitCode}. ");
         }
 
         /// <summary>
@@ -207,11 +207,11 @@ namespace JudgeCore
         /// <returns>调用结果</returns>
         protected string Test(string main, string args = "")
         {
-            WriteDebug("");
+            Trace.WriteLine("");
             var proc = MakeProcess(Path.Combine(ToolchainPath[0], main), args);
             proc.Start();
             var val = proc.StandardError.ReadToEnd() + proc.StandardOutput.ReadToEnd();
-            WriteDebug(val.Trim());
+            Trace.WriteLine(val.Trim());
             return val;
         }
         
@@ -223,7 +223,7 @@ namespace JudgeCore
         /// <returns>进程实例</returns>
         protected SandboxProcess MakeProcess(string filename, string arguments = "")
         {
-            WriteDebug(filename + " " + arguments);
+            Trace.WriteLine(filename + " " + arguments);
             var ret = SandboxProcess.Create(filename, arguments, true, true);
             ret.Setup(128, 5, 10);
             return ret;

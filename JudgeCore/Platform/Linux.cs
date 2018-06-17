@@ -44,7 +44,7 @@ namespace JudgeCore.Platform
                 StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
 
-            Helper.WriteDebug(StartInfo.FileName + " " + StartInfo.Arguments);
+            Trace.WriteLine(StartInfo.FileName + " " + StartInfo.Arguments);
             inside = Process.Start(StartInfo);
             pid_t = inside.Id;
             StartInfo.FileName = tmp_fn;
