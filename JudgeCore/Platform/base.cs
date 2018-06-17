@@ -187,7 +187,12 @@ namespace JudgeCore
         /// </summary>
         /// <param name="len">时间长度</param>
         /// <returns>是否退出</returns>
-        public abstract bool WaitForExit(int len = -1);
+        public abstract bool WaitForExit(int len);
+        
+        /// <summary>
+        /// 等待退出
+        /// </summary>
+        public abstract void WaitForExit();
         
         /// <summary>
         /// 结束沙盒进程

@@ -102,6 +102,8 @@ namespace JudgeCore.Platform
 
         protected override double TotalTimeCore() => inside.UserProcessorTime.TotalMilliseconds;
 
+        public override void WaitForExit() => inside.WaitForExit();
+        
         protected override double RunningTimeCore() => (DateTime.Now - inside.StartTime).TotalMilliseconds;
 
         public WinNT()

@@ -78,10 +78,10 @@ namespace JudgeCore
                 proc.Setup(MemoryLimit, TimeLimit, 1, true);
                 proc.Start();
                 
-                Task.Run(() => proc.Watch());
+                //Task.Run(() => proc.Watch());
                 Task.Run(() => Judger[id].Input(proc.StandardInput));
                 ti.Result = Judger[id].Judge(proc.StandardOutput);
-                proc.WaitForExit();
+                proc.Watch();
                 proc.Kill();
 
                 if (proc.ExitCode == -1) ti.Result = JudgeResult.UndefinedError;
@@ -140,12 +140,16 @@ namespace JudgeCore
                 proc.StartInfo.Environment["PATH"] = Compiler.ToolchainPath[0] + ";";
             else
                 proc.StartInfo.Environment["PATH"] = "";
-            
-            proc.Setup(MemoryLimit, TimeLimit, 1, true);
-            proc.Start();
-            proc.StandardOutput.Close();
-            proc.WaitForExit(1000);
-            proc.Kill();
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                // Prefetch
+                proc.Setup(MemoryLimit, TimeLimit, 1, true);
+                proc.Start();
+                proc.StandardOutput.Close();
+                proc.WaitForExit(1000);
+                proc.Kill();
+            }
 
             for (int i = 0; i < Judger.Count; i++)
             {

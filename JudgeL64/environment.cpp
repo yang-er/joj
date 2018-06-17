@@ -124,19 +124,21 @@ void watch_sandbox(
 
 	while (true)
 	{
+		fprintf(stderr, "before wait4\n");
 		wait4(app, &status, __WALL, &ruse);
 		
+		printf("after wait4");
 		if (first)
 		{
 			ptrace(PTRACE_SETOPTIONS, app, NULL,
 				PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACEEXIT);
-			signal(SIGCHLD, SIG_IGN);
 			first = false;
 		}
 		
 		if (WIFEXITED(status)) break;
 		*exitcode = WEXITSTATUS(status);
 
+		printf("WEXITSTATUS\n");
 		tempmemory = pf ? ruse.ru_minflt * getpagesize() 
 			: get_proc_status(app, "VmPeak:") << 10;
 
@@ -162,6 +164,7 @@ void watch_sandbox(
 			break;
 		}
 
+		printf("PTRACE_GETREGS\n");
 		ptrace(PTRACE_GETREGS, app, NULL, &reg);
 		call_id = (unsigned int)reg.REG_SYSCALL % call_array_size;
 
@@ -180,7 +183,9 @@ void watch_sandbox(
 			break;
 		}
 
+		printf("PTRACE_SYSCALL\n");
 		ptrace(PTRACE_SYSCALL, app, NULL, NULL);
+		printf("next round\n");
 	}
 }
 

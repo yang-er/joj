@@ -92,6 +92,8 @@ namespace JudgeCore.Platform
             throw new NotImplementedException();
         }
 
+        public override void WaitForExit() => inside.WaitForExit();
+        
         public Linux()
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix)
