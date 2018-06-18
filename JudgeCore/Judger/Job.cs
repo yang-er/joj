@@ -78,10 +78,10 @@ namespace JudgeCore
                 proc.Setup(MemoryLimit, TimeLimit, 1, true);
                 proc.Start();
                 
-                //Task.Run(() => proc.Watch());
+                Task.Run(() => proc.Watch());
                 Task.Run(() => Judger[id].Input(proc.StandardInput));
                 ti.Result = Judger[id].Judge(proc.StandardOutput);
-                proc.Watch();
+                while (!proc.HasExited) ;
                 proc.Kill();
 
                 if (proc.ExitCode == -1) ti.Result = JudgeResult.UndefinedError;
