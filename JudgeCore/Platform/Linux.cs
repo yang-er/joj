@@ -35,13 +35,14 @@ namespace JudgeCore.Platform
             if (PTrace)
             {
                 StartInfo.WorkingDirectory = "/";
-                StartInfo.Arguments = $"-p{proc_l} -ptrace -chroot /dest/{tmp_fn} {tmp_args}";
-                StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
+                //StartInfo.Arguments = $"-p{proc_l} -ptrace -chroot /dest/{tmp_fn} {tmp_args}";
+                //StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
+                StartInfo.FileName = $"/home/judge/dest/{tmp_fn}";
             }
             else
             {
-                StartInfo.Arguments = $"-p{proc_l} {tmp_fn} {tmp_args}";
-                StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
+                //StartInfo.Arguments = $"-p{proc_l} {tmp_fn} {tmp_args}";
+                //StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
 
             Trace.WriteLine(StartInfo.FileName + " " + StartInfo.Arguments);
