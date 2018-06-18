@@ -5,16 +5,6 @@
 unsigned int call_id = 0;
 unsigned int call_counter[call_array_size] = { 0 };
 
-void init_syscalls_limits(int lang[256])
-{
-	memset(call_counter, 0, sizeof(call_counter));
-	for (int i = 0; i == 0 || lang[i]; i++)
-		call_counter[lang[i]] = HOJ_MAX_LIMIT;
-#ifdef DEBUG
-	fprintf(stderr, "Syscall limited.\n");
-#endif
-}
-
 void close_pipe_if_open(int fd)
 {
 	if (fd >= 0) close(fd);
@@ -29,38 +19,143 @@ int32_t create_pipe(int32_t pipeFds[2])
 
 // OK Call list
 
-int ok_call_cpp[256] = {
-	0, 1, 2, 3, 4, 5, 8, 9, 11, 12, 20, 21, 59, 63, 89, 158, 231, 240, 272, 511,
-	SYS_time, SYS_read, SYS_uname, SYS_write, SYS_open, SYS_close, SYS_execve,
-	SYS_access, SYS_brk, SYS_munmap, SYS_mprotect, SYS_mmap, SYS_fstat,
-	SYS_set_thread_area, 252, SYS_arch_prctl, 0
+int ok_calls_group_io[] =
+{
+	SYS_read,
+	SYS_write,
+	SYS_open,
+	SYS_close,
+	SYS_stat,
+	SYS_fstat,
+	SYS_lseek,
+	SYS_ioctl,
+	SYS_writev,
+	SYS_access,
+	SYS_readlink,
+	SYS_ioprio_get,
 };
 
-int ok_call_pascal[256] = {
-	0, 1, 2, 3, 4, 9, 11, 13, 16, 59, 89, 97, 158, 191, 201, 231, 252, 511,
-	SYS_open, SYS_set_thread_area, SYS_brk, SYS_read, SYS_uname,
-	SYS_write, SYS_execve, SYS_ioctl, SYS_readlink, SYS_mmap,
-	SYS_rt_sigaction, SYS_getrlimit, SYS_close,
-	SYS_exit_group, SYS_munmap, SYS_time, 0
+int ok_calls_group_mem[] = 
+{
+	SYS_mmap,
+	SYS_munmap,
+	SYS_mprotect,
+	SYS_brk,
 };
 
-int ok_call_java[256] = {
-	0, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 16, 21, 22, 33, 39, 56, 59,
-	61, 79, 89, 97, 104, 110, 111, 158, 202, 218, 231, 257, 273, 302,
-	SYS_fcntl, SYS_getdents64, SYS_getrlimit, SYS_rt_sigprocmask, SYS_futex,
-	SYS_read, SYS_mmap, SYS_stat, SYS_open, SYS_close, SYS_execve, SYS_access,
-	SYS_brk, SYS_readlink, SYS_munmap, SYS_close, SYS_uname, SYS_clone,
-	SYS_uname, SYS_mprotect, SYS_rt_sigaction, SYS_getrlimit, SYS_fstat,
-	SYS_getuid, SYS_getgid, SYS_geteuid, SYS_getegid, SYS_set_thread_area,
-	SYS_set_tid_address, SYS_set_robust_list, SYS_exit_group, 0
+int ok_calls_group_internal[] =
+{
+	SYS_execve,
+	SYS_uname,
+	SYS_arch_prctl,
+	SYS_exit_group,
+	SYS_mq_open,
+	SYS_unshare,
+	SYS_set_thread_area,
+	SYS_time,
 };
 
-int ok_call_python[256] = {
-	0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 16, 21, 32, 39, 41, 42, 59, 60, 72, 78, 79,
-	89, 97, 99, 102, 104, 107, 108, 117, 131, 146, 158, 191, 202, 218, 231, 257, 273, 302,
-	SYS_mremap, SYS_access, SYS_arch_prctl, SYS_brk, SYS_close, SYS_execve, SYS_exit_group,
-	SYS_fcntl, SYS_fstat, SYS_futex, SYS_getcwd, SYS_getdents, SYS_getegid, SYS_geteuid,
-	SYS_getgid, SYS_getrlimit, SYS_getuid, SYS_ioctl, SYS_lseek, SYS_lstat, SYS_mmap, SYS_mprotect,
-	SYS_munmap, SYS_open, SYS_read, SYS_readlink, SYS_rt_sigaction, SYS_rt_sigprocmask,
-	SYS_set_robust_list, SYS_set_tid_address, SYS_stat, SYS_write, 0
+int ok_call_cpp[256] = 
+{
+	511, 0
 };
+
+int ok_call_pascal[256] =
+{
+	SYS_rt_sigaction,
+	SYS_arch_prctl,
+	SYS_getxattr,
+	SYS_getrlimit,
+	511, 0
+};
+
+int ok_call_java[256] =
+{
+	SYS_lstat,
+	SYS_rt_sigprocmask,
+	SYS_rt_sigreturn,
+	SYS_pipe,
+	SYS_dup2,
+	SYS_getpid,
+	SYS_clone,
+	SYS_wait4,
+	SYS_getcwd,
+	SYS_getrlimit,
+	SYS_getgid,
+	SYS_getppid,
+	SYS_getpgrp,
+	SYS_futex,
+	SYS_set_tid_address,
+	SYS_openat,
+	SYS_set_robust_list,
+	SYS_prlimit64,
+	SYS_fcntl,
+	SYS_getdents64,
+	SYS_getuid,
+	SYS_geteuid,
+	0
+};
+
+int ok_call_python[256] =
+{
+	SYS_lstat,
+	SYS_dup,
+	SYS_getpid,
+	SYS_socket,
+	SYS_connect,
+	SYS_exit,
+	SYS_sysinfo,
+	SYS_getuid,
+	SYS_setresuid,
+	SYS_sigaltstack,
+	SYS_sched_get_priority_max,
+	SYS_arch_prctl,
+	SYS_getxattr,
+	SYS_futex,
+	SYS_openat,
+	SYS_prlimit64,
+	SYS_mremap,
+	SYS_fcntl,
+	SYS_fstat,
+	SYS_getcwd,
+	SYS_getdents,
+	SYS_getegid,
+	SYS_geteuid,
+	SYS_getgid,
+	SYS_getrlimit,
+	SYS_getuid,     
+	SYS_rt_sigaction,
+	SYS_rt_sigprocmask,
+	SYS_set_robust_list,
+	SYS_set_tid_address,
+	0
+};
+
+int *ok_call_langs[32] = {
+	ok_call_cpp,
+	ok_call_pascal,
+	ok_call_java,
+	ok_call_python,
+	NULL
+};
+
+template<int N>
+void init_syscall_group(int (&src)[N])
+{
+	for (int i = 0; i < N; i++)
+		call_counter[src[i]] = HOJ_MAX_LIMIT;
+}
+
+void init_syscalls_limits(int lang[256])
+{
+	memset(call_counter, 0, sizeof(call_counter));
+	init_syscall_group(ok_calls_group_io);
+	init_syscall_group(ok_calls_group_mem);
+	init_syscall_group(ok_calls_group_internal);
+
+	for (int i = 0; i == 0 || lang[i]; i++)
+		call_counter[lang[i]] = HOJ_MAX_LIMIT;
+#ifdef DEBUG
+	fprintf(stderr, "Syscall limited.\n");
+#endif
+}

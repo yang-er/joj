@@ -84,6 +84,14 @@ DLL pid_t setup_sandbox(
  *    Sandbox Setting up    *
  ****************************/
 
+struct sandbox_args
+{
+	rlim_t mem, time, proc;
+	bool ptrace, chroot;
+	int argf, *ok_calls;
+	sandbox_args();
+};
+
 DLL bool use_ptrace;
 
 // Switch the uid to `USERID`
@@ -105,4 +113,4 @@ DLL bool set_ptrace();
 DLL bool set_chroot(const char *to_chdir);
 
 // Solve arguments
-DLL bool solve_arg(char *arg);
+DLL bool solve_arg(int argc, char **argv, sandbox_args *ret);

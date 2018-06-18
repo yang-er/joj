@@ -70,6 +70,10 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="trace_call.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt" />
+    <Text Include="syscall.csv" />
+  </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

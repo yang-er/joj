@@ -132,10 +132,10 @@ void watch_sandbox(
 
 	while (true)
 	{
-		fprintf(stderr, "before wait4\n");
+		//fprintf(stderr, "before wait4\n");
 		wait4(app, &status, __WALL, &ruse);
 		
-		printf("after wait4");
+		//fprintf(stderr, "after wait4\n");
 		if (first)
 		{
 			ptrace(PTRACE_SETOPTIONS, app, NULL,
@@ -143,24 +143,25 @@ void watch_sandbox(
 			first = false;
 		}
 		
-		if (WIFEXITED(status)) break;
 		*exitcode = WEXITSTATUS(status);
+		if (WIFEXITED(status)) break;
 
-		printf("WEXITSTATUS\n");
+		//fprintf(stderr, "WEXITSTATUS\n");
 		tempmemory = pf ? ruse.ru_minflt * getpagesize() 
 			: get_proc_status(app, "VmPeak:") << 10;
 
 		if (tempmemory > *max_mem)
 			*max_mem = tempmemory;
 
-		if (*max_mem > _mem << 20)
+		if (_mem && *max_mem > (_mem << 20))
 		{
 			unset_sandbox(app);
 			break;
 		}
 
-		if (time(NULL) > p + _time / 100)
+		if (_time && time(NULL) > p + _time / 100)
 		{
+			//fprintf(stderr, "alarm\n");
 			unset_sandbox(app);
 			break;
 		}
@@ -172,7 +173,7 @@ void watch_sandbox(
 			break;
 		}
 
-		printf("PTRACE_GETREGS\n");
+		//fprintf(stderr, "PTRACE_GETREGS\n");
 		ptrace(PTRACE_GETREGS, app, NULL, &reg);
 		call_id = (unsigned int)reg.REG_SYSCALL % call_array_size;
 
@@ -187,13 +188,13 @@ void watch_sandbox(
 		else
 		{
 			fprintf(stderr, "Not allowed syscall: %d.\n", call_id);
-			unset_sandbox(app);
-			break;
+			//unset_sandbox(app);
+			//break;
 		}
 
-		printf("PTRACE_SYSCALL\n");
+		//fprintf(stderr, "PTRACE_SYSCALL\n");
 		ptrace(PTRACE_SYSCALL, app, NULL, NULL);
-		printf("next round\n");
+		//fprintf(stderr, "next round\n");
 	}
 }
 
