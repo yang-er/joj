@@ -11,7 +11,6 @@ namespace JudgeCore
     /// </summary>
     public abstract class SandboxProcess
     {
-        protected Process inside;
         protected ProcessStartInfo info;
         protected long mem_l;
         protected int time_l, proc_l;
@@ -21,6 +20,7 @@ namespace JudgeCore
         protected abstract int ExitCodeCore();
         protected abstract double TotalTimeCore();
         protected abstract double RunningTimeCore();
+        protected abstract bool HasExitedCore();
 
         /// <summary>
         /// 跟踪进程执行状态
@@ -40,7 +40,7 @@ namespace JudgeCore
         /// <summary>
         /// 是否已经退出
         /// </summary>
-        public bool HasExited => inside.HasExited;
+        public bool HasExited => HasExitedCore();
 
         /// <summary>
         /// 标准输出流
@@ -158,7 +158,17 @@ namespace JudgeCore
         /// <param name="e">元数据</param>
         protected void StreamPipe(StringBuilder dest, DataReceivedEventArgs e)
         {
-            dest.AppendLine(e.Data);
+            StreamPipe(dest, e.Data);
+        }
+
+        /// <summary>
+        /// 引导异步流内容
+        /// </summary>
+        /// <param name="dest">目标</param>
+        /// <param name="val">元数据</param>
+        protected void StreamPipe(StringBuilder dest, string val)
+        {
+            dest.AppendLine(val);
             if (dest.Length > 4096)
             {
                 dest.Append(", ......");

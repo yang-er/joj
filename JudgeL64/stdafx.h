@@ -61,9 +61,6 @@ extern char *workdir;
 *   Environment Prepares   *
 ****************************/
 
-// Create a pipe
-DLL int create_pipe(int *fd, int std);
-
 // Watch for PTRACE
 DLL void watch_sandbox(
 	rlim_t mem, rlim_t time, pid_t app,
@@ -75,10 +72,10 @@ DLL void unset_sandbox(pid_t app);
 
 // Setup a sandbox
 DLL pid_t setup_sandbox(
-    rlim_t mem, rlim_t time, rlim_t proc,
-    bool to_chroot, const char *chdir,
-    bool to_ptrace,
-	const char *fn, const char *argv,
+	rlim_t mem, rlim_t time, rlim_t proc,
+	bool to_chroot, const char *to_chdir, bool to_ptrace,
+	const char *fn, char* const argv[], char* const envp[],
+	bool redIn, bool redOut, bool redErr,
 	int *std_in, int *std_out, int *std_err
 );
 

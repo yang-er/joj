@@ -15,6 +15,18 @@ void init_syscalls_limits(int lang[256])
 #endif
 }
 
+void close_pipe_if_open(int fd)
+{
+	if (fd >= 0) close(fd);
+}
+
+int32_t create_pipe(int32_t pipeFds[2])
+{
+	int32_t result;
+	while ((result = pipe2(pipeFds, 02000000)) < 0 && errno == EINTR);
+	return result;
+}
+
 // OK Call list
 
 int ok_call_cpp[256] = {

@@ -8,6 +8,7 @@ namespace JudgeCore.Platform
 {
     public class WinNT : SandboxProcess
     {
+        protected Process inside;
         private IntPtr job_obj;
         
         protected override int ExitCodeCore() => inside.ExitCode;
@@ -61,13 +62,31 @@ namespace JudgeCore.Platform
         }
 
         public override bool WaitForExit(int len) => inside.WaitForExit(len);
-        
+        public override void WaitForExit() => inside.WaitForExit();
+        protected override double TotalTimeCore() => inside.UserProcessorTime.TotalMilliseconds;
+        protected override double RunningTimeCore() => (DateTime.Now - inside.StartTime).TotalMilliseconds;
+        protected override bool HasExitedCore() => inside.HasExited;
+
         public override void Kill()
         {
             if (job_obj == IntPtr.Zero) return;
             UnsetSandbox(job_obj);
             job_obj = IntPtr.Zero;
         }
+
+        public override void Watch()
+        {
+            while (!HasExited && !OutOfLimit()) ;
+            if (!HasExited) Kill();
+        }
+
+        public WinNT()
+        {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+                throw new Win32Exception("平台读取错误");
+        }
+
+        #region P/Invoke
 
         [DllImport("JudgeW32.dll", SetLastError = true)]
         public static extern UIntPtr PeakProcessMemoryInfo(IntPtr hProcess);
@@ -94,22 +113,6 @@ namespace JudgeCore.Platform
         [DllImport("wer.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern int WerRemoveExcludedApplication(string pwzExeName, bool bAllUsers);
 
-        public override void Watch()
-        {
-            while (!HasExited && !OutOfLimit()) ;
-            if (!HasExited) Kill();
-        }
-
-        protected override double TotalTimeCore() => inside.UserProcessorTime.TotalMilliseconds;
-
-        public override void WaitForExit() => inside.WaitForExit();
-        
-        protected override double RunningTimeCore() => (DateTime.Now - inside.StartTime).TotalMilliseconds;
-
-        public WinNT()
-        {
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-                throw new Win32Exception("平台读取错误");
-        }
+        #endregion
     }
 }
