@@ -63,7 +63,7 @@ extern char *workdir;
 
 // Watch for PTRACE
 DLL void watch_sandbox(
-	rlim_t mem, rlim_t time, pid_t app,
+	rlim_t mem, rlim_t time, pid_t app, bool _ptrace,
 	int *max_mem, int *max_time, int *exitcode, bool pf
 );
 

@@ -33,6 +33,8 @@ bool limit_time(rlim_t time)
 	rlimit limits;
 	limits.rlim_cur = limits.rlim_max = time;
 	int ret = setrlimit(RLIMIT_CPU, &limits);
+	alarm(0);
+	alarm(time * 2);
 	if (ret == 0) return true;
 	else exit(ret);
 }

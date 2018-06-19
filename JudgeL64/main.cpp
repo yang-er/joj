@@ -8,7 +8,7 @@ const char *HELP =
 "\n"
 "Avaliable Options: \n"
 "  -m128    128M Memory Limit\n"
-"  -t1      1s Time Limit\n"
+"  -t1000   1000ms Time Limit\n"
 "  -p1      1 Proc Count Limit\n"
 "  -ptrace  Trace System Calls\n"
 "  -chroot  Change Default Root\n"
@@ -70,7 +70,14 @@ int main(int argc, char **argv)
 	sandbox_args my_args;
 	if (!solve_arg(argc, argv, &my_args))
 		return EINVAL;
-	if (access(argv[my_args.argf], X_OK) != 0)
+	if (my_args.chroot)
+	{
+		char buff[256];
+		sprintf(buff, "%s%s", USERHOME, argv[my_args.argf]);
+		if (access(buff, X_OK) != 0)
+			return ENOENT;
+	}
+	else if (access(argv[my_args.argf], X_OK) != 0)
 		return ENOENT;
 
 	/*
@@ -90,10 +97,6 @@ int main(int argc, char **argv)
 		return EPIPE;
 	}*/
 
-	limit_memory(my_args.mem);
-	limit_time(my_args.time / 1000 + 1);
-	limit_proc(my_args.proc);
-
 	pid_t child = fork();
 	if (child == 0)
 	{
@@ -107,10 +110,16 @@ int main(int argc, char **argv)
 		}*/
 
 		// Setting limit
-		if (my_args.chroot) set_chroot("/");
+		if (my_args.mem)
+			limit_memory(my_args.mem);
+		if (my_args.time)
+			limit_time(my_args.time / 1000 + 1);
+		if (my_args.proc)
+			limit_proc(my_args.proc);
+		if (my_args.chroot)
+			set_chroot("/");
 		switch_uid();
-		if (my_args.ptrace)
-			ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+		ptrace(PTRACE_TRACEME, 0, NULL, NULL);
 
 		// bye
 		execv(argv[my_args.argf], argv + my_args.argf);
@@ -134,7 +143,7 @@ int main(int argc, char **argv)
 		{
 			int max_mem, max_time, exit_code;
 			watch_sandbox(
-				my_args.mem, my_args.time, child,
+				my_args.mem, my_args.time, child, my_args.ptrace,
 				&max_mem, &max_time, &exit_code, false
 			);
 			fprintf(stderr, "Mem: %d B, Time: %d, ExitCode: %x\n", max_mem, max_time, exit_code);

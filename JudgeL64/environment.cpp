@@ -118,7 +118,7 @@ int get_miliseconds(timeval &r)
 
 // Thanks to hustoj
 void watch_sandbox(
-	rlim_t _mem, rlim_t _time, pid_t app,
+	rlim_t _mem, rlim_t _time, pid_t app, bool _ptrace,
 	int *max_mem, int *max_time, int *exitcode, bool pf
   )
 {
@@ -148,7 +148,7 @@ void watch_sandbox(
 
 		//fprintf(stderr, "WEXITSTATUS\n");
 		tempmemory = pf ? ruse.ru_minflt * getpagesize() 
-			: get_proc_status(app, "VmPeak:") << 10;
+			: get_proc_status(app, "VmSize:") << 10;
 
 		if (tempmemory > *max_mem)
 			*max_mem = tempmemory;
@@ -156,46 +156,72 @@ void watch_sandbox(
 		if (_mem && *max_mem > (_mem << 20))
 		{
 			unset_sandbox(app);
+			*exitcode = SIGUSR2;
 			break;
 		}
 
 		if (_time && time(NULL) > p + _time / 100)
 		{
-			//fprintf(stderr, "alarm\n");
+			fprintf(stderr, "alarm, %d %d %d\n", time(NULL), p, _time/100);
 			unset_sandbox(app);
+			
+			*exitcode = SIGXCPU;
 			break;
 		}
 
 		if (*exitcode != 5 && *exitcode != 0 && *exitcode != 133)
 		{
+			switch (*exitcode)
+			{
+			case SIGCHLD:
+			case SIGALRM:
+				alarm(0);
+			case SIGKILL:
+			case SIGXCPU:
+				break;
+			case SIGXFSZ:
+				break;
+			default:
+				break;
+			}
 			fprintf(stderr, "ExitSignal: %s\n", strsignal(*exitcode));
 			unset_sandbox(app);
 			break;
 		}
 
-		//fprintf(stderr, "PTRACE_GETREGS\n");
-		ptrace(PTRACE_GETREGS, app, NULL, &reg);
-		call_id = (unsigned int)reg.REG_SYSCALL % call_array_size;
+		if (_ptrace)
+		{
+			//fprintf(stderr, "PTRACE_GETREGS\n");
+			ptrace(PTRACE_GETREGS, app, NULL, &reg);
+			call_id = (unsigned int)reg.REG_SYSCALL % call_array_size;
 
-		if (call_counter[call_id])
-		{
-			//call_counter[reg.REG_SYSCALL]--;
-		}
-		else if (record_call)
-		{
-			call_counter[call_id] = 1;
-		}
-		else
-		{
-			fprintf(stderr, "Not allowed syscall: %d.\n", call_id);
-			//unset_sandbox(app);
-			//break;
+			if (call_counter[call_id])
+			{
+				//call_counter[reg.REG_SYSCALL]--;
+			}
+			else if (record_call)
+			{
+				call_counter[call_id] = 1;
+			}
+			else
+			{
+				fprintf(stderr, "Not allowed syscall: %d.\n", call_id);
+				//unset_sandbox(app);
+				//break;
+			}
 		}
 
 		//fprintf(stderr, "PTRACE_SYSCALL\n");
 		ptrace(PTRACE_SYSCALL, app, NULL, NULL);
 		//fprintf(stderr, "next round\n");
 	}
+
+	fprintf(stderr, "isrss: %ld, min_flt: %ld, user: %d, sys: %d\n",
+		ruse.ru_isrss,
+		ruse.ru_minflt,
+		get_miliseconds(ruse.ru_utime),
+		get_miliseconds(ruse.ru_stime)
+	);
 }
 
 // Thanks to hustoj
