@@ -10,19 +10,29 @@ const char *HELP =
 "  -m128    128M Memory Limit\n"
 "  -t1000   1000ms Time Limit\n"
 "  -p1      1 Proc Count Limit\n"
+"  -l0      The 0th lang syscalls\n"
+"  -s/pipe  Send info in named pipe\n"
 "  -ptrace  Trace System Calls\n"
 "  -chroot  Change Default Root\n"
 "\n"
 "NOTICE: All ENV will be passed!\n"
 "        UID will be set to " USERNAME "'s\n"
-"        NEED all param in order.\n"
 ;
+
+FILE *stdprn;
 
 sandbox_args::sandbox_args()
 {
-	ok_calls = NULL;
+	ok_calls = 0;
+	pipe_name = NULL;
 	mem = proc = time = 0;
-	chroot = ptrace = false;
+	chroot = ptrace = page_fault = false;
+}
+
+sandbox_stat::sandbox_stat()
+{
+	exitcode = 0;
+	max_mem = max_time = 0;
 }
 
 bool solve_arg(int argc, char **argv, sandbox_args *ret)
@@ -43,7 +53,9 @@ bool solve_arg(int argc, char **argv, sandbox_args *ret)
 		else if (sscanf(argv[argf], "-p%lu", &tmp) == 1)
 			ret->proc = tmp;
 		else if (sscanf(argv[argf], "-l%lu", &tmp) == 1)
-			ret->ok_calls = ok_call_langs[tmp];
+			ret->ok_calls = int(tmp);
+		else if (strstr(argv[argf], "-s/") == argv[argf])
+			ret->pipe_name = argv[argf] + 2;
 		else
 			break;
 	}
@@ -80,35 +92,9 @@ int main(int argc, char **argv)
 	else if (access(argv[my_args.argf], X_OK) != 0)
 		return ENOENT;
 
-	/*
-	// Redirect stdio by pipe2
-	int stdinFds[2] = { -1, -1 }, stdoutFds[2] = { -1, -1 }, stderrFds[2] = { -1, -1 };
-	if ((create_pipe(stdinFds) != 0) ||
-		(create_pipe(stdoutFds) != 0) ||
-		(create_pipe(stderrFds) != 0))
-	{
-		fprintf(stderr, "pipe redirect failed.\n");
-		close_pipe_if_open(stdinFds[READ_END_OF_PIPE]);
-		close_pipe_if_open(stdinFds[WRITE_END_OF_PIPE]);
-		close_pipe_if_open(stdoutFds[WRITE_END_OF_PIPE]);
-		close_pipe_if_open(stdoutFds[READ_END_OF_PIPE]);
-		close_pipe_if_open(stderrFds[WRITE_END_OF_PIPE]);
-		close_pipe_if_open(stderrFds[READ_END_OF_PIPE]);
-		return EPIPE;
-	}*/
-
 	pid_t child = fork();
 	if (child == 0)
 	{
-		/*
-		// Redirect stdio
-		if ((dup2(stdinFds[READ_END_OF_PIPE], STDIN_FILENO) == -1) ||
-			(dup2(stdoutFds[WRITE_END_OF_PIPE], STDOUT_FILENO) == -1) ||
-			(dup2(stderrFds[WRITE_END_OF_PIPE], STDERR_FILENO) == -1))
-		{
-			_exit(errno);
-		}*/
-
 		// Setting limit
 		if (my_args.mem)
 			limit_memory(my_args.mem);
@@ -127,34 +113,18 @@ int main(int argc, char **argv)
 	}
 	else if (child > 0)
 	{
-		/*
-		dup2(stdinFds[READ_END_OF_PIPE], STDIN_FILENO);
-
-		*std_in = stdinFds[WRITE_END_OF_PIPE];
-		*std_out = stdoutFds[READ_END_OF_PIPE];
-		*std_err = stderrFds[READ_END_OF_PIPE];
-
-		// Parent doesn't need
-		close_pipe_if_open(stdinFds[READ_END_OF_PIPE]);
-		close_pipe_if_open(stdoutFds[WRITE_END_OF_PIPE]);
-		close_pipe_if_open(stderrFds[WRITE_END_OF_PIPE]);*/
-
-		if (my_args.ptrace)
-		{
-			int max_mem, max_time, exit_code;
-			watch_sandbox(
-				my_args.mem, my_args.time, child, my_args.ptrace,
-				&max_mem, &max_time, &exit_code, false
-			);
-			fprintf(stderr, "Mem: %d B, Time: %d, ExitCode: %x\n", max_mem, max_time, exit_code);
-			return WEXITSTATUS(exit_code);
-		}
+		if (my_args.pipe_name)
+			stdprn = fopen(my_args.pipe_name, "w");
+		else if (true)
+			stdprn = stderr;
 		else
-		{
-			int wait_status;
-			waitpid(child, &wait_status, 0);
-			return wait_status;
-		}
+			stdprn = fopen("/dev/null", "w");
+		sandbox_stat stats;
+		watch_sandbox(my_args, child, &stats);
+		fprintf(stdprn,
+			"Mem: %d B, Time: %d, ExitCode: 0x%x\n",
+			stats.max_mem, stats.max_time, stats.exitcode);
+		return stats.exitcode;
 	}
 	else
 	{

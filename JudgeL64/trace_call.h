@@ -8,15 +8,7 @@
 #include <signal.h>
 #include <fcntl.h>
 
-#define DLL extern "C"
-
-extern int ok_call_cpp[256];
-extern int ok_call_pascal[256];
-extern int ok_call_java[256];
-extern int ok_call_python[256];
-
 extern int *ok_call_langs[32];
-
 const bool record_call = false;
 const int call_array_size = 512;
 extern unsigned int call_id;
@@ -28,10 +20,4 @@ enum
 	WRITE_END_OF_PIPE = 1,
 };
 
-extern "C" {
-
 void init_syscalls_limits(int lang[256]);
-void close_pipe_if_open(int fd);
-int32_t create_pipe(int32_t pipeFds[2]);
-
-}

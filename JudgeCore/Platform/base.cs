@@ -1,5 +1,6 @@
 ﻿using JudgeCore.Platform;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -9,7 +10,7 @@ namespace JudgeCore
     /// <summary>
     /// 沙盒进程
     /// </summary>
-    public abstract class SandboxProcess
+    public abstract class SandboxProcess : Component
     {
         protected ProcessStartInfo info;
         protected long mem_l;

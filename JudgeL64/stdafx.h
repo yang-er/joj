@@ -57,60 +57,45 @@ extern char *workdir;
 #define JOJ_RUN 9
 #define JOJ_UE  10
 
+struct sandbox_args
+{
+	rlim_t mem, time, proc;
+	bool ptrace, chroot, page_fault;
+	int argf, ok_calls;
+	const char *pipe_name;
+	sandbox_args();
+};
+
+struct sandbox_stat
+{
+	ulong max_mem, max_time;
+	int exitcode;
+	sandbox_stat();
+};
+
+extern FILE *stdprn;
+#define stdprn stdprn
+
 /****************************
 *   Environment Prepares   *
 ****************************/
 
-// Watch for PTRACE
-DLL void watch_sandbox(
-	rlim_t mem, rlim_t time, pid_t app, bool _ptrace,
-	int *max_mem, int *max_time, int *exitcode, bool pf
+void watch_sandbox(
+	const sandbox_args &args,
+	pid_t app,
+	sandbox_stat *stats
 );
 
-// Unset sandbox
-DLL void unset_sandbox(pid_t app);
-
-// Setup a sandbox
-DLL pid_t setup_sandbox(
-	rlim_t mem, rlim_t time, rlim_t proc,
-	bool to_chroot, const char *to_chdir, bool to_ptrace,
-	const char *fn, char* const argv[], char* const envp[],
-	bool redIn, bool redOut, bool redErr,
-	int *std_in, int *std_out, int *std_err
-);
+void unset_sandbox(pid_t app);
 
 
 /****************************
  *    Sandbox Setting up    *
  ****************************/
 
-struct sandbox_args
-{
-	rlim_t mem, time, proc;
-	bool ptrace, chroot;
-	int argf, *ok_calls;
-	sandbox_args();
-};
-
-DLL bool use_ptrace;
-
-// Switch the uid to `USERID`
-DLL bool switch_uid();
-
-// Set Memory Limit
-DLL bool limit_memory(rlim_t mem);
-
-// Set CPU Time Limit
-DLL bool limit_time(rlim_t time);
-
-// Set Process Limit
-DLL bool limit_proc(rlim_t proc);
-
-// Setup PTRACE
-DLL bool set_ptrace();
-
-// Setup chroot
-DLL bool set_chroot(const char *to_chdir);
-
-// Solve arguments
-DLL bool solve_arg(int argc, char **argv, sandbox_args *ret);
+bool switch_uid();
+bool limit_memory(rlim_t mem);
+bool limit_time(rlim_t time);
+bool limit_proc(rlim_t proc);
+bool set_chroot(const char *to_chdir);
+bool solve_arg(int argc, char **argv, sandbox_args *ret);

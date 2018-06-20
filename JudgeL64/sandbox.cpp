@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-bool use_ptrace = false;
-
 bool switch_uid()
 {
 	uid_t r, e, s;
@@ -34,7 +32,7 @@ bool limit_time(rlim_t time)
 	limits.rlim_cur = limits.rlim_max = time;
 	int ret = setrlimit(RLIMIT_CPU, &limits);
 	alarm(0);
-	alarm(time * 2);
+	alarm(uint(time * 2));
 	if (ret == 0) return true;
 	else exit(ret);
 }
@@ -49,13 +47,6 @@ bool limit_proc(rlim_t proc)
 	ret = setrlimit(RLIMIT_CORE, &limits);
 	if (ret == 0) return true;
 	else exit(ret);
-}
-
-bool set_ptrace()
-{
-	use_ptrace = true;
-	ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-	return true;
 }
 
 bool set_chroot(const char *to_chdir)

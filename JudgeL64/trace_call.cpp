@@ -5,20 +5,7 @@
 unsigned int call_id = 0;
 unsigned int call_counter[call_array_size] = { 0 };
 
-void close_pipe_if_open(int fd)
-{
-	if (fd >= 0) close(fd);
-}
-
-int32_t create_pipe(int32_t pipeFds[2])
-{
-	int32_t result;
-	while ((result = pipe2(pipeFds, 02000000)) < 0 && errno == EINTR);
-	return result;
-}
-
 // OK Call list
-
 int ok_calls_group_io[] =
 {
 	SYS_read,
