@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 		sandbox_stat stats;
 		watch_sandbox(my_args, child, &stats);
 		fprintf(stdprn,
-			"Mem: %d B, Time: %d, ExitCode: 0x%x\n",
+			"%lu %lu %d\n",
 			stats.max_mem, stats.max_time, stats.exitcode);
 		return stats.exitcode;
 	}

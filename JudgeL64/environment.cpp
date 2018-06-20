@@ -70,7 +70,7 @@ void watch_sandbox(
 
 		if (args.time && ulong(time(NULL) - p) > args.time / 300)
 		{
-			fprintf(stdprn, "run out of 2nd limit.\n");
+			fprintf(stderr, "run out of 2nd limit.\n");
 			unset_sandbox(app);
 			stats->exitcode = SIGXCPU;
 			break;
@@ -79,13 +79,13 @@ void watch_sandbox(
 		stats->max_time = get_miliseconds(ruse.ru_utime);
 		if (stats->max_time > args.time)
 		{
-			fprintf(stdprn, "run out of 1st limit.\n");
+			fprintf(stderr, "run out of 1st limit.\n");
 			unset_sandbox(app);
 			stats->exitcode = SIGXCPU;
 			break;
 		}
 
-		if (stats->exitcode != 5 && stats->exitcode != 0 && stats->exitcode != 133)
+		if (stats->exitcode != 5 && stats->exitcode != 0 && stats->exitcode != 133 && (args.ptrace && stats->exitcode != 17))
 		{
 			switch (stats->exitcode)
 			{
@@ -95,7 +95,7 @@ void watch_sandbox(
 				default:
 					break;
 			}
-			fprintf(stdprn, "ExitSignal: %s\n", strsignal(stats->exitcode));
+			fprintf(stderr, "ExitSignal: %s\n", strsignal(stats->exitcode));
 			unset_sandbox(app);
 			break;
 		}
@@ -115,7 +115,8 @@ void watch_sandbox(
 			}
 			else
 			{
-				fprintf(stdprn, "Not allowed syscall: %d.\n", call_id);
+				fprintf(stderr, "Not allowed syscall: %d.\n", call_id);
+				stats->exitcode = 255;
 				unset_sandbox(app);
 				break;
 			}

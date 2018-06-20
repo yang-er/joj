@@ -44,7 +44,7 @@ int ok_calls_group_internal[] =
 
 int ok_call_cpp[256] = 
 {
-	511, 0
+	257, 511, 0
 };
 
 int ok_call_pascal[256] =
