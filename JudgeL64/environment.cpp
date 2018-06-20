@@ -116,7 +116,7 @@ void watch_sandbox(
 			else
 			{
 				fprintf(stderr, "Not allowed syscall: %d.\n", call_id);
-				stats->exitcode = 255;
+				stats->exitcode = SIGSYS;
 				unset_sandbox(app);
 				break;
 			}

@@ -209,5 +209,20 @@ namespace JudgeCore
         /// 结束沙盒进程
         /// </summary>
         public abstract void Kill();
+
+        /// <summary>
+        /// 是否为运行时错误
+        /// </summary>
+        public abstract bool IsRuntimeError { get; }
+
+        /// <summary>
+        /// 是否为内存超限
+        /// </summary>
+        public virtual bool IsMemoryLimitExceeded => (long)MaxMemory > mem_l << 20;
+
+        /// <summary>
+        /// 是否为内存超限
+        /// </summary>
+        public virtual bool IsTimeLimitExceeded => TotalTime > time_l;
     }
 }

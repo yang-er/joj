@@ -34,12 +34,12 @@ namespace JudgeCore.Platform
             if (PTrace)
             {
                 StartInfo.WorkingDirectory = "/";
-                StartInfo.Arguments = $"-t{time_l} -p{proc_l} -s/tmp/judge_pipe -ptrace -chroot /dest/{tmp_fn} {tmp_args}";
+                StartInfo.Arguments = $"-t{time_l} -m{mem_l} -p{proc_l} -s/tmp/judge_pipe -ptrace -chroot /dest/{tmp_fn} {tmp_args}";
                 StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
             else
             {
-                StartInfo.Arguments = $"-t{time_l} -p{proc_l} -s/tmp/judge_pipe {tmp_fn} {tmp_args}";
+                StartInfo.Arguments = $"-t{time_l} -m{mem_l} -p{proc_l} -s/tmp/judge_pipe {tmp_fn} {tmp_args}";
                 StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
 
@@ -119,6 +119,26 @@ namespace JudgeCore.Platform
         protected override bool HasExitedCore() => inside.HasExited;
 
         public override void WaitForExit() => inside.WaitForExit();
+
+        public override bool IsRuntimeError
+        {
+            get
+            {
+                switch (ExitCodeCore())
+                {
+                    case 31:   // SIGSYS
+                    case 4:    // SIGILL
+                    case 2:    // SIGINT
+                    case 8:    // SIGFPE
+                    case 11:   // SIGSEGV
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+
+        public override bool IsTimeLimitExceeded => (int)timep > time_l || ec == 14 || ec == 24;
 
         public Linux()
         {

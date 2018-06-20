@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 		if (my_args.mem)
 			limit_memory(my_args.mem);
 		if (my_args.time)
-			limit_time(my_args.time / 1000 + 1);
+			limit_time(my_args.time / 1000);
 		if (my_args.proc)
 			limit_proc(my_args.proc);
 		if (my_args.chroot)
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
 	else if (child > 0)
 	{
 		if (my_args.pipe_name)
-			stdprn = fopen(my_args.pipe_name, "w");
+			stdprn = fopen(my_args.pipe_name, "wx");
 		else if (true)
 			stdprn = stderr;
 		else
@@ -124,6 +124,7 @@ int main(int argc, char **argv)
 		fprintf(stdprn,
 			"%lu %lu %d\n",
 			stats.max_mem, stats.max_time, stats.exitcode);
+		fclose(stdprn);
 		return stats.exitcode;
 	}
 	else

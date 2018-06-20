@@ -47,6 +47,7 @@ namespace JudgeDaemon
                 if (Console.IsErrorRedirected)
                 {
                     Console.WriteLine("Debugger not trigged, putting into stderr..");
+                    Trace.Listeners.Clear();
                     Trace.Listeners.Add(new TextWriterTraceListener(Console.Error));
                 }
                 else

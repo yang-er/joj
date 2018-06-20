@@ -80,6 +80,25 @@ namespace JudgeCore.Platform
             if (!HasExited) Kill();
         }
 
+        public override bool IsRuntimeError
+        {
+            get
+            {
+                switch (ExitCodeCore())
+                {
+                    case -1073741676:   // INTDIV0
+                    case -1073740940:   // SEGFLT
+                    case -1073741819:   // ACCVIO
+                    case -1073741571:   // STKOVR
+                    case -1073741515:   // DLLERR
+                    case 4194432:       // SEGFLT in MinGW
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+        
         public WinNT()
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)

@@ -81,20 +81,21 @@ namespace JudgeCore
                 Task.Run(() => proc.Watch());
                 Task.Run(() => Judger[id].Input(proc.StandardInput));
                 ti.Result = Judger[id].Judge(proc.StandardOutput);
-                while (!proc.HasExited) ;
-                proc.Kill();
+                proc.WaitForExit();
 
-                if (proc.ExitCode == -1) ti.Result = JudgeResult.UndefinedError;
+                if (proc.ExitCode != 0)
+                    ti.Result = JudgeResult.UndefinedError;
 
                 // Judge extra info
                 ti.Time = proc.TotalTime;
-                if (ti.Time >= TimeLimit)
+                if (proc.IsTimeLimitExceeded)
                     ti.Result = JudgeResult.TimeLimitExceeded;
                 ti.Memory = (long)proc.MaxMemory;
-                if (ti.Memory > MemoryLimit << 20)
+                if (proc.IsMemoryLimitExceeded)
                     ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = proc.ExitCode;
-                if (ti.ExitCode != 0 && ti.ExitCode != -1 && ti.ExitCode != -2) ti.Result = JudgeResult.RuntimeError;
+                if (proc.IsRuntimeError)
+                    ti.Result = JudgeResult.RuntimeError;
                 Trace.WriteLine($"Runtime: {ti.Time}ms, Memory: {ti.Memory / 1024}kb, ExitCode: 0x" + ti.ExitCode.ToString("x"));
             }
             catch (Exception ex)

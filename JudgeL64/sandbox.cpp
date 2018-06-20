@@ -15,12 +15,12 @@ bool switch_uid()
 bool limit_memory(rlim_t mem)
 {
 	rlimit limits;
-	limits.rlim_cur = limits.rlim_max = mem << 20;
+	limits.rlim_cur = limits.rlim_max = rlim_t((mem << 20) * 1.1);
 	int ret = setrlimit(RLIMIT_DATA, &limits);
 	if (ret != 0) exit(ret);
 	ret = setrlimit(RLIMIT_STACK, &limits);
 	if (ret != 0) exit(ret);
-	limits.rlim_cur = limits.rlim_max = 0;
+	//limits.rlim_cur = limits.rlim_max = 0;
 	ret = setrlimit(RLIMIT_AS, &limits);
 	if (ret == 0) return true;
 	else exit(ret);
@@ -32,7 +32,7 @@ bool limit_time(rlim_t time)
 	limits.rlim_cur = limits.rlim_max = time;
 	int ret = setrlimit(RLIMIT_CPU, &limits);
 	alarm(0);
-	alarm(uint(time * 2));
+	alarm(time);
 	if (ret == 0) return true;
 	else exit(ret);
 }
