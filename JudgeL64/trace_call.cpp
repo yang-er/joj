@@ -144,7 +144,4 @@ void init_syscalls_limits(int lang[256])
 
 	for (int i = 0; i == 0 || lang[i]; i++)
 		call_counter[lang[i]] = HOJ_MAX_LIMIT;
-#ifdef DEBUG
-	fprintf(stderr, "Syscall limited.\n");
-#endif
 }

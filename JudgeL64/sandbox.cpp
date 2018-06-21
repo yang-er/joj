@@ -3,10 +3,11 @@
 bool switch_uid()
 {
 	uid_t r, e, s;
-	setresgid(USERID, USERID, USERID);
+	int ret;
+	ret = setresgid(USERID, USERID, USERID);
 	getresgid(&r, &e, &s);
 	if (!r || !e || !s) exit(-1);
-	setreuid(USERID, USERID);
+	ret = setreuid(USERID, USERID);
 	getresuid(&r, &e, &s);
 	if (!r || !e || !s) exit(-1);
 	return true;
@@ -51,7 +52,9 @@ bool limit_proc(rlim_t proc)
 
 bool set_chroot(const char *to_chdir)
 {
-	chroot("/home/judge");
-	chdir(to_chdir ? to_chdir : "/");
-	return true;
+	int ret;
+	ret = chroot("/home/judge");
+	ret = ret && chdir(to_chdir ? to_chdir : "/");
+	if (ret == 0) return true;
+	else exit(ret);
 }

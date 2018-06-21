@@ -34,12 +34,12 @@ namespace JudgeCore.Platform
             if (PTrace)
             {
                 StartInfo.WorkingDirectory = "/";
-                StartInfo.Arguments = $"-t{time_l} -m{mem_l} -p{proc_l} -s/tmp/judge_pipe -ptrace -chroot /dest/{tmp_fn} {tmp_args}";
+                StartInfo.Arguments = $"std -t{time_l} -m{mem_l} -p{proc_l} -l0 -s/tmp/judge_pipe -pt -ch /dest/{tmp_fn} {tmp_args}";
                 StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
             else
             {
-                StartInfo.Arguments = $"-t{time_l} -m{mem_l} -p{proc_l} -s/tmp/judge_pipe {tmp_fn} {tmp_args}";
+                StartInfo.Arguments = $"std -t{time_l} -m{mem_l} -p{proc_l} -s/tmp/judge_pipe {tmp_fn} {tmp_args}";
                 StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
 

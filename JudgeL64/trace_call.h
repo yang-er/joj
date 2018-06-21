@@ -14,10 +14,4 @@ const int call_array_size = 512;
 extern unsigned int call_id;
 extern unsigned int call_counter[call_array_size];
 
-enum
-{
-	READ_END_OF_PIPE = 0,
-	WRITE_END_OF_PIPE = 1,
-};
-
-void init_syscalls_limits(int lang[256]);
+extern "C" void init_syscalls_limits(int lang[256]);

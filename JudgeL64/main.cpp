@@ -3,17 +3,26 @@
 
 const char *HELP = 
 "Judge Sandbox version 1.0\n"
-"usage: JudgeL64 [OPTIONS] FILE\n"
-"       JudgeL64 -init\n"
+"usage: JudgeL64 std [OPTIONS] FILE\n"
+"       JudgeL64 init %LANG\n"
+"       JudgeL64 kill %PPID (%SIG=9)\n"
 "\n"
-"Avaliable Options: \n"
+"init Tips:\n"
+"  Copy language %LANG's needed files\n"
+"  to /home/" USERNAME " to prepare run-env.\n"
+"\n"
+"kill Tips:\n"
+"  Directly send %SIG to %PPID and\n"
+"  its children processes. No waitpid.\n"
+"\n"
+"std Avaliable Options: \n"
 "  -m128    128M Memory Limit\n"
 "  -t1000   1000ms Time Limit\n"
 "  -p1      1 Proc Count Limit\n"
 "  -l0      The 0th lang syscalls\n"
-"  -s/pipe  Send info in named pipe\n"
-"  -ptrace  Trace System Calls\n"
-"  -chroot  Change Default Root\n"
+"  -s/pip   Send info in named pipe\n"
+"  -pt      Trace System Calls\n"
+"  -ch      Change Default Root\n"
 "\n"
 "NOTICE: All ENV will be passed!\n"
 "        UID will be set to " USERNAME "'s\n"
@@ -40,11 +49,11 @@ bool solve_arg(int argc, char **argv, sandbox_args *ret)
 	ulong tmp;
 	int &argf = ret->argf;
 
-	for (argf = 1; argf <= argc; argf++)
+	for (argf = 2; argf <= argc; argf++)
 	{
-		if (strcmp(argv[argf], "-ptrace") == 0)
+		if (strcmp(argv[argf], "-pt") == 0)
 			ret->ptrace = true;
-		else if (strcmp(argv[argf], "-chroot") == 0)
+		else if (strcmp(argv[argf], "-ch") == 0)
 			ret->chroot = true;
 		else if (sscanf(argv[argf], "-m%lu", &tmp) == 1)
 			ret->mem = tmp;
@@ -54,7 +63,7 @@ bool solve_arg(int argc, char **argv, sandbox_args *ret)
 			ret->proc = tmp;
 		else if (sscanf(argv[argf], "-l%lu", &tmp) == 1)
 			ret->ok_calls = int(tmp);
-		else if (strstr(argv[argf], "-s/") == argv[argf])
+		else if (strncmp(argv[argf], "-s/", 3) == 0)
 			ret->pipe_name = argv[argf] + 2;
 		else
 			break;
@@ -64,21 +73,8 @@ bool solve_arg(int argc, char **argv, sandbox_args *ret)
 	return true;
 }
 
-int main(int argc, char **argv)
+int modstd(int argc, char **argv)
 {
-	// Security Checks
-	if (getuid() != 0)
-	{
-		fprintf(stderr, "Need root permission.\n");
-		return EACCES;
-	}
-
-	if (argc <= 1)
-	{
-		puts(HELP);
-		return 0;
-	}
-
 	sandbox_args my_args;
 	if (!solve_arg(argc, argv, &my_args))
 		return EINVAL;
@@ -131,4 +127,47 @@ int main(int argc, char **argv)
 	{
 		return EINVAL;
 	}
+}
+
+int modinit(int argc, char **argv)
+{
+	puts("Not Implemented.");
+}
+
+int modkill(int argc, char **argv)
+{
+	stdprn = stderr;
+	int ppid, sig;
+	if (sscanf(argv[2], "%d", &ppid) != 1)
+		return -1;
+	if (argv[3] && sscanf(argv[3], "%d", &sig) == 1);
+	else sig = SIGKILL;
+	return kill_proc_tree(ppid, sig);
+}
+
+int modhelp(int argc, char **argv)
+{
+	puts(HELP);
+	return 0;
+}
+
+int main(int argc, char **argv)
+{
+	// Security Checks
+	if (getuid() != 0)
+	{
+		fprintf(stderr, "Need root permission.\n");
+		return EACCES;
+	}
+
+	if (argc <= 2)
+		return modhelp(argc, argv);
+	else if (strcmp(argv[1], "std") == 0)
+		return modstd(argc, argv);
+	else if (strcmp(argv[1], "init") == 0)
+		return modinit(argc, argv);
+	else if (strcmp(argv[1], "kill") == 0)
+		return modkill(argc, argv);
+	else
+		return modhelp(argc, argv);
 }

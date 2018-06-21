@@ -1,5 +1,9 @@
 #include "stdafx.h"
 #include "trace_call.h"
+#include <vector>
+#include <algorithm>
+using std::vector;
+using std::binary_search;
 
 // Thanks to hustoj
 int get_proc_status(pid_t pid, const char *mark)
@@ -70,7 +74,7 @@ void watch_sandbox(
 
 		if (args.time && ulong(time(NULL) - p) > args.time / 300)
 		{
-			fprintf(stderr, "run out of 2nd limit.\n");
+			fprintf(stdprn, "run out of 2nd limit.\n");
 			unset_sandbox(app);
 			stats->exitcode = SIGXCPU;
 			break;
@@ -79,7 +83,7 @@ void watch_sandbox(
 		stats->max_time = get_miliseconds(ruse.ru_utime);
 		if (stats->max_time > args.time)
 		{
-			fprintf(stderr, "run out of 1st limit.\n");
+			fprintf(stdprn, "run out of 1st limit.\n");
 			unset_sandbox(app);
 			stats->exitcode = SIGXCPU;
 			break;
@@ -95,7 +99,7 @@ void watch_sandbox(
 				default:
 					break;
 			}
-			fprintf(stderr, "ExitSignal: %s\n", strsignal(stats->exitcode));
+			fprintf(stdprn, "ExitSignal: %s\n", strsignal(stats->exitcode));
 			unset_sandbox(app);
 			break;
 		}
@@ -115,7 +119,7 @@ void watch_sandbox(
 			}
 			else
 			{
-				fprintf(stderr, "Not allowed syscall: %d.\n", call_id);
+				fprintf(stdprn, "Not allowed syscall: %d.\n", call_id);
 				stats->exitcode = SIGSYS;
 				unset_sandbox(app);
 				break;
@@ -130,4 +134,40 @@ void watch_sandbox(
 void unset_sandbox(pid_t app)
 {
 	ptrace(PTRACE_KILL, app, NULL, NULL);
+}
+
+int read_proc_tree(pid_t begins, vector<pid_t> &to_kill)
+{
+    DIR *dp = opendir("/proc");
+    if (dp == NULL) return -1;
+    dirent *dr;
+    pid_t temp;
+    while (dr = readdir(dp))
+    {
+        if (dr->d_type != 4)
+            continue;
+        else if (sscanf(dr->d_name, "%d", &temp) != 1)
+            continue;
+        else if (temp < begins)
+            continue;
+        else if (temp == begins)
+            to_kill.push_back(begins);
+        else if (binary_search(to_kill.begin(), to_kill.end(), get_proc_status(temp, "PPid:")))
+            to_kill.push_back(temp);
+    }
+}
+
+int kill_proc_tree(pid_t pid, int sig)
+{
+    vector<pid_t> to_kill;
+    read_proc_tree(pid, to_kill);
+
+    for (pid_t cur : to_kill)
+    {
+        fprintf(stdprn, "%d ", cur);
+        kill(cur, sig);
+    }
+
+    fprintf(stdprn, "SIG%d sent.\n", sig);
+    return 0;
 }

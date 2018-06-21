@@ -20,7 +20,8 @@
 #include <assert.h>
 #include <errno.h>
 
-#define DLL extern "C"
+#define _BEGIN_DLL_DECL extern "C" {
+#define _END_DLL_DECL }
 
 /****************************
  *    Common Definitions    *
@@ -76,6 +77,8 @@ struct sandbox_stat
 extern FILE *stdprn;
 #define stdprn stdprn
 
+_BEGIN_DLL_DECL
+
 /****************************
 *   Environment Prepares   *
 ****************************/
@@ -86,16 +89,41 @@ void watch_sandbox(
 	sandbox_stat *stats
 );
 
-void unset_sandbox(pid_t app);
+void unset_sandbox(
+	pid_t app
+);
 
+int kill_proc_tree(
+	pid_t pid,
+	int sig
+);
 
 /****************************
  *    Sandbox Setting up    *
  ****************************/
 
 bool switch_uid();
-bool limit_memory(rlim_t mem);
-bool limit_time(rlim_t time);
-bool limit_proc(rlim_t proc);
-bool set_chroot(const char *to_chdir);
-bool solve_arg(int argc, char **argv, sandbox_args *ret);
+
+bool limit_memory(
+	rlim_t mem
+);
+
+bool limit_time(
+	rlim_t time
+);
+
+bool limit_proc(
+	rlim_t proc
+);
+
+bool set_chroot(
+	const char *to_chdir
+);
+
+bool solve_arg(
+	int argc,
+	char **argv,
+	sandbox_args *ret
+);
+
+_END_DLL_DECL
