@@ -19,8 +19,8 @@ bool limit_memory(rlim_t mem)
 	limits.rlim_cur = limits.rlim_max = rlim_t((mem << 20) * 1.1);
 	int ret = setrlimit(RLIMIT_DATA, &limits);
 	if (ret != 0) exit(ret);
-	ret = setrlimit(RLIMIT_STACK, &limits);
-	if (ret != 0) exit(ret);
+	//ret = setrlimit(RLIMIT_STACK, &limits);
+	//if (ret != 0) exit(ret);
 	//limits.rlim_cur = limits.rlim_max = 0;
 	ret = setrlimit(RLIMIT_AS, &limits);
 	if (ret == 0) return true;

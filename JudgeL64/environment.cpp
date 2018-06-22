@@ -126,7 +126,7 @@ void watch_sandbox(
 				break;
 			}
 
-			if (call_id == SYS_write)
+			if (false && call_id == SYS_write)
 			{
 				write_len += reg.REG_RET;
 				if (write_len > LIM_FILE_SIZE)

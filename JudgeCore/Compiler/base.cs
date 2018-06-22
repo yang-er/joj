@@ -75,9 +75,8 @@ namespace JudgeCore
         protected void ReadCompileResult(SandboxProcess proc)
         {
             var stdout = new StringBuilder();
-            var stderr = new StringBuilder();
             proc.Setup(128, 1000, 10);
-            proc.Start(stdout, stderr);
+            proc.Start(stdout, stdout);
             proc.WaitForExit(3000);
 
             if (!proc.HasExited)
@@ -88,8 +87,6 @@ namespace JudgeCore
             {
                 StandardOutput = stdout.ToString().Trim();
                 if (StandardOutput != "") Trace.WriteLine(StandardOutput);
-                StandardError = stderr.ToString().Trim();
-                if (StandardError != "") Trace.WriteLine(StandardError);
             }
 
             proc.Kill();

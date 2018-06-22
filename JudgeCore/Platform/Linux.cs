@@ -16,13 +16,14 @@ namespace JudgeCore.Platform
 
         public override void Kill(int exitcode = 0)
         {
+            if (inside.HasExited) return;
             var si = new ProcessStartInfo();
             si.FileName = sandbox_app;
             si.Arguments = $"kill {pid_t} {exitcode} kip";
             si.RedirectStandardError = true;
             si.StandardErrorEncoding = Console.Error.Encoding;
             var proc = Process.Start(si);
-            var ret = proc.StandardOutput.ReadToEnd();
+            var ret = proc.StandardError.ReadToEnd();
             proc.WaitForExit();
             Trace.WriteLine(ret);
         }
@@ -108,7 +109,9 @@ namespace JudgeCore.Platform
             var fp = File.ReadAllText("/tmp/judge_pipe").Trim().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             File.Delete("/tmp/judge_pipe");
             for (int i = 0; i < fp.Length - 1; i++)
-                Trace.Write(fp[i]);
+                Trace.WriteLine(fp[i]);
+            if (fp.Length == 0)
+                throw new NotImplementedException("Nothing traced.");
             var list = fp[fp.Length - 1].Split(' ');
             memp = ulong.Parse(list[0]);
             timep = ulong.Parse(list[1]);
