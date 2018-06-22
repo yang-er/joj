@@ -133,6 +133,7 @@ void watch_sandbox(
 // Thanks to hustoj
 void unset_sandbox(pid_t app)
 {
+	kill_proc_tree(app, SIGKILL, true);
 	ptrace(PTRACE_KILL, app, NULL, NULL);
 }
 
@@ -157,13 +158,15 @@ int read_proc_tree(pid_t begins, vector<pid_t> &to_kill)
     }
 }
 
-int kill_proc_tree(pid_t pid, int sig)
+int kill_proc_tree(pid_t pid, int sig, bool kip)
 {
     vector<pid_t> to_kill;
     read_proc_tree(pid, to_kill);
 
     for (pid_t cur : to_kill)
     {
+		if (kip && cur == pid)
+			continue;
         fprintf(stdprn, "%d ", cur);
         kill(cur, sig);
     }

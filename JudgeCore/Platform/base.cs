@@ -173,7 +173,7 @@ namespace JudgeCore
             if (dest.Length > 4096)
             {
                 dest.Append(", ......");
-                Kill();
+                Kill(25);
             }
         }
 
@@ -208,7 +208,7 @@ namespace JudgeCore
         /// <summary>
         /// 结束沙盒进程
         /// </summary>
-        public abstract void Kill();
+        public abstract void Kill(int exitcode = 0);
 
         /// <summary>
         /// 是否为运行时错误

@@ -81,9 +81,11 @@ namespace JudgeCore
                 Task.Run(() => proc.Watch());
                 Task.Run(() => Judger[id].Input(proc.StandardInput));
                 ti.Result = Judger[id].Judge(proc.StandardOutput);
+                if (ti.Result == JudgeResult.OutputLimitExceeded)
+                    proc.Kill(25);
                 proc.WaitForExit();
 
-                if (proc.ExitCode != 0)
+                if (proc.ExitCode != 0 && proc.ExitCode != 25)
                     ti.Result = JudgeResult.UndefinedError;
 
                 // Judge extra info

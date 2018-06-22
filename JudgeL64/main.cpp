@@ -142,7 +142,8 @@ int modkill(int argc, char **argv)
 		return -1;
 	if (argv[3] && sscanf(argv[3], "%d", &sig) == 1);
 	else sig = SIGKILL;
-	return kill_proc_tree(ppid, sig);
+	bool skip_parent = argv[4] && strcmp(argv[4], "kip") == 0;
+	return kill_proc_tree(ppid, sig, skip_parent);
 }
 
 int modhelp(int argc, char **argv)

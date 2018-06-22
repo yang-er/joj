@@ -95,7 +95,8 @@ void unset_sandbox(
 
 int kill_proc_tree(
 	pid_t pid,
-	int sig
+	int sig,
+	bool kip
 );
 
 /****************************

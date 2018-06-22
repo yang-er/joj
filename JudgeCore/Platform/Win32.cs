@@ -67,7 +67,7 @@ namespace JudgeCore.Platform
         protected override double RunningTimeCore() => (DateTime.Now - inside.StartTime).TotalMilliseconds;
         protected override bool HasExitedCore() => inside.HasExited;
 
-        public override void Kill()
+        public override void Kill(int exitcode = 0)
         {
             if (job_obj == IntPtr.Zero) return;
             UnsetSandbox(job_obj);

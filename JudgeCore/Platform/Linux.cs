@@ -2,10 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace JudgeCore.Platform
 {
@@ -15,10 +12,19 @@ namespace JudgeCore.Platform
         private int pid_t, ec;
         private ulong memp, timep;
         bool read_result;
-        
-        public override void Kill()
+        const string sandbox_app = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
+
+        public override void Kill(int exitcode = 0)
         {
-            // UnsetSandbox(pid_t);
+            var si = new ProcessStartInfo();
+            si.FileName = sandbox_app;
+            si.Arguments = $"kill {pid_t} {exitcode} kip";
+            si.RedirectStandardError = true;
+            si.StandardErrorEncoding = Console.Error.Encoding;
+            var proc = Process.Start(si);
+            var ret = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit();
+            Trace.WriteLine(ret);
         }
 
         public override bool OutOfLimit()
@@ -33,17 +39,15 @@ namespace JudgeCore.Platform
 
             if (PTrace)
             {
-                StartInfo.WorkingDirectory = "/";
                 StartInfo.Arguments = $"std -t{time_l} -m{mem_l} -p{proc_l} -l0 -s/tmp/judge_pipe -pt -ch /dest/{tmp_fn} {tmp_args}";
-                StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
             else
             {
                 StartInfo.Arguments = $"std -t{time_l} -m{mem_l} -p{proc_l} -s/tmp/judge_pipe {tmp_fn} {tmp_args}";
-                StartInfo.FileName = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
             }
 
             read_result = false;
+            StartInfo.FileName = sandbox_app;
             Trace.WriteLine(StartInfo.FileName + " " + StartInfo.Arguments);
             inside = Process.Start(StartInfo);
             pid_t = inside.Id;
@@ -81,6 +85,7 @@ namespace JudgeCore.Platform
         }
 
         public override bool WaitForExit(int len = -1) => inside.WaitForExit(len);
+
         protected override int ExitCodeCore()
         {
             ReadResult();
@@ -92,6 +97,7 @@ namespace JudgeCore.Platform
             ReadResult();
             return memp;
         }
+
         public override void Watch() { }
 
         private void ReadResult()
@@ -99,9 +105,11 @@ namespace JudgeCore.Platform
             if (read_result) return;
             if (!File.Exists("/tmp/judge_pipe"))
                 throw new NotImplementedException("This is not science.");
-            var fp = File.ReadAllText("/tmp/judge_pipe").Trim();
+            var fp = File.ReadAllText("/tmp/judge_pipe").Trim().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             File.Delete("/tmp/judge_pipe");
-            var list = fp.Split(' ');
+            for (int i = 0; i < fp.Length - 1; i++)
+                Trace.Write(fp[i]);
+            var list = fp[fp.Length - 1].Split(' ');
             memp = ulong.Parse(list[0]);
             timep = ulong.Parse(list[1]);
             ec = int.Parse(list[2]);
