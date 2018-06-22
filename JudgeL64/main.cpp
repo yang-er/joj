@@ -34,7 +34,7 @@ sandbox_args::sandbox_args()
 {
 	ok_calls = 0;
 	pipe_name = NULL;
-	mem = proc = time = 0;
+	mem = proc = time = file = 0;
 	chroot = ptrace = page_fault = false;
 }
 
@@ -59,6 +59,8 @@ bool solve_arg(int argc, char **argv, sandbox_args *ret)
 			ret->mem = tmp;
 		else if (sscanf(argv[argf], "-t%lu", &tmp) == 1)
 			ret->time = tmp;
+		else if (sscanf(argv[argf], "-o%lu", &tmp) == 1)
+			ret->file = tmp << 10;
 		else if (sscanf(argv[argf], "-p%lu", &tmp) == 1)
 			ret->proc = tmp;
 		else if (sscanf(argv[argf], "-l%lu", &tmp) == 1)

@@ -58,9 +58,11 @@ extern char *workdir;
 #define JOJ_RUN 9
 #define JOJ_UE  10
 
+#define LIM_FILE_SIZE 1<<18
+
 struct sandbox_args
 {
-	rlim_t mem, time, proc;
+	rlim_t mem, time, proc, file;
 	bool ptrace, chroot, page_fault;
 	int argf, ok_calls;
 	const char *pipe_name;

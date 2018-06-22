@@ -38,6 +38,7 @@ void watch_sandbox(
 {
 	init_syscalls_limits(ok_call_langs[args.ok_calls]);
 	int status;
+	uint64_t write_len = 0;
 	ulong tempmemory;
 	user_regs_struct reg;
 	rusage ruse;
@@ -123,6 +124,17 @@ void watch_sandbox(
 				stats->exitcode = SIGSYS;
 				unset_sandbox(app);
 				break;
+			}
+
+			if (call_id == SYS_write)
+			{
+				write_len += reg.REG_RET;
+				if (write_len > LIM_FILE_SIZE)
+				{
+					stats->exitcode = SIGXFSZ;
+					unset_sandbox(app);
+					break;
+				}
 			}
 		}
 
