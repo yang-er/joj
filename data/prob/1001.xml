@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<problem>
+	<id>1001</id>
+	<title><![CDATA[A + B Problem]]></title>
+	<description><![CDATA[Calculate A + B.]]></description>
+	<input><![CDATA[One line, which contain two integers A and B.]]></input>
+	<output><![CDATA[Output A + B in one line.]]></output>
+	<author><![CDATA[Online Judge Series]]></author>
+	<time_limit>1000</time_limit>
+	<memory_limit>32</memory_limit>
+
+	<samples>
+		<group>
+			<input><![CDATA[1 1
+]]></input>
+			<output><![CDATA[2
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[2333 4333
+]]></input>
+			<output><![CDATA[6666
+]]></output>
+		</group>
+	</samples>
+
+	<test_cases>
+		<group>
+			<input><![CDATA[1 2
+]]></input>
+			<output><![CDATA[3
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[0 0
+]]></input>
+			<output><![CDATA[0
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[1 -1
+]]></input>
+			<output><![CDATA[0
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[145565 2
+]]></input>
+			<output><![CDATA[145567
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[145565 145565
+]]></input>
+			<output><![CDATA[291130
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[122 2
+]]></input>
+			<output><![CDATA[124
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[-1 2
+]]></input>
+			<output><![CDATA[1
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[10 2
+]]></input>
+			<output><![CDATA[12
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[01 2
+]]></input>
+			<output><![CDATA[3
+]]></output>
+		</group>
+		<group>
+			<input><![CDATA[1 200
+]]></input>
+			<output><![CDATA[201
+]]></output>
+		</group>
+	</test_cases>
+
+	<hint><![CDATA[All the results will be in -2^31 ~ 2^31-1.]]></hint>
+</problem>
