@@ -6,9 +6,8 @@ using System.Text;
 
 namespace JudgeCore.Platform
 {
-    public class Linux : SandboxProcess
+    public sealed class Linux : SandboxProcess
     {
-        protected Process inside;
         private int pid_t, ec;
         private ulong memp, timep;
         bool read_result;
@@ -126,9 +125,7 @@ namespace JudgeCore.Platform
         }
 
         protected override double RunningTimeCore() => (inside.ExitTime - inside.StartTime).TotalMilliseconds;
-
-        protected override bool HasExitedCore() => inside.HasExited;
-
+        
         public override void WaitForExit() => inside.WaitForExit();
 
         public override bool IsRuntimeError

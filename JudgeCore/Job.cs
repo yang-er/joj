@@ -33,7 +33,7 @@ namespace JudgeCore
         /// <summary>
         /// 最大内存限制
         /// </summary>
-        public long MemoryLimit { get; set; } = 128;
+        public ulong MemoryLimit { get; set; } = 128;
 
         /// <summary>
         /// 最大运行时间限制
@@ -92,7 +92,7 @@ namespace JudgeCore
                 ti.Time = proc.TotalTime;
                 if (proc.IsTimeLimitExceeded)
                     ti.Result = JudgeResult.TimeLimitExceeded;
-                ti.Memory = (long)proc.MaxMemory;
+                ti.Memory = proc.MaxMemory;
                 if (proc.IsMemoryLimitExceeded)
                     ti.Result = JudgeResult.MemoryLimitExceeded;
                 ti.ExitCode = proc.ExitCode;

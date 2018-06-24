@@ -6,9 +6,8 @@ using System.Text;
 
 namespace JudgeCore.Platform
 {
-    public class WinNT : SandboxProcess
+    public sealed class WinNT : SandboxProcess
     {
-        protected Process inside;
         private IntPtr job_obj;
         
         protected override int ExitCodeCore() => inside.ExitCode;
@@ -16,7 +15,7 @@ namespace JudgeCore.Platform
         
         public override bool OutOfLimit()
         {
-            return TotalTime >= TimeLimit || RunningTime >= TimeLimit * 10 || (long)MaxMemory > MemoryLimit << 20;
+            return TotalTime >= TimeLimit || RunningTime >= TimeLimit * 10 || MaxMemory > MemoryLimit << 20;
         }
         
         public override void Start(StringBuilder _out = null, StringBuilder _err = null)
@@ -54,7 +53,7 @@ namespace JudgeCore.Platform
             }
         }
         
-        public override bool Setup(long mem, int time, int proc, bool trace)
+        public override bool Setup(ulong mem, int time, int proc, bool trace)
         {
             base.Setup(mem, time, proc, trace);
             job_obj = SetupSandbox((uint)mem, (uint)time, (uint)proc);
@@ -65,7 +64,6 @@ namespace JudgeCore.Platform
         public override void WaitForExit() => inside.WaitForExit();
         protected override double TotalTimeCore() => inside.UserProcessorTime.TotalMilliseconds;
         protected override double RunningTimeCore() => (DateTime.Now - inside.StartTime).TotalMilliseconds;
-        protected override bool HasExitedCore() => inside.HasExited;
 
         public override void Kill(int exitcode = 0)
         {
