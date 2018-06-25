@@ -9,7 +9,7 @@ namespace JudgeCore.Judger
     /// 特殊评判的一个例子
     /// </summary>
     [Obsolete("Only as an example", true)]
-    public class SpecialJudge : IJudger
+    public class OtherJudge : IJudger
     {
         private readonly string input;
 
@@ -36,7 +36,7 @@ namespace JudgeCore.Judger
             else return JudgeResult.PresentationError;
         }
 
-        public SpecialJudge(XmlNode node)
+        public OtherJudge(XmlNode node)
         {
             input = node.SelectSingleNode("input").InnerText;
         }
