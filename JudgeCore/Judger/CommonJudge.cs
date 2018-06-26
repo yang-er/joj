@@ -24,7 +24,7 @@ namespace JudgeCore.Judger
             }
             catch (IOException ex)
             {
-                Trace.WriteLine(ex.ToString());
+                Trace.WriteLine(ex.Message);
             }
         }
 

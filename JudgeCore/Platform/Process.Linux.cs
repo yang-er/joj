@@ -10,7 +10,9 @@ namespace JudgeCore.Platform
     {
         private int pid_t, ec;
         private ulong memp, timep;
-        bool read_result;
+        private bool read_result;
+        private StringBuilder pt_stderr;
+        private string pt_stderr_str;
         const string sandbox_app = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
 
         public override void Kill(int exitcode = 0)
@@ -24,6 +26,7 @@ namespace JudgeCore.Platform
             var proc = Process.Start(si);
             var ret = proc.StandardError.ReadToEnd();
             proc.WaitForExit();
+            inside.WaitForExit();
             Trace.WriteLine(ret);
         }
 
@@ -37,9 +40,15 @@ namespace JudgeCore.Platform
             var tmp_args = StartInfo.Arguments;
             var tmp_fn = StartInfo.FileName;
 
+            if (File.Exists("/tmp/judge_pipe"))
+                File.Delete("/tmp/judge_pipe");
+
             if (PTrace)
             {
                 StartInfo.Arguments = $"std -t{time_l} -m{mem_l} -p{proc_l} -l0 -s/tmp/judge_pipe -pt -ch /dest/{tmp_fn} {tmp_args}";
+                pt_stderr = new StringBuilder();
+                _err = pt_stderr;
+                info.RedirectStandardError = true;
             }
             else
             {
@@ -106,16 +115,39 @@ namespace JudgeCore.Platform
             if (!File.Exists("/tmp/judge_pipe"))
                 throw new NotImplementedException("This is not science.");
             var fp = File.ReadAllText("/tmp/judge_pipe").Trim().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            File.Delete("/tmp/judge_pipe");
+            //File.Delete("/tmp/judge_pipe");
             for (int i = 0; i < fp.Length - 1; i++)
                 Trace.WriteLine(fp[i]);
+            
             if (fp.Length == 0)
-                throw new NotImplementedException("Nothing traced.");
-            var list = fp[fp.Length - 1].Split(' ');
-            memp = ulong.Parse(list[0]);
-            timep = ulong.Parse(list[1]);
-            ec = int.Parse(list[2]);
-            read_result = true;
+            {
+                Trace.WriteLine("Nothing traced.");
+                timep = 0;
+                memp = 0;
+                ec = -1;
+                read_result = true;
+            }
+            else
+            {
+                var list = fp[fp.Length - 1].Split(' ');
+                memp = ulong.Parse(list[0]);
+                timep = ulong.Parse(list[1]);
+                ec = int.Parse(list[2]);
+                read_result = true;
+            }
+
+            if (pt_stderr != null)
+            {
+                pt_stderr_str = pt_stderr.ToString().Trim();
+                pt_stderr.Clear();
+                if (pt_stderr_str.Length > 0)
+                {
+                    Trace.WriteLine("=== run stderr ===");
+                    Trace.WriteLine(pt_stderr_str.Trim());
+                    Trace.WriteLine("==================");
+                    if (ec == 31 && pt_stderr_str.Contains("invalid pointer")) ec = 11;
+                }
+            }
         }
 
         protected override double TotalTimeCore()
@@ -135,6 +167,8 @@ namespace JudgeCore.Platform
                 switch (ExitCodeCore())
                 {
                     case 31:   // SIGSYS
+                    case 10:   // SIGBUS
+                    case 9:    // SIGABT
                     case 4:    // SIGILL
                     case 2:    // SIGINT
                     case 8:    // SIGFPE

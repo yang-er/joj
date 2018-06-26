@@ -89,7 +89,7 @@ namespace JudgeCore
                 if (StandardOutput != "") Trace.WriteLine(StandardOutput);
             }
 
-            proc.Kill();
+            proc.Kill(6);
             ExitCode = proc.ExitCode;
             Trace.WriteLine($"Compiler exited with status code {ExitCode}. ");
         }
