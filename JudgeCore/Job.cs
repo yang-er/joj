@@ -84,6 +84,7 @@ namespace JudgeCore
                 if (ti.Result == JudgeResult.OutputLimitExceeded)
                     proc.Kill(25);
                 proc.WaitForExit();
+                proc.RefreshState(Compiler);
 
                 if (proc.ExitCode != 0 && proc.ExitCode != 25)
                     ti.Result = JudgeResult.UndefinedError;

@@ -14,16 +14,18 @@ namespace JudgeCore
     {
         protected ProcessStartInfo info;
         protected ulong mem_l;
-        protected int time_l, proc_l;
+        protected int time_l, proc_l, ec;
         protected StreamReader stdout, stderr;
         protected StreamWriter stdin;
         protected Process inside;
         protected abstract ulong MaxMemoryCore();
-        protected abstract int ExitCodeCore();
         protected abstract double TotalTimeCore();
         protected abstract double RunningTimeCore();
         protected virtual bool HasExitedCore() => inside.HasExited;
+        protected bool read_result;
+        protected StringBuilder pt_stderr;
         private bool keep_reading = true;
+        private string pt_stderr_str;
 
         /// <summary>
         /// 跟踪进程执行状态
@@ -38,7 +40,7 @@ namespace JudgeCore
         /// <summary>
         /// 退出状态码
         /// </summary>
-        public int ExitCode => ExitCodeCore();
+        public int ExitCode => AssertAndReturn(read_result, "State has been checked.", ec);
 
         /// <summary>
         /// 是否已经退出
@@ -104,6 +106,37 @@ namespace JudgeCore
         /// 是否超过沙盒的限制
         /// </summary>
         public abstract bool OutOfLimit();
+
+        /// <summary>
+        /// 刷新状态
+        /// </summary>
+        public virtual void RefreshState(ICompiler compiler)
+        {
+            if (compiler != null && pt_stderr != null)
+            {
+                pt_stderr_str = pt_stderr.ToString().Trim();
+                pt_stderr.Clear();
+                if (pt_stderr_str.Length > 0)
+                {
+                    Trace.WriteLine(pt_stderr_str.Trim());
+                    compiler.CheckStandardError(pt_stderr_str, ref ec);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 断言并返回
+        /// </summary>
+        /// <typeparam name="T">要返回的类型</typeparam>
+        /// <param name="cond">条件</param>
+        /// <param name="msg">不满足的时候返回消息</param>
+        /// <param name="val">返回值</param>
+        /// <returns>返回值</returns>
+        protected static T AssertAndReturn<T>(bool cond, string msg, T val)
+        {
+            Debug.Assert(cond, msg);
+            return val;
+        }
 
         internal SandboxProcess()
         {

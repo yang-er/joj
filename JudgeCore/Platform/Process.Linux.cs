@@ -8,34 +8,28 @@ namespace JudgeCore.Platform
 {
     public sealed class Linux : SandboxProcess
     {
-        private int pid_t, ec;
+        private int pid_t;
         private ulong memp, timep;
-        private bool read_result;
-        private StringBuilder pt_stderr;
-        private string pt_stderr_str;
         const string sandbox_app = "/home/xiaoyang/Source/joj/Debug/netcoreapp2.0/JudgeL64.out";
 
         public override void Kill(int exitcode = 0)
         {
             if (inside.HasExited) return;
-            var si = new ProcessStartInfo();
-            si.FileName = sandbox_app;
-            si.Arguments = $"kill {pid_t} {exitcode} kip";
-            si.RedirectStandardError = true;
-            si.StandardErrorEncoding = Console.Error.Encoding;
-            var proc = Process.Start(si);
+
+            var proc = Process.Start(new ProcessStartInfo
+            {
+                FileName = sandbox_app,
+                Arguments = $"kill {pid_t} {exitcode} kip",
+                RedirectStandardError = true,
+                StandardErrorEncoding = Console.Error.Encoding
+            });
+
             var ret = proc.StandardError.ReadToEnd();
 
             // Prevent zombie sub process
             proc.WaitForExit();
             inside.WaitForExit();
             Trace.WriteLine(ret.Trim());
-        }
-
-        public override bool OutOfLimit()
-        {
-            // Only should be run inside
-            throw new PlatformNotSupportedException();
         }
 
         public override void Start(StringBuilder _out = null, StringBuilder _err = null)
@@ -49,9 +43,6 @@ namespace JudgeCore.Platform
             if (PTrace)
             {
                 StartInfo.Arguments = $"std -t{time_l} -m{mem_l} -p{proc_l} -l0 -s/tmp/judge_pipe -pt -ch /dest/{tmp_fn} {tmp_args}";
-                pt_stderr = new StringBuilder();
-                _err = pt_stderr;
-                info.RedirectStandardError = true;
             }
             else
             {
@@ -96,23 +87,7 @@ namespace JudgeCore.Platform
             }
         }
 
-        public override bool WaitForExit(int len = -1) => inside.WaitForExit(len);
-
-        protected override int ExitCodeCore()
-        {
-            ReadResult();
-            return ec;
-        }
-
-        protected override ulong MaxMemoryCore()
-        {
-            ReadResult();
-            return memp;
-        }
-
-        public override void Watch() { }
-
-        private void ReadResult()
+        public override void RefreshState(ICompiler compiler)
         {
             if (read_result) return;
             var pipe_filename = "/tmp/judge_pipe."+pid_t;
@@ -142,55 +117,37 @@ namespace JudgeCore.Platform
                 read_result = true;
             }
 
-            if (pt_stderr != null)
-            {
-                pt_stderr_str = pt_stderr.ToString().Trim();
-                pt_stderr.Clear();
-                if (pt_stderr_str.Length > 0)
-                {
-                    Trace.WriteLine(pt_stderr_str.Trim());
-                    if (ec == 31 && pt_stderr_str.Contains("invalid pointer")) ec = 11;
-                }
-            }
+            base.RefreshState(compiler);
         }
 
-        protected override double TotalTimeCore()
-        {
-            ReadResult();
-            return timep;
-        }
-
+        public override bool OutOfLimit() => AssertAndReturn(false, "We shouldn't call OutOfLimit() function.", true);
+        protected override ulong MaxMemoryCore() => AssertAndReturn(read_result, "State has been checked.", memp);
+        protected override double TotalTimeCore() => AssertAndReturn(read_result, "State has been checked.", timep);
         protected override double RunningTimeCore() => (inside.ExitTime - inside.StartTime).TotalMilliseconds;
         
+        public override void Watch() { }
         public override void WaitForExit() => inside.WaitForExit();
+        public override bool WaitForExit(int len) => inside.WaitForExit(len);
 
-        public override bool IsRuntimeError
-        {
-            get
-            {
-                switch (ExitCodeCore())
-                {
-                    case 31:   // SIGSYS
-                    case 10:   // SIGBUS
-                    case 9:    // SIGABT
-                    case 4:    // SIGILL
-                    case 2:    // SIGINT
-                    case 8:    // SIGFPE
-                    case 11:   // SIGSEGV
-                    case 13:   // SIGPIPE
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        }
-
+        public override bool IsRuntimeError => Enum.IsDefined(typeof(ExitSignal), ec);
         public override bool IsTimeLimitExceeded => (int)timep > time_l || ec == 14 || ec == 24;
 
         public Linux()
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix)
                 throw new Win32Exception("平台读取错误");
+        }
+
+        public enum ExitSignal : int
+        {
+            SIGSYS = 31,
+            SIGBUS = 10,
+            SIGABT = 9,
+            SIGILL = 4,
+            SIGINT = 2,
+            SIGFPE = 8,
+            SIGSEGV = 11,
+            SIGPIPE = 13,
         }
     }
 }
