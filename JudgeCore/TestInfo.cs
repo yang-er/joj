@@ -13,7 +13,7 @@
         /// <summary>
         /// 运行内存大小
         /// </summary>
-        public long Memory;
+        public ulong Memory;
 
         /// <summary>
         /// 运行结果

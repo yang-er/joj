@@ -2,12 +2,13 @@
 #include <sys/syscall.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <errno.h>
+#include <signal.h>
+#include <fcntl.h>
 
-extern int ok_call_cpp[256];
-extern int ok_call_pascal[256];
-extern int ok_call_java[256];
-extern int ok_call_python[256];
-
+extern int *ok_call_langs[32];
 const bool record_call = false;
 const int call_array_size = 512;
 extern unsigned int call_id;

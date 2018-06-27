@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Xml;
 
 namespace JudgeCore.Judger
 {
@@ -14,9 +16,16 @@ namespace JudgeCore.Judger
 
         public void Input(StreamWriter stream)
         {
-            stream.Write(_input);
-            stream.Flush();
-            stream.Close();
+            try
+            {
+                stream.Write(_input);
+                stream.Flush();
+                stream.Close();
+            }
+            catch (IOException ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
         }
 
         public JudgeResult Judge(StreamReader stream)
@@ -62,5 +71,10 @@ namespace JudgeCore.Judger
             _correct = ans.Replace("\r", "");
             _realthing = _correct.Replace("\n", "").Replace("\t", "").Replace(" ", "");
         }
+
+        public CommonJudge(XmlNode node) : this(
+            node.SelectSingleNode("input").InnerText,
+            node.SelectSingleNode("output").InnerText
+        ) { }
     }
 }

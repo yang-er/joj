@@ -31,6 +31,11 @@ namespace JudgeCore.Compiler
             return true;
         }
 
+        public override void CheckStandardError(string err, ref int ec)
+        {
+            //throw new NotImplementedException();
+        }
+
         public Msvc(XmlNode root)
         {
             Appendix = ".exe";

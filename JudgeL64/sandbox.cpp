@@ -1,14 +1,13 @@
 #include "stdafx.h"
 
-bool use_ptrace = false;
-
 bool switch_uid()
 {
 	uid_t r, e, s;
-	setresgid(USERID, USERID, USERID);
+	int ret;
+	ret = setresgid(USERID, USERID, USERID);
 	getresgid(&r, &e, &s);
 	if (!r || !e || !s) exit(-1);
-	setreuid(USERID, USERID);
+	ret = setreuid(USERID, USERID);
 	getresuid(&r, &e, &s);
 	if (!r || !e || !s) exit(-1);
 	return true;
@@ -17,12 +16,12 @@ bool switch_uid()
 bool limit_memory(rlim_t mem)
 {
 	rlimit limits;
-	limits.rlim_cur = limits.rlim_max = mem << 20;
+	limits.rlim_cur = limits.rlim_max = rlim_t((mem << 20) * 1.1);
 	int ret = setrlimit(RLIMIT_DATA, &limits);
 	if (ret != 0) exit(ret);
-	ret = setrlimit(RLIMIT_STACK, &limits);
-	if (ret != 0) exit(ret);
-	limits.rlim_cur = limits.rlim_max = 0;
+	//ret = setrlimit(RLIMIT_STACK, &limits);
+	//if (ret != 0) exit(ret);
+	//limits.rlim_cur = limits.rlim_max = 0;
 	ret = setrlimit(RLIMIT_AS, &limits);
 	if (ret == 0) return true;
 	else exit(ret);
@@ -33,6 +32,8 @@ bool limit_time(rlim_t time)
 	rlimit limits;
 	limits.rlim_cur = limits.rlim_max = time;
 	int ret = setrlimit(RLIMIT_CPU, &limits);
+	alarm(0);
+	alarm(time);
 	if (ret == 0) return true;
 	else exit(ret);
 }
@@ -49,16 +50,11 @@ bool limit_proc(rlim_t proc)
 	else exit(ret);
 }
 
-bool set_ptrace()
-{
-	use_ptrace = true;
-	ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-	return true;
-}
-
 bool set_chroot(const char *to_chdir)
 {
-	chroot("/home/judge");
-	chdir(to_chdir ? to_chdir : "/");
-	return true;
+	int ret;
+	ret = chroot("/home/judge");
+	ret = ret && chdir(to_chdir ? to_chdir : "/");
+	if (ret == 0) return true;
+	else exit(ret);
 }

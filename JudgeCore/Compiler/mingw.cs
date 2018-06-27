@@ -44,7 +44,13 @@ namespace JudgeCore.Compiler
                 ret.StartInfo.Environment["PATH"] = ToolchainPath[0] + ";";
             return ret;
         }
-        
+
+        public override void CheckStandardError(string err, ref int ec)
+        {
+            if (ec == 4194432) ec = (int)Platform.WinNT.ErrorCode.SegmentFault;
+            //throw new NotImplementedException();
+        }
+
         [Obsolete("This kind of access is not flexible", true)]
         public MinGW()
         {

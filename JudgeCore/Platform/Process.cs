@@ -1,5 +1,6 @@
 ﻿using JudgeCore.Platform;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -9,18 +10,22 @@ namespace JudgeCore
     /// <summary>
     /// 沙盒进程
     /// </summary>
-    public abstract class SandboxProcess
+    public abstract class SandboxProcess : Component
     {
-        protected Process inside;
         protected ProcessStartInfo info;
-        protected long mem_l;
-        protected int time_l, proc_l;
+        protected ulong mem_l;
+        protected int time_l, proc_l, ec;
         protected StreamReader stdout, stderr;
         protected StreamWriter stdin;
+        protected Process inside;
         protected abstract ulong MaxMemoryCore();
-        protected abstract int ExitCodeCore();
         protected abstract double TotalTimeCore();
         protected abstract double RunningTimeCore();
+        protected virtual bool HasExitedCore() => inside.HasExited;
+        protected bool read_result;
+        protected StringBuilder pt_stderr;
+        private bool keep_reading = true;
+        private string pt_stderr_str;
 
         /// <summary>
         /// 跟踪进程执行状态
@@ -35,12 +40,12 @@ namespace JudgeCore
         /// <summary>
         /// 退出状态码
         /// </summary>
-        public int ExitCode => ExitCodeCore();
+        public int ExitCode => AssertAndReturn(read_result, "State has been checked.", ec);
 
         /// <summary>
         /// 是否已经退出
         /// </summary>
-        public bool HasExited => inside.HasExited;
+        public bool HasExited => HasExitedCore();
 
         /// <summary>
         /// 标准输出流
@@ -60,17 +65,17 @@ namespace JudgeCore
         /// <summary>
         /// 沙盒进程内存限制
         /// </summary>
-        public long MemoryLimit => mem_l;
+        public ulong MemoryLimit => mem_l;
 
         /// <summary>
         /// 沙盒进程时间限制
         /// </summary>
-        public long TimeLimit => time_l;
+        public int TimeLimit => time_l;
 
         /// <summary>
         /// 沙盒内进程数量限制
         /// </summary>
-        public long ProcessLimit => proc_l;
+        public int ProcessLimit => proc_l;
 
         /// <summary>
         /// 进程启动信息
@@ -101,6 +106,37 @@ namespace JudgeCore
         /// 是否超过沙盒的限制
         /// </summary>
         public abstract bool OutOfLimit();
+
+        /// <summary>
+        /// 刷新状态
+        /// </summary>
+        public virtual void RefreshState(ICompiler compiler)
+        {
+            if (compiler != null && pt_stderr != null)
+            {
+                pt_stderr_str = pt_stderr.ToString().Trim();
+                pt_stderr.Clear();
+                if (pt_stderr_str.Length > 0)
+                {
+                    Trace.WriteLine(pt_stderr_str.Trim());
+                    compiler.CheckStandardError(pt_stderr_str, ref ec);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 断言并返回
+        /// </summary>
+        /// <typeparam name="T">要返回的类型</typeparam>
+        /// <param name="cond">条件</param>
+        /// <param name="msg">不满足的时候返回消息</param>
+        /// <param name="val">返回值</param>
+        /// <returns>返回值</returns>
+        protected static T AssertAndReturn<T>(bool cond, string msg, T val)
+        {
+            Debug.Assert(cond, msg);
+            return val;
+        }
 
         internal SandboxProcess()
         {
@@ -158,11 +194,22 @@ namespace JudgeCore
         /// <param name="e">元数据</param>
         protected void StreamPipe(StringBuilder dest, DataReceivedEventArgs e)
         {
-            dest.AppendLine(e.Data);
+            StreamPipe(dest, e.Data);
+        }
+
+        /// <summary>
+        /// 引导异步流内容
+        /// </summary>
+        /// <param name="dest">目标</param>
+        /// <param name="val">元数据</param>
+        protected void StreamPipe(StringBuilder dest, string val)
+        {
+            if (!keep_reading) return;
+            dest.AppendLine(val);
             if (dest.Length > 4096)
             {
                 dest.Append(", ......");
-                Kill();
+                keep_reading = false;
             }
         }
 
@@ -173,7 +220,7 @@ namespace JudgeCore
         /// <param name="cpu">CPU时间限制</param>
         /// <param name="pl">进程数量限制</param>
         /// <returns>无意义</returns>
-        public virtual bool Setup(long mem, int time, int proc, bool trace = false)
+        public virtual bool Setup(ulong mem, int time, int proc, bool trace = false)
         {
             mem_l = mem;
             time_l = time;
@@ -197,6 +244,21 @@ namespace JudgeCore
         /// <summary>
         /// 结束沙盒进程
         /// </summary>
-        public abstract void Kill();
+        public abstract void Kill(int exitcode = 0);
+
+        /// <summary>
+        /// 是否为运行时错误
+        /// </summary>
+        public abstract bool IsRuntimeError { get; }
+
+        /// <summary>
+        /// 是否为内存超限
+        /// </summary>
+        public virtual bool IsMemoryLimitExceeded => MaxMemory > mem_l << 20;
+
+        /// <summary>
+        /// 是否为内存超限
+        /// </summary>
+        public virtual bool IsTimeLimitExceeded => TotalTime > time_l;
     }
 }

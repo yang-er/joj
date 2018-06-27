@@ -75,9 +75,8 @@ namespace JudgeCore
         protected void ReadCompileResult(SandboxProcess proc)
         {
             var stdout = new StringBuilder();
-            var stderr = new StringBuilder();
             proc.Setup(128, 1000, 10);
-            proc.Start(stdout, stderr);
+            proc.Start(stdout, stdout);
             proc.WaitForExit(3000);
 
             if (!proc.HasExited)
@@ -88,11 +87,10 @@ namespace JudgeCore
             {
                 StandardOutput = stdout.ToString().Trim();
                 if (StandardOutput != "") Trace.WriteLine(StandardOutput);
-                StandardError = stderr.ToString().Trim();
-                if (StandardError != "") Trace.WriteLine(StandardError);
             }
 
-            proc.Kill();
+            proc.Kill(6);
+            proc.RefreshState(null);
             ExitCode = proc.ExitCode;
             Trace.WriteLine($"Compiler exited with status code {ExitCode}. ");
         }
@@ -209,9 +207,11 @@ namespace JudgeCore
         {
             Trace.WriteLine("");
             var proc = MakeProcess(Path.Combine(ToolchainPath[0], main), args);
-            proc.Start();
-            var val = proc.StandardError.ReadToEnd() + proc.StandardOutput.ReadToEnd();
-            Trace.WriteLine(val.Trim());
+            var sb = new StringBuilder();
+            proc.Start(sb, sb);
+            proc.WaitForExit();
+            var val = sb.ToString().Trim();
+            Trace.WriteLine(val);
             return val;
         }
         
@@ -244,6 +244,8 @@ namespace JudgeCore
         {
             return CreateJudgeProcess(guid.ToString("D"));
         }
+
+        public abstract void CheckStandardError(string err, ref int ec);
 
         /// <summary>
         /// 创建评测进程

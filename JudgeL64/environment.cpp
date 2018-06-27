@@ -1,92 +1,19 @@
 #include "stdafx.h"
 #include "trace_call.h"
-
-// Obsolete
-pid_t setup_sandbox(
-    rlim_t mem, rlim_t time, rlim_t proc,
-    bool to_chroot, const char *to_chdir,
-    bool to_ptrace,
-    const char *fn, const char *args,
-    int *std_in, int *std_out, int *std_err )
-{
-    pid_t sub_proc = fork();
-    if (sub_proc == 0) // This means, currently running in child process.
-    {
-        // Redirect stdio
-		if (std_in) create_pipe(std_in, STDIN_FILENO);
-		if (std_out) create_pipe(std_out, STDOUT_FILENO);
-		if (std_err) create_pipe(std_err, STDERR_FILENO);
-
-		// Setting limit
-        limit_memory(mem);
-        limit_time(time);
-        limit_proc(proc);
-        if (to_chroot)
-            set_chroot(to_chdir);
-        ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-
-		// parsing args
-		int argc = 0;
-		char *argv[32], file_name[strlen(fn)+1];
-		strcpy(file_name, fn);
-		argv[argc++] = file_name;
-
-		if (args)
-		{
-			int len = strlen(args);
-			char cp_args[len + 2], *p = cp_args;
-			strcpy(cp_args, args);
-			argv[argc++] = p;
-			while (p = strchr(p, ' '))
-			{
-				if (p[1] == ' ')
-				{
-					p[0] = 0;
-					p++;
-				}
-				else
-				{
-					p[0] = 0;
-					argv[argc++] = p + 1;
-				}
-			}
-		}
-
-		execv(fn, argv);
-		exit(-1);
-    }
-    else // This means, currently running in parent process.
-    {
-		if (to_ptrace)
-		{
-			use_ptrace = true;
-			ptrace(PTRACE_SETOPTIONS, sub_proc, NULL, 
-				PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACEEXIT);
-		}
-		else
-		{
-			use_ptrace = false;
-		}
-
-		return sub_proc;
-    }
-}
-
-// Obsolete
-int create_pipe(int *fd, int std)
-{
-
-}
+#include <vector>
+#include <algorithm>
+using std::vector;
+using std::binary_search;
 
 // Thanks to hustoj
-int get_proc_status(int pid, const char *mark)
+int get_proc_status(pid_t pid, const char *mark)
 {
 	FILE * pf;
 	char fn[96], buf[150];
 	int ret = 0;
 	sprintf(fn, "/proc/%d/status", pid);
 	pf = fopen(fn, "re");
-	int m = strlen(mark);
+	size_t m = strlen(mark);
 	while (pf && fgets(buf, 149, pf))
 	{
 		buf[strlen(buf) - 1] = 0;
@@ -98,24 +25,21 @@ int get_proc_status(int pid, const char *mark)
 }
 
 // Thanks to hustoj
-int get_page_fault_mem(struct rusage & ruse, pid_t & pidApp)
-{
-	return ruse.ru_minflt * getpagesize();
-}
-
-int get_miliseconds(timeval &r)
+ulong get_miliseconds(timeval &r)
 {
 	return r.tv_sec * 1000 + r.tv_usec / 1000;
 }
 
 // Thanks to hustoj
 void watch_sandbox(
-	rlim_t _mem, rlim_t _time, pid_t app,
-	int *max_mem, int *max_time, int *exitcode, bool pf
-  )
+	const sandbox_args &args,
+	pid_t app,
+	sandbox_stat *stats )
 {
-	init_syscalls_limits(ok_call_cpp);
-	int status, sig, tempmemory;
+	init_syscalls_limits(ok_call_langs[args.ok_calls]);
+	int status;
+	uint64_t write_len = 0;
+	ulong tempmemory;
 	user_regs_struct reg;
 	rusage ruse;
 	uint call_id;
@@ -124,10 +48,8 @@ void watch_sandbox(
 
 	while (true)
 	{
-		fprintf(stderr, "before wait4\n");
 		wait4(app, &status, __WALL, &ruse);
 		
-		printf("after wait4");
 		if (first)
 		{
 			ptrace(PTRACE_SETOPTIONS, app, NULL,
@@ -135,62 +57,136 @@ void watch_sandbox(
 			first = false;
 		}
 		
+		stats->exitcode = WEXITSTATUS(status);
 		if (WIFEXITED(status)) break;
-		*exitcode = WEXITSTATUS(status);
 
-		printf("WEXITSTATUS\n");
-		tempmemory = pf ? ruse.ru_minflt * getpagesize() 
-			: get_proc_status(app, "VmPeak:") << 10;
+		tempmemory = args.page_fault ? ruse.ru_minflt * getpagesize() 
+			: get_proc_status(app, "VmSize:") << 10;
 
-		if (tempmemory > *max_mem)
-			*max_mem = tempmemory;
+		if (tempmemory > stats->max_mem)
+			stats->max_mem = tempmemory;
 
-		if (*max_mem > _mem << 20)
+		if (args.mem && stats->max_mem > (args.mem << 20))
 		{
 			unset_sandbox(app);
+			stats->exitcode = SIGUSR2;
 			break;
 		}
 
-		if (time(NULL) > p + _time / 100)
+		if (args.time && ulong(time(NULL) - p) > args.time / 300)
 		{
+			fprintf(stdprn, "Run out of 2nd time limit : may be there's pending codes.\n");
 			unset_sandbox(app);
+			stats->exitcode = SIGXCPU;
 			break;
 		}
 
-		if (*exitcode != 5 && *exitcode != 0 && *exitcode != 133)
+		stats->max_time = get_miliseconds(ruse.ru_utime);
+		if (stats->max_time > args.time)
 		{
-			fprintf(stderr, "ExitSignal: %s\n", strsignal(*exitcode));
+			fprintf(stdprn, "Run out of regular time limit.\n");
 			unset_sandbox(app);
+			stats->exitcode = SIGXCPU;
 			break;
 		}
 
-		printf("PTRACE_GETREGS\n");
-		ptrace(PTRACE_GETREGS, app, NULL, &reg);
-		call_id = (unsigned int)reg.REG_SYSCALL % call_array_size;
+		if (stats->exitcode != 5 && stats->exitcode != 0 && stats->exitcode != 133 && (args.ptrace && stats->exitcode != 17))
+		{
+			switch (stats->exitcode)
+			{
+				case SIGCHLD:
+				case SIGALRM:
+					alarm(0);
+					break;
+				case SIGPIPE:
+					stats->exitcode = SIGXFSZ;
+				default:
+					break;
+			}
 
-		if (call_counter[call_id])
-		{
-			//call_counter[reg.REG_SYSCALL]--;
-		}
-		else if (record_call)
-		{
-			call_counter[call_id] = 1;
-		}
-		else
-		{
-			fprintf(stderr, "Not allowed syscall: %d.\n", call_id);
-			unset_sandbox(app);
+			fprintf(stdprn, "Exit Signal: %s\n", strsignal(stats->exitcode));
+			// unset_sandbox(app);
 			break;
 		}
 
-		printf("PTRACE_SYSCALL\n");
+		if (args.ptrace)
+		{
+			ptrace(PTRACE_GETREGS, app, NULL, &reg);
+			call_id = (unsigned int)reg.REG_SYSCALL % call_array_size;
+
+			if (call_counter[call_id])
+			{
+				//call_counter[reg.REG_SYSCALL]--;
+			}
+			else if (record_call)
+			{
+				call_counter[call_id] = 1;
+			}
+			else
+			{
+				fprintf(stdprn, "Not allowed syscall: %d.\n", call_id);
+				stats->exitcode = SIGSYS;
+				unset_sandbox(app);
+				break;
+			}
+
+			if (false && call_id == SYS_write)
+			{
+				write_len += reg.REG_RET;
+				if (write_len > LIM_FILE_SIZE)
+				{
+					stats->exitcode = SIGXFSZ;
+					unset_sandbox(app);
+					break;
+				}
+			}
+		}
+
 		ptrace(PTRACE_SYSCALL, app, NULL, NULL);
-		printf("next round\n");
 	}
 }
 
 // Thanks to hustoj
 void unset_sandbox(pid_t app)
 {
+	kill_proc_tree(app, SIGKILL, true);
 	ptrace(PTRACE_KILL, app, NULL, NULL);
+}
+
+int read_proc_tree(pid_t begins, vector<pid_t> &to_kill)
+{
+    DIR *dp = opendir("/proc");
+    if (dp == NULL) return -1;
+    dirent *dr;
+    pid_t temp;
+    while (dr = readdir(dp))
+    {
+        if (dr->d_type != 4)
+            continue;
+        else if (sscanf(dr->d_name, "%d", &temp) != 1)
+            continue;
+        else if (temp < begins)
+            continue;
+        else if (temp == begins)
+            to_kill.push_back(begins);
+        else if (binary_search(to_kill.begin(), to_kill.end(), get_proc_status(temp, "PPid:")))
+            to_kill.push_back(temp);
+    }
+}
+
+int kill_proc_tree(pid_t pid, int sig, bool kip)
+{
+    vector<pid_t> to_kill;
+    read_proc_tree(pid, to_kill);
+
+    for (pid_t cur : to_kill)
+    {
+		if (kip && cur == pid)
+			continue;
+        fprintf(stdprn, "%d ", cur);
+        kill(cur, sig);
+    }
+
+    fprintf(stdprn, "SIG%d sent.\n", sig);
+    return 0;
 }

@@ -20,7 +20,8 @@
 #include <assert.h>
 #include <errno.h>
 
-#define DLL extern "C"
+#define _BEGIN_DLL_DECL extern "C" {
+#define _END_DLL_DECL }
 
 /****************************
  *    Common Definitions    *
@@ -57,55 +58,75 @@ extern char *workdir;
 #define JOJ_RUN 9
 #define JOJ_UE  10
 
+#define LIM_FILE_SIZE 1<<18
+
+struct sandbox_args
+{
+	rlim_t mem, time, proc, file;
+	bool ptrace, chroot, page_fault;
+	int argf, ok_calls;
+	const char *pipe_name;
+	sandbox_args();
+};
+
+struct sandbox_stat
+{
+	ulong max_mem, max_time;
+	int exitcode;
+	sandbox_stat();
+};
+
+extern FILE *stdprn;
+#define stdprn stdprn
+
+_BEGIN_DLL_DECL
+
 /****************************
 *   Environment Prepares   *
 ****************************/
 
-// Create a pipe
-DLL int create_pipe(int *fd, int std);
-
-// Watch for PTRACE
-DLL void watch_sandbox(
-	rlim_t mem, rlim_t time, pid_t app,
-	int *max_mem, int *max_time, int *exitcode, bool pf
+void watch_sandbox(
+	const sandbox_args &args,
+	pid_t app,
+	sandbox_stat *stats
 );
 
-// Unset sandbox
-DLL void unset_sandbox(pid_t app);
-
-// Setup a sandbox
-DLL pid_t setup_sandbox(
-    rlim_t mem, rlim_t time, rlim_t proc,
-    bool to_chroot, const char *chdir,
-    bool to_ptrace,
-	const char *fn, const char *argv,
-	int *std_in, int *std_out, int *std_err
+void unset_sandbox(
+	pid_t app
 );
 
+int kill_proc_tree(
+	pid_t pid,
+	int sig,
+	bool kip
+);
 
 /****************************
  *    Sandbox Setting up    *
  ****************************/
 
-DLL bool use_ptrace;
+bool switch_uid();
 
-// Switch the uid to `USERID`
-DLL bool switch_uid();
+bool limit_memory(
+	rlim_t mem
+);
 
-// Set Memory Limit
-DLL bool limit_memory(rlim_t mem);
+bool limit_time(
+	rlim_t time
+);
 
-// Set CPU Time Limit
-DLL bool limit_time(rlim_t time);
+bool limit_proc(
+	rlim_t proc
+);
 
-// Set Process Limit
-DLL bool limit_proc(rlim_t proc);
+bool set_chroot(
+	const char *to_chdir
+);
 
-// Setup PTRACE
-DLL bool set_ptrace();
+bool solve_arg(
+	int argc,
+	char **argv,
+	sandbox_args *ret
+);
 
-// Setup chroot
-DLL bool set_chroot(const char *to_chdir);
-
-// Solve arguments
-DLL bool solve_arg(char *arg);
+_END_DLL_DECL

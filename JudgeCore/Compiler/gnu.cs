@@ -29,6 +29,12 @@ namespace JudgeCore.Compiler
             return true;
         }
 
+        public override void CheckStandardError(string err, ref int ec)
+        {
+            if (ec == 31 && err.Contains("invalid pointer")) ec = 11;
+            if (ec == 31 && err.Contains("std::bad_alloc")) ec = 12;
+        }
+
         public GNU(XmlNode xml)
         {
             LoadFromXml(xml);

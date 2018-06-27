@@ -70,7 +70,7 @@ namespace JudgeDaemon
                 prob = Problems[obj.GetInt32(1)];
                 job = new Job(CompilerList[obj.GetInt32(2)], prob.Judger)
                 {
-                    MemoryLimit = prob.MemoryLimit,
+                    MemoryLimit = (ulong)prob.MemoryLimit,
                     TimeLimit = prob.ExecuteTimeLimit,
                 };
                 Console.WriteLine();
@@ -103,7 +103,7 @@ namespace JudgeDaemon
                 if (res.Result == JudgeResult.Accepted)
                     acs++;
                 exetime += (long)res.Time;
-                exemem += res.Memory / 1024;
+                exemem += (long)res.Memory / 1024;
                 TotalQueries++;
                 command.ExecuteNonQuery();
             }
