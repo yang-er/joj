@@ -75,7 +75,7 @@ void watch_sandbox(
 
 		if (args.time && ulong(time(NULL) - p) > args.time / 300)
 		{
-			fprintf(stdprn, "run out of 2nd limit.\n");
+			fprintf(stdprn, "Run out of 2nd time limit : may be there's pending codes.\n");
 			unset_sandbox(app);
 			stats->exitcode = SIGXCPU;
 			break;
@@ -84,7 +84,7 @@ void watch_sandbox(
 		stats->max_time = get_miliseconds(ruse.ru_utime);
 		if (stats->max_time > args.time)
 		{
-			fprintf(stdprn, "run out of 1st limit.\n");
+			fprintf(stdprn, "Run out of regular time limit.\n");
 			unset_sandbox(app);
 			stats->exitcode = SIGXCPU;
 			break;
@@ -97,11 +97,15 @@ void watch_sandbox(
 				case SIGCHLD:
 				case SIGALRM:
 					alarm(0);
+					break;
+				case SIGPIPE:
+					stats->exitcode = SIGXFSZ;
 				default:
 					break;
 			}
-			fprintf(stdprn, "ExitSignal: %s\n", strsignal(stats->exitcode));
-			unset_sandbox(app);
+
+			fprintf(stdprn, "Exit Signal: %s\n", strsignal(stats->exitcode));
+			// unset_sandbox(app);
 			break;
 		}
 

@@ -25,13 +25,16 @@ namespace JudgeCore.Platform
             si.StandardErrorEncoding = Console.Error.Encoding;
             var proc = Process.Start(si);
             var ret = proc.StandardError.ReadToEnd();
+
+            // Prevent zombie sub process
             proc.WaitForExit();
             inside.WaitForExit();
-            Trace.WriteLine(ret);
+            Trace.WriteLine(ret.Trim());
         }
 
         public override bool OutOfLimit()
         {
+            // Only should be run inside
             throw new PlatformNotSupportedException();
         }
 
@@ -57,7 +60,7 @@ namespace JudgeCore.Platform
 
             read_result = false;
             StartInfo.FileName = sandbox_app;
-            Trace.WriteLine(StartInfo.FileName + " " + StartInfo.Arguments);
+            //Trace.WriteLine(StartInfo.FileName + " " + StartInfo.Arguments);
             inside = Process.Start(StartInfo);
             pid_t = inside.Id;
             StartInfo.FileName = tmp_fn;
@@ -112,10 +115,13 @@ namespace JudgeCore.Platform
         private void ReadResult()
         {
             if (read_result) return;
-            if (!File.Exists("/tmp/judge_pipe"))
+            var pipe_filename = "/tmp/judge_pipe."+pid_t;
+            if (!File.Exists(pipe_filename))
                 throw new NotImplementedException("This is not science.");
-            var fp = File.ReadAllText("/tmp/judge_pipe").Trim().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            //File.Delete("/tmp/judge_pipe");
+            var fp = File.ReadAllText(pipe_filename)
+                .Trim()
+                .Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            File.Delete(pipe_filename);
             for (int i = 0; i < fp.Length - 1; i++)
                 Trace.WriteLine(fp[i]);
             
@@ -142,9 +148,7 @@ namespace JudgeCore.Platform
                 pt_stderr.Clear();
                 if (pt_stderr_str.Length > 0)
                 {
-                    Trace.WriteLine("=== run stderr ===");
                     Trace.WriteLine(pt_stderr_str.Trim());
-                    Trace.WriteLine("==================");
                     if (ec == 31 && pt_stderr_str.Contains("invalid pointer")) ec = 11;
                 }
             }
@@ -173,6 +177,7 @@ namespace JudgeCore.Platform
                     case 2:    // SIGINT
                     case 8:    // SIGFPE
                     case 11:   // SIGSEGV
+                    case 13:   // SIGPIPE
                         return true;
                     default:
                         return false;

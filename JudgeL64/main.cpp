@@ -112,7 +112,11 @@ int modstd(int argc, char **argv)
 	else if (child > 0)
 	{
 		if (my_args.pipe_name)
-			stdprn = fopen(my_args.pipe_name, "wx");
+		{
+			char file_name[128];
+			sprintf(file_name, "%s.%d", my_args.pipe_name, getpid());
+			stdprn = fopen(file_name, "wx");
+		}
 		else if (true)
 			stdprn = stderr;
 		else
